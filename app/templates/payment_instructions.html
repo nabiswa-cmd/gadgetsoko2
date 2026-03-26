@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Receipt | Gadget Soko Kenya</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { --primary: #0f4c81; --accent: #ffcc00; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        
+        .receipt-card { 
+            max-width: 500px; margin: 40px auto; background: white; 
+            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            overflow: hidden; border-top: 8px solid var(--primary);
+        }
+
+        .header { text-align: center; padding: 30px 20px; background: #fafafa; }
+        .header i { font-size: 50px; color: #28a745; margin-bottom: 10px; }
+        .header h2 { margin: 0; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+
+        .details-section { padding: 20px 30px; border-bottom: 1px dashed #ddd; }
+        .row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 15px; }
+        .label { color: #777; }
+        .value { font-weight: bold; color: #333; }
+
+        .payment-box { 
+            margin: 20px 30px; padding: 20px; 
+            background: #fff9e6; border: 1px solid #ffeeba; border-radius: 10px;
+            text-align: center;
+        }
+        .instruction-text { font-size: 14px; color: #856404; margin-bottom: 15px; line-height: 1.5; }
+        .pay-code { font-size: 22px; font-weight: 800; color: var(--primary); display: block; margin: 5px 0; }
+
+        .footer-btns { padding: 20px 30px 40px; text-align: center; }
+        .btn { 
+            display: inline-block; padding: 12px 25px; border-radius: 8px; 
+            text-decoration: none; font-weight: bold; transition: 0.3s; 
+        }
+        .btn-print { background: #eee; color: #333; margin-right: 10px; }
+        .btn-home { background: var(--primary); color: white; }
+        
+        @media print { .footer-btns { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="receipt-card">
+    <div class="header">
+        <i class="fas fa-check-circle"></i>
+        <h2>Order Received</h2>
+        <p>Thank you for shopping with Gadget Soko!</p>
+    </div>
+
+    <div class="details-section">
+        <div class="row">
+            <span class="label">Order ID:</span>
+            <span class="value">#GSK-{{ order.id }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Date:</span>
+            <span class="value">{{ order.created_at|date:"d M, Y H:i" }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Customer:</span>
+            <span class="value">{{ order.name }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Payment Mode:</span>
+            <span class="value" style="text-transform: uppercase;">{{ order.payment_method }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Status:</span>
+            <span class="value" style="color: #f39c12;">Awaiting Payment</span>
+        </div>
+    </div>
+
+    <div class="details-section">
+        <div class="row">
+            <span class="label">Amount Due:</span>
+            <span class="value" style="font-size: 20px; color: var(--primary);">KES {{ order.total }}</span>
+        </div>
+    </div>
+
+    <div class="payment-box">
+        {% if order.payment_method == 'equity' %}
+            <p class="instruction-text">Please pay the total amount via <b>Equity WingCash</b> or <b>EazzyPay</b> to our Till Number:</p>
+            <span class="pay-code">Till: 7788990</span>
+            <small>Enter <b>#GSK-{{ order.id }}</b> as the Account Reference.</small>
+        
+        {% elif order.payment_method == 'pochi' %}
+            <p class="instruction-text">Send money directly to our <b>Pochi la Biashara</b> number:</p>
+            <span class="pay-code">0722 000 000</span>
+            <small>Once done, your order will be updated to 'Paid'.</small>
+
+        {% elif order.payment_method == 'mpesa' %}
+            <p class="instruction-text">If you didn't see the PIN prompt, use <b>Paybill 400200</b>:</p>
+            <span class="pay-code">Acc: {{ order.id }}</span>
+        {% endif %}
+    </div>
+
+    <div class="footer-btns">
+        <a href="javascript:window.print()" class="btn btn-print"><i class="fas fa-print"></i> Print</a>
+        <a href="{% url 'index' %}" class="btn btn-home">Back to Shop</a>
+    </div>
+</div>
+
+</body>
+</html>

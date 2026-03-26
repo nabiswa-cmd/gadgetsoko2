@@ -285,40 +285,49 @@ def remove_cart(request, item_id):
 from .models import UserActivity
 
 @login_required
-
+@login_required
 def check(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-
     cart_items = CartItem.objects.filter(user=request.user)
-    total = sum(item.quantity * item.product.discounted_price for item in cart_items)
+    if not cart_items:
+        messages.warning(request, "Your cart is empty.")
+        return redirect('view_cart')
+
+    # Calculate subtotal from cart items
+    subtotal = sum(item.quantity * item.product.discounted_price for item in cart_items)
 
     if request.method == "POST":
+        # 1. GET FORM DATA
         name = request.POST.get("name")
         email = request.POST.get("email")
         phone = request.POST.get("phone")
         address = request.POST.get("address")
+        region = request.POST.get("region") # 'nairobi' or 'outside'
+        payment_method = request.POST.get("payment_method") # 'mpesa', 'equity', 'pochi', 'pod'
+        
+        # 2. CALCULATE TOTALS
+        shipping_fee = 300 if region == "outside" else 0
+        final_total = subtotal + shipping_fee
 
-        # 🔥 TRACK CHECKOUT ATTEMPT
-        UserActivity.objects.create(
-            user=request.user,
-            action='CHECKOUT',
-            extra_info=f"Checkout started | Total: KES {total}"
-        )
+        # Determine location area for the destination string
+        if region == "nairobi":
+            location_area = request.POST.get("nairobi_area")
+        else:
+            location_area = request.POST.get("outside_town")
 
-        # CREATE ORDER
+        # 3. CREATE THE ORDER RECORD
+        # Note: Ensure these fields (destination, payment_status) exist in your Order model
         order = Order.objects.create(
             user=request.user,
             name=name,
             email=email,
             phone=phone,
-            destination=address,
-            total=total,
+            destination=f"{location_area} - {address}",
+            total=final_total,
             status="Pending",
-            payment_status="Pending"
+            payment_status="Awaiting Payment"
         )
 
-        # CREATE ORDER ITEMS
+        # 4. CREATE ORDER ITEMS
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
@@ -327,43 +336,57 @@ def check(request):
                 price=item.product.discounted_price
             )
 
-        # 🔥 TRACK PAYMENT ATTEMPT (before MPESA)
+        # 5. LOG ACTIVITY
         UserActivity.objects.create(
             user=request.user,
-            action='PAYMENT',
-            extra_info=f"MPESA attempt | Order #{order.id} | KES {total}"
+            action='CHECKOUT',
+            extra_info=f"Order #{order.id} Created | Method: {payment_method} | Total: KES {final_total}"
         )
 
-        # MPESA
-        response = lipa_na_mpesa(
-            phone_number=phone,
-            amount=total,
-            account_ref=f"ORDER{order.id}",
-            transaction_desc="Gadget Purchase"
-        )
-
-        print("MPESA RESPONSE:", response)
-
-        # OPTIONAL: track success/failure
-        if response.get('ResponseCode') == '0':
-            UserActivity.objects.create(
-                user=request.user,
-                action='PAYMENT',
-                extra_info=f"STK Sent successfully | Order #{order.id}"
-            )
-        else:
-            UserActivity.objects.create(
-                user=request.user,
-                action='PAYMENT',
-                extra_info=f"STK Failed | Order #{order.id}"
+        # 6. HANDLE SPECIFIC PAYMENT LOGIC
+        
+        if payment_method == "mpesa":
+            # Trigger STK Push
+            response = lipa_na_mpesa(
+                phone_number=phone,
+                amount=final_total,
+                account_ref=f"GSK{order.id}",
+                transaction_desc="Gadget Purchase"
             )
 
-        # CLEAR CART
-        cart_items.delete()
+            if response.get('ResponseCode') == '0':
+                order.mpesa_checkout_id = response.get('CheckoutRequestID')
+                order.status = 'STK_Sent'
+                order.save()
+                messages.success(request, "M-Pesa prompt sent to your phone.")
+            else:
+                messages.error(request, "M-Pesa push failed. Please use the manual instructions below.")
 
-        return redirect('dashboard')
+        elif payment_method == "pod":
+            order.payment_status = "Pay on Delivery"
+            order.status = "Confirmed"
+            order.save()
+            messages.success(request, f"Order #{order.id} confirmed for delivery.")
 
-    return render(request, 'check.html', {'total': total})
+        # 7. FINAL STEPS
+        cart_items.delete() # Clear the cart after order is safely in DB
+        
+        # This redirect provides the order_id that your URL pattern requires
+        return redirect('payment_instructions', order_id=order.id)
+
+    # GET request: Show the checkout page
+    return render(request, 'check.html', {'total': subtotal})
+
+def payment_instructions(request, order_id):
+    # Fetch the order and ensure it belongs to the logged-in user
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    return render(request, 'payment_instructions.html', {
+        'order': order,
+        'method': order.payment_status # Or order.payment_method depending on your model
+    })
+
+
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
@@ -902,4 +925,11 @@ def add_admin_view(request):
             default_password = "bugbugGADGET"
 
             # Create admin user
+
+from django.contrib import messages
+
+def google_login_callback(request):
+    # ... your login logic ...
+    messages.success(request, f"Hello, {request.user.username}!")
+    return redirect('dashboard') # or wherever your dashboard is
            

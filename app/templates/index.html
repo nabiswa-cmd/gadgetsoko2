@@ -60,6 +60,19 @@
     </style>
 </head>
 <body>
+    {% if messages %}
+    {% for message in messages %}
+        <div id="loginBadge" class="login-badge">
+            <div class="badge-icon">
+                <i class="fa fa-check"></i>
+            </div>
+            <div class="badge-content">
+                <h4>Hello, {{ request.user.username }}!</h4>
+                <p>Your login was successful. Continue shopping with Gadget Soko Kenya.</p>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
 
 <div id="bot-launcher" onclick="toggleChat()">
     <i class="fas fa-robot"></i>
@@ -116,6 +129,8 @@
                 <img src="{% static 'images/logo.png' %}" alt="Gadget Soko">
             </a>
         </div>
+        
+
 
         <nav class="menu">
             <a href="#categories">Categories</a>
@@ -369,20 +384,40 @@
         $.get(`/remove-cart/${id}/`, function() { updateCartSidebar(); });
     }
 
-    /* --- BANNER & SEARCH --- */
-    const rotatingPhotos = [
-        "{% static 'images/f.png' %}",
-        "{% static 'images/photo1.jpg' %}",
-        "{% static 'images/photo2.png' %}",
-        "{% static 'images/repl.png' %}"
-    ];
-    let idx = 0;
-    setInterval(() => {
-        idx = (idx + 1) % rotatingPhotos.length;
-        let banner = document.getElementById("bannerImage");
-        if(banner) banner.src = rotatingPhotos[idx];
-    }, 4000);
+    /* --- IMPROVED BANNER ROTATION --- */
+const rotatingPhotos = [
+    "{% static 'images/f.png' %}",
+    "{% static 'images/photo1.png' %}",
+    "{% static 'images/photo2.png' %}",
+    
+    "{% static 'images/eg.png' %}"
+];
 
+let idx = 0;
+const banner = document.getElementById("bannerImage");
+
+// Preload images to prevent "flicker" when switching
+rotatingPhotos.forEach(src => {
+    const img = new Image();
+    img.src = src;
+});
+
+function rotateBanner() {
+    idx = (idx + 1) % rotatingPhotos.length;
+    
+    // Smooth Fade Transition
+    $(banner).fadeOut(400, function() {
+        $(this).attr('src', rotatingPhotos[idx]).fadeIn(400);
+    });
+}
+
+// Handle broken images: If an image fails, skip to the next one immediately
+banner.onerror = function() {
+    console.error("Failed to load: " + this.src);
+    rotateBanner(); 
+};
+
+setInterval(rotateBanner, 4000);
     $('#liveSearchInput').on('keyup', function(){
         let query = $(this).val();
         if(query.length < 2){ $('#search-results').hide(); return; }
@@ -396,6 +431,21 @@
     $(document).on('click', function(e){
         if(!$(e.target).closest('.search-box').length) $('#search-results').hide();
     });
+
+    window.onload = function() {
+    const badge = document.getElementById('loginBadge');
+    if (badge) {
+        // Show the badge with a slight delay
+        setTimeout(() => {
+            badge.classList.add('show');
+        }, 500);
+
+        // Hide it automatically after 5 seconds
+        setTimeout(() => {
+            badge.classList.remove('show');
+        }, 5500);
+    }
+};
 </script>
 </body>
 </html>

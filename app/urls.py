@@ -18,6 +18,7 @@ urlpatterns = [
 
 
     path('check/', views.check, name='check'),
+    path('payment-instructions/<int:order_id>/', views.payment_instructions, name='payment_instructions'),
     path('brand/<int:brand_id>/', views.products_by_brand, name='products_by_brand'),
     
 

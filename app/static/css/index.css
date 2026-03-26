@@ -591,3 +591,102 @@ button { font-family: inherit; cursor: pointer; transition: 0.3s; }
     font-size: 14px;
     color: #ccc;
 }
+/* Toast Notification Style */
+.login-badge {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #ffffff;
+    border-left: 5px solid #ff5a2c; /* Gadget Soko Orange */
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 9999;
+    transform: translateX(120%);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.login-badge.show {
+    transform: translateX(0);
+}
+
+.badge-icon {
+    background: #ff5a2c;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge-content h4 {
+    margin: 0;
+    color: #111;
+    font-size: 0.95rem;
+}
+
+.badge-content p {
+    margin: 2px 0 0;
+    color: #666;
+    font-size: 0.85rem;
+}
+/* --- MOBILE RESPONSIVENESS --- */
+
+/* 1. Hamburger Menu Button (Hidden on Desktop) */
+.menu-toggle {
+    display: none;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block; /* Show only on mobile */
+    }
+
+    .sidebar {
+        left: -100%; /* Hide sidebar off-screen */
+        transition: 0.3s ease;
+        width: 280px;
+        box-shadow: 10px 0 15px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.open {
+        left: 0; /* Slide in when toggled */
+    }
+
+    .navbar {
+        left: 0; /* Navbar spans full width on mobile */
+        padding: 0 15px;
+    }
+
+    .main {
+        margin-left: 0; /* Content takes full width */
+        padding: 15px;
+    }
+
+    .cards {
+        grid-template-columns: 1fr; /* Stack cards vertically */
+    }
+
+    .table-container {
+        overflow-x: auto; /* Allow horizontal scroll for wide tables */
+    }
+
+    /* Adjust the login badge for mobile */
+    .login-badge {
+        width: 90%;
+        right: 5%;
+        top: 10px;
+    }
+}

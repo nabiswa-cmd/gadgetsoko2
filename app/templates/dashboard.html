@@ -3,245 +3,215 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Gadget Soko</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
+        :root {
+            --primary-color: #ff5a2c;
+            --sidebar-bg: #111;
+            --body-bg: #f4f6f9;
+            --header-height: 60px;
+            --sidebar-width: 240px;
         }
 
-        /* NAVBAR */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--body-bg);
+            display: flex;
+        }
+
+        /* --- NAVBAR (STICKY) --- */
         .navbar {
-            background: #ff5a2c;
-            color: white;
-            padding: 15px 30px;
+            background: white;
+            color: #333;
+            height: var(--header-height);
+            padding: 0 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
+        .navbar h2 { margin: 0; font-size: 1.2rem; color: var(--primary-color); }
+
+        /* --- SIDEBAR (FIXED) --- */
         .sidebar {
-            width: 220px;
-            min-height: 100vh;
-            background: #111;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
             position: fixed;
+            top: 0;
+            left: 0;
             color: white;
-            padding-top: 20px;
+            z-index: 1001;
+            overflow-y: auto;
         }
 
         .sidebar h3 {
             text-align: center;
-            padding: 20px 0;
-            border-bottom: 1px solid #333;
+            padding: 25px 0;
+            background: rgba(255,255,255,0.05);
             margin: 0;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
         }
 
         .sidebar a {
-            display: block;
-            padding: 15px;
-            color: #ccc;
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: #b8c7ce;
             text-decoration: none;
-            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.9rem;
         }
 
+        .sidebar a i { width: 25px; margin-right: 10px; }
+
         .sidebar a:hover, .sidebar a.active {
-            background: #ff5a2c;
+            background: var(--primary-color);
             color: white;
         }
 
+        /* --- MAIN CONTENT AREA --- */
         .main {
-            margin-left: 220px;
-            padding: 20px;
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 30px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
+        /* OVERVIEW CARDS */
         .cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
 
         .card {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
             text-align: center;
+            transition: transform 0.2s;
         }
+        
+        .card:hover { transform: translateY(-5px); }
 
-        .card i {
-            font-size: 30px;
-            margin-bottom: 10px;
-            color: #ff5a2c;
-        }
+        .card i { font-size: 35px; margin-bottom: 15px; color: var(--primary-color); }
 
+        /* TABLES */
         .table-container {
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
             margin-top: 20px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table th, table td {
-            padding: 12px;
-            text-align: left;
-        }
+        table { width: 100%; border-collapse: collapse; }
 
         table th {
-            background: #111;
-            color: white;
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #eee;
         }
 
-        table tr:nth-child(even) {
-            background: #f9f9f9;
+        table td { padding: 15px; border-bottom: 1px solid #eee; color: #555; }
+
+        table tr:last-child td { border-bottom: none; }
+
+        /* SECTIONS & CHARTS */
+        .section, .charts, .settings-panel {
+            display: none; 
+            animation: fadeIn 0.4s ease;
         }
 
-        h2 {
-            margin-top: 30px;
-        }
+        .active-section { display: block; }
 
-        .charts, .settings-panel {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            display: none; /* initially hidden */
-            margin-top: 20px;
-        }
-
-        .charts.active, .settings-panel.active {
-            display: block;
-        }
-
-        canvas {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .settings-panel button {
-            display: block;
-            margin: 10px 0;
-            padding: 10px;
+            display: inline-block;
+            margin: 10px 10px 10px 0;
+            padding: 12px 20px;
             border: none;
-            background: #ff5a2c;
+            background: var(--primary-color);
             color: white;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            width: 200px;
+            font-weight: 600;
         }
 
-        .settings-panel button:hover {
-            opacity: 0.9;
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
-    <h2>Gadget Soko Admin</h2>
-    <div class="user">
-        <i class="fa fa-user"></i> {{ request.user.username|default:"Admin" }}
-    </div>
-</div>
-
-
 <div class="sidebar">
-    <h3>Dashboard</h3>
-    <a onclick="showSection('overview')" class="active"><i class="fa fa-chart-line"></i> Overview</a>
-    
-    <a onclick="showSection('activity')">
-        <i class="fa fa-eye"></i> Customer Activity
-    </a>
-
+    <h3>GADGET SOKO</h3>
+    <a onclick="showSection('overview')" class="nav-link active"><i class="fa fa-chart-line"></i> Overview</a>
+    <a onclick="showSection('activity')" class="nav-link"><i class="fa fa-eye"></i> Customer Activity</a>
     <a href="{% url 'manage_orders' %}"><i class="fa fa-shopping-cart"></i> Orders</a>
     <a href="{% url 'manage_products' %}"><i class="fa fa-box"></i> Products</a>
     <a href="{% url 'customers' %}"><i class="fa fa-users"></i> Customers</a>
-    <a href="{% url 'add_product' %}"><i class="fa fa-plus-circle"></i> Add Products</a>
-
-    <a onclick="showSection('analytics')"><i class="fa fa-chart-bar"></i> Analytics</a>
-    <a onclick="showSection('settings')"><i class="fa fa-cog"></i> Settings</a>
+    <a onclick="showSection('analytics')" class="nav-link"><i class="fa fa-chart-bar"></i> Analytics</a>
+    <a onclick="showSection('settings')" class="nav-link"><i class="fa fa-cog"></i> Settings</a>
+    <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
     <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Logout</a>
+</div>
+
+<div class="navbar">
+    <h2>Dashboard</h2>
+    <div class="user">
+        <i class="fa fa-user-circle"></i> {{ request.user.username|default:"Admin User" }}
+    </div>
 </div>
 
 <div class="main">
 
-    <div id="overview" class="section active">
+    <div id="overview" class="section active-section">
+        <div class="cards">
+            <div class="card">
+                <i class="fa fa-shopping-bag"></i>
+                <h3>Total Sales</h3>
+                <p>KES {{ total_revenue|default:"0" }}</p>
+            </div>
+            <div class="card">
+                <i class="fa fa-users"></i>
+                <h3>Active Users</h3>
+                <p>{{ active_users_count|default:"0" }}</p>
+            </div>
+            <div class="card">
+                <i class="fa fa-clock"></i>
+                <h3>Pending Orders</h3>
+                <p>{{ pending_orders_count|default:"0" }}</p>
+            </div>
         </div>
 
-    <div id="activity" class="section" style="display:none;">
-        <h2>Live Customer Tracking</h2>
-        <p style="color: #666;">Track Gmail users, viewed products, and M-Pesa progress.</p>
-        
-        <div class="table-container">
-            <table id="activityTable">
-                <thead>
-                    <tr>
-                        <th>Customer Gmail</th>
-                        <th>Action</th>
-                        <th>Product</th>
-                        <th>Time</th>
-                        <th>Details</th>
-                        <th>Action</th>
-                        
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for log in customer_activity %}
-<tr>
-    <td><strong>{{ log.user.email }}</strong></td>
-
-    <td>
-        {% if log.action == 'LOGIN' %}
-            <span style="color: blue;"><i class="fa fa-sign-in"></i> Login</span>
-        {% elif log.action == 'VIEW' %}
-            <span style="color: #555;"><i class="fa fa-eye"></i> Viewed</span>
-        {% elif log.action == 'CART' %}
-            <span style="color: orange;"><i class="fa fa-cart-plus"></i> Cart</span>
-        {% elif log.action == 'CHECKOUT' %}
-            <span style="color: purple;"><i class="fa fa-credit-card"></i> Checkout</span>
-        {% elif log.action == 'PAYMENT' %}
-            <span style="color: green;"><i class="fa fa-money-bill"></i> Payment</span>
-        {% endif %}
-    </td>
-
-    <td>{{ log.product.name|default:"-" }}</td>
-
-    <td>{{ log.timestamp|timesince }} ago</td>
-
-    <td>{{ log.extra_info }}</td>
-
-    <td>
-        <a href="mailto:{{ log.user.email }}"
-           style="background:#ff5a2c; color:white; padding:5px 10px; border-radius:4px; text-decoration:none; font-size:12px;">
-           Contact
-        </a>
-    </td>
-</tr>
-{% empty %}
-<tr>
-    <td colspan="6" style="text-align:center; padding:20px;">
-        No activity yet
-    </td>
-</tr>
-{% endfor %}
-
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    </div>
-        <!-- RECENT ORDERS -->
         <h2>Recent Orders</h2>
         <div class="table-container">
             <table>
@@ -255,101 +225,122 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if recent_orders %}
-                        {% for order in recent_orders %}
-                        <tr>
-                            <td>{{ order.id }}</td>
-                            <td>{{ order.name|default:"N/A" }}</td>
-                            <td>{{ order.phone|default:"N/A" }}</td>
-                            <td>KES {{ order.total|default:"0" }}</td>
-                            <td>{{ order.status|default:"Pending" }}</td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="5" style="text-align:center;">No recent orders</td>
-                        </tr>
-                    {% endif %}
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.name|default:"N/A" }}</td>
+                        <td>{{ order.phone|default:"N/A" }}</td>
+                        <td>KES {{ order.total|default:"0" }}</td>
+                        <td><span class="status-badge">{{ order.status|default:"Pending" }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" style="text-align:center;">No recent orders</td></tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- ANALYTICS SECTION -->
-    <div id="analytics" class="charts">
-        <h2>Revenue Chart</h2>
-        <canvas id="revenueChart"></canvas>
-
-        <h2>Top Products Chart</h2>
-        <canvas id="topProductsChart"></canvas>
+    <div id="activity" class="section">
+        <h2>Live Customer Tracking</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer Gmail</th>
+                        <th>Action</th>
+                        <th>Product</th>
+                        <th>Time</th>
+                        <th>Details</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in customer_activity %}
+                    <tr>
+                        <td><strong>{{ log.user.email }}</strong></td>
+                        <td>
+                            {% if log.action == 'LOGIN' %}<span style="color: blue;">Login</span>
+                            {% elif log.action == 'VIEW' %}<span>Viewed</span>
+                            {% elif log.action == 'PAYMENT' %}<span style="color: green;">Paid</span>
+                            {% else %}<span>{{ log.action }}</span>{% endif %}
+                        </td>
+                        <td>{{ log.product.name|default:"-" }}</td>
+                        <td>{{ log.timestamp|timesince }} ago</td>
+                        <td>{{ log.extra_info }}</td>
+                        <td><a href="mailto:{{ log.user.email }}" style="color: var(--primary-color);">Contact</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- SETTINGS SECTION -->
+    <div id="analytics" class="charts">
+        <h2>Business Insights</h2>
+        <div style="margin-bottom: 40px;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+        <div>
+            <canvas id="topProductsChart"></canvas>
+        </div>
+    </div>
+
     <div id="settings" class="settings-panel">
         <h2>Admin Settings</h2>
-        <button onclick="window.location.href='{% url 'change_password' %}'"><i class="fa fa-key"></i> Change Password</button>
-        <button onclick="window.location.href='{% url 'add_admin' %}'"><i class="fa fa-user-plus"></i> Add Admin</button>
-        <button onclick="window.location.href='{% url 'manage_orders' %}'"><i class="fa fa-trash"></i> Delete Orders</button>
+        <button onclick="window.location.href='#'">Change Password</button>
+        <button onclick="window.location.href='#'">Add Admin</button>
     </div>
 
 </div>
 
-<!-- JAVASCRIPT TO SWITCH SECTIONS -->
 <script>
-    function showSection(section) {
-    // Remove active class from sidebar
-    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-    if(event) event.target.closest('a').classList.add('active');
+    function showSection(sectionId) {
+        // Update Sidebar Active State
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
 
-    // Hide ALL sections
-    document.querySelectorAll('.section, .charts, .settings-panel').forEach(el => {
-        el.style.display = 'none';
-        el.classList.remove('active');
-    });
+        // Toggle Sections
+        document.querySelectorAll('.section, .charts, .settings-panel').forEach(section => {
+            section.classList.remove('active-section');
+            section.style.display = 'none';
+        });
 
-    // Show selected
-    const selected = document.getElementById(section);
-    if(selected) {
-        selected.style.display = 'block';
-        selected.classList.add('active');
+        const activeSec = document.getElementById(sectionId);
+        activeSec.style.display = 'block';
+        setTimeout(() => activeSec.classList.add('active-section'), 10);
     }
-}
-    
 
-    // REVENUE CHART
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    const revenueChart = new Chart(revenueCtx, {
+    // Revenue Chart (Example Data)
+    new Chart(document.getElementById('revenueChart'), {
         type: 'line',
         data: {
-            labels: {{ revenue_labels|safe }},
+            labels: {{ revenue_labels|safe|default:"[]" }},
             datasets: [{
                 label: 'Revenue (KES)',
-                data: {{ revenue_values|safe }},
-                backgroundColor: 'rgba(255,90,44,0.2)',
-                borderColor: 'rgba(255,90,44,1)',
-                borderWidth: 2,
+                data: {{ revenue_values|safe|default:"[]" }},
+                borderColor: '#ff5a2c',
+                backgroundColor: 'rgba(255,90,44,0.1)',
                 fill: true,
-                tension: 0.3
+                tension: 0.4
             }]
-        },
-        options: { responsive: true, plugins: { legend: { display: true } } }
+        }
     });
 
-    // TOP PRODUCTS CHART
-    const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
-    const topProductsChart = new Chart(topProductsCtx, {
+    // Top Products Chart
+    new Chart(document.getElementById('topProductsChart'), {
         type: 'bar',
         data: {
-            labels: {{ top_products_labels|safe }},
+            labels: {{ top_products_labels|safe|default:"[]" }},
             datasets: [{
-                label: 'Total Sold',
-                data: {{ top_products_values|safe }},
-                backgroundColor: 'rgba(255,90,44,0.7)',
-                borderColor: 'rgba(255,90,44,1)',
-                borderWidth: 1
+                label: 'Units Sold',
+                data: {{ top_products_values|safe|default:"[]" }},
+                backgroundColor: '#111'
             }]
         },
-        options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } } }
+        options: { indexAxis: 'y' }
     });
 </script>
 

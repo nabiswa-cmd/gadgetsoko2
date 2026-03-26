@@ -58,30 +58,39 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.product.name} ({self.quantity})"
 
-
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100)
-    email = models.EmailField(null=True, blank=True)  # ✅ FIXED
+    email = models.EmailField(null=True, blank=True)
     phone = models.CharField(max_length=15)
+    
+    # --- UPDATED FIELDS ---
+    region = models.CharField(max_length=20, default="nairobi") # 'nairobi' or 'outside'
+    location_area = models.CharField(max_length=255, default="N/A") # Estate name or Town
+    address = models.TextField(default="") # Specific house/office details
+    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_method = models.CharField(max_length=20, default="mpesa") # mpesa, equity, pochi, pod
+    # ----------------------
     destination = models.CharField(max_length=255, default="N/A")
-    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    status = models.CharField(max_length=50, default='Pending')
-    created_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(max_length=50, default="Pending")
+    
+
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
-        ('STK_Sent', 'STK Push Sent'), # User clicked pay, waiting for PIN
-        ('Paid', 'Paid'),             # Callback received Success
-        ('Failed', 'Failed'),         # Callback received Error or Timeout
+        ('STK_Sent', 'STK Push Sent'),
+        ('Paid', 'Paid'),
+        ('Failed', 'Failed'),
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     checkout_request_id = models.CharField(max_length=100, blank=True, null=True)
     mpesa_receipt = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'Order {self.id} - {self.name}'
-
+ 
 
 class OrderItem(models.Model):
     
