@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<<<<<<< HEAD
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | Gadget Soko Kenya</title>
@@ -254,11 +255,147 @@
         <div class="total-price summary-row">
             <span>Grand Total</span>
             <span id="grand-total" style="color: var(--primary);">KES {{ subtotal }}</span>
+=======
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout | Gadget Soko Kenya</title>
+
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+
+<style>
+/* Container */
+.checkout-container{
+    width:90%;
+    max-width:1000px;
+    margin:40px auto;
+    background:white;
+    padding:30px 40px;
+    border-radius:8px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.1);
+}
+
+/* Cart Items */
+.cart-item{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid #eee;
+    padding:12px 0;
+    font-size:16px;
+}
+
+/* Total */
+.total{
+    font-size:22px;
+    font-weight:bold;
+    margin-top:20px;
+    text-align:right;
+    color:#0f4c81;
+}
+
+/* Form Inputs */
+form h3{
+    margin-top:30px;
+    color:#0f4c81;
+}
+
+input, textarea, select{
+    width:100%;
+    padding:10px;
+    margin:8px 0 15px 0;
+    border:1px solid #ccc;
+    border-radius:4px;
+    font-size:14px;
+}
+
+button{
+    background:#0f4c81;
+    color:white;
+    border:none;
+    padding:12px;
+    font-size:16px;
+    cursor:pointer;
+    border-radius:4px;
+    width:100%;
+}
+
+button:hover{
+    background:#08345a;
+}
+
+/* Payment Options */
+.payment-options{
+    display:flex;
+    gap:20px;
+    margin-bottom:15px;
+}
+
+.payment-options label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="topbar">
+        <div>Language</div>
+        <div>
+            <a href="{% url 'login' %}">Login</a> |
+            <a href="#contact">Contact</a>
+        </div>
+    </div>
+    <div class="navbar">
+        <div class="logo">
+            <a href="{% url 'index' %}"><img src="{% static 'images/logo.png' %}"></a>
+        </div>
+        <nav class="menu">
+            <a href="{% url 'index' %}">Home</a>
+            <a href="{% url 'products' %}">Products</a>
+            <a href="#services">Services</a>
+            <a href="#contact">Contact</a>
+        </nav>
+        <div class="cart">
+            <a href="{% url 'view_cart' %}">🛒</a>
+>>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
         </div>
     </div>
 </div>
 
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="items" id="itemsInput">
+    <input type="hidden" name="total" id="totalInput">
+
+    <h3>Customer Details</h3>
+    <input type="text" name="name" placeholder="Full Name" required>
+    <input type="email" name="email" placeholder="Email Address" required>
+    <input type="text" name="phone" placeholder="Phone Number" required>
+    <textarea name="address" placeholder="Delivery Address" required></textarea>
+
+    <h3>Payment Method</h3>
+    <div class="payment-options">
+        <label><input type="radio" name="payment_method" value="card" disabled> Card (coming soon)</label>
+        <label><input type="radio" name="payment_method" value="mpesa" checked> M-Pesa</label>
+        <label><input type="radio" name="payment_method" value="paypal" disabled> PayPal (coming soon)</label>
+    </div>
+
+    <button type="submit">Place Order & Pay via M-Pesa</button>
+</form>
+
+</div>
+{% for item in cart_items %}
+<div class="cart-item">
+    <span>{{ item.product.name }}</span>
+    <span>KES {{ item.product.price }}</span>
+</div>
+{% endfor %}
+
 <script>
+<<<<<<< HEAD
     // Pull the subtotal directly from Django context
     const baseTotal = parseInt("{{ subtotal }}");
 
@@ -269,11 +406,25 @@
         const shippingFeeLabel = document.getElementById('shipping-fee');
         const grandTotalLabel = document.getElementById('grand-total');
         const regionInput = document.getElementById('region-input');
+=======
+// Load cart from localStorage
 
-        // Reset Buttons
-        document.getElementById('btn-nairobi').classList.remove('active');
-        document.getElementById('btn-outside').classList.remove('active');
+let cartItems = document.getElementById("cartItems");
+let total = 0;
+>>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
 
+// Display cart items
+cart.forEach(item => {
+    total += parseFloat(item.price);
+    cartItems.innerHTML += `
+    <div class="cart-item">
+        <span>${item.name}</span>
+        <span>KSh ${item.price}</span>
+    </div>
+    `;
+});
+
+<<<<<<< HEAD
         if(loc === 'nairobi') {
             document.getElementById('btn-nairobi').classList.add('active');
             nairobiSection.classList.remove('hidden');
@@ -313,7 +464,12 @@
 
     // Run on load
     window.onload = () => setLocation('nairobi');
+=======
+// Set total and form hidden inputs
+document.getElementById("cartTotal").innerText = total;
+document.getElementById("itemsInput").value = JSON.stringify(cart);
+document.getElementById("totalInput").value = total;
+>>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
 </script>
-
 </body>
 </html>

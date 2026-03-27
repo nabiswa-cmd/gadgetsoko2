@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout | Gadget Soko Kenya</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/Mpesa_styles.css' %}">
+
+<style>
+:root {
+    --primary-color: #00c79c;
+    --primary-hover: #009e7c;
+    --text-color: #333;
+    --text-light: #555;
+    --background: #f5f7fa;
+    --white: #ffffff;
+    --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--background);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-color);
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+h1 { margin-bottom: 1rem; font-size: 1.5rem; font-weight: 600; }
+.description { color: var(--text-light); margin-bottom: 1.5rem; }
+.price { font-size: 2rem; font-weight: 600; color: var(--primary-color); margin-bottom: 2rem; }
+
+.pay-button {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+.pay-button:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+
+/* Modal Overlay */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+/* Modal Box */
+.modal {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    margin: 10% auto;
+    box-shadow: var(--shadow);
+    position: relative;
+}
+
+.modal h2 { margin-bottom: 1rem; font-size: 1.3rem; }
+.modal label { display: block; margin-bottom: 5px; font-weight: 500; }
+.modal input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.modal button {
+    width: 100%;
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.modal button:hover { background: var(--primary-hover); }
+
+.modal .close-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Checkout</h1>
+    <p class="description">Secure your ticket with M-Pesa</p>
+    <div class="price">KES <span id="ticketAmount">10</span></div>
+
+    <button id="payButton" class="pay-button"><i class="fas fa-mobile-alt"></i> Pay via M-Pesa</button>
+
+    <!-- Customer Details (for context) -->
+    <div class="customer-details" style="margin-top:2rem; text-align:left;">
+        <h3>Customer Details</h3>
+        <input type="text" placeholder="Full Name">
+        <input type="email" placeholder="Email">
+        <input type="text" placeholder="Phone">
+        <textarea placeholder="Delivery Address" style="width:100%;padding:10px;border-radius:4px;"></textarea>
+    </div>
+</div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <button class="close-btn" id="closeModal">&times;</button>
+        <h2>M-Pesa Payment</h2>
+        <p>Amount to pay: <strong>KES <span id="mpesaAmount">10</span></strong></p>
+        <label for="mpesaStk">Enter M-Pesa STK Confirmation Number:</label>
+        <input type="text" id="mpesaStk" placeholder="e.g., ABC123XYZ">
+        <button id="confirmPayment">Confirm Payment</button>
+    </div>
+</div>
+
+<script>
+// Amount
+const amount = 10;
+document.getElementById('ticketAmount').innerText = amount;
+document.getElementById('mpesaAmount').innerText = amount;
+
+// Show modal on click
+document.getElementById('payButton').addEventListener('click', function(){
+    document.getElementById('modalOverlay').style.display = 'block';
+});
+
+// Close modal
+document.getElementById('closeModal').addEventListener('click', function(){
+    document.getElementById('modalOverlay').style.display = 'none';
+});
+
+// Confirm payment
+document.getElementById('confirmPayment').addEventListener('click', function(){
+    const stkNumber = document.getElementById('mpesaStk').value.trim();
+    if(!stkNumber){
+        alert('Please enter your M-Pesa STK confirmation number.');
+        return;
+    }
+    alert(`Payment confirmed!\nAmount: KES ${amount}\nSTK Number: ${stkNumber}`);
+    document.getElementById('modalOverlay').style.display = 'none';
+    // Here, submit STK number to backend via AJAX/form
+});
+</script>
+
+</body>
+</html>

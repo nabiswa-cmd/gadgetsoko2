@@ -1,9 +1,11 @@
 import requests
 from requests.auth import HTTPBasicAuth
 from django.conf import settings
-
+from dotenv import load_dotenv
 import base64
 from datetime import datetime
+import os
+load_dotenv()
 
 def get_mpesa_access_token():
     url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
@@ -11,8 +13,8 @@ def get_mpesa_access_token():
     response = requests.get(
         url,
         auth=HTTPBasicAuth(
-            settings.MPESA_CONSUMER_KEY,
-            settings.MPESA_CONSUMER_SECRET
+            os.getenv("MPESA_CONSUMER_KEY"),
+            os.getenv("MPESA_CONSUMER_SECRET")
         )
     )
 
@@ -32,19 +34,19 @@ def lipa_na_mpesa(phone_number, amount, account_ref, transaction_desc):
 
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
-    password_str = f"{settings.MPESA_SHORTCODE}{settings.MPESA_PASSKEY}{timestamp}"
+    password_str = f"{os.getenv("MPESA_SHORTCODE")}{os.getenv("MPESA_PASSKEY")}{timestamp}"
     password = base64.b64encode(password_str.encode('utf-8')).decode('utf-8')
 
     payload = {
-        "BusinessShortCode": settings.MPESA_SHORTCODE,
+        "BusinessShortCode": os.getenv("MPESA_SHORTCODE"),
         "Password": password,
         "Timestamp": timestamp,
         "TransactionType": "CustomerPayBillOnline",
         "Amount": int(amount),
         "PartyA": phone_number,
-        "PartyB": settings.MPESA_SHORTCODE,
+        "PartyB": os.getenv("MPESA_SHORTCODE"),
         "PhoneNumber": phone_number,
-        "CallBackURL": settings.MPESA_CALLBACK_URL,
+        "CallBackURL": os.getenv('MPESA_CALLBACK_URL'),
         "AccountReference": account_ref,
         "TransactionDesc": transaction_desc
     }
