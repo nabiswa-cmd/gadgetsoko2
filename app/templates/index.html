@@ -9,203 +9,54 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo-32x32.png' %}">
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* ─── BANNER FIX: always show immediately ──────────────────── */
-        .banner { overflow: hidden; line-height: 0; background: #0a1628; }
-        .banner img {
-            width: 100%; height: auto;
-            display: block;
-            opacity: 1;                     /* visible immediately */
-            transition: opacity 0.5s ease;  /* smooth crossfade only on rotation */
-        }
-
-        /* ─── CHATBOT ──────────────────────────────────────────────── */
+        /* --- ROBOT CHATBOT STYLES --- */
         #bot-launcher {
-            position: fixed; bottom: 30px; left: 30px;
-            width: 60px; height: 60px;
-            background: linear-gradient(135deg,#00c79c,#009e7c);
-            color: white; border-radius: 50%;
+            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
+            background: #00a650; color: white; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 26px; cursor: pointer;
-            box-shadow: 0 6px 20px rgba(0,199,156,0.45);
-            z-index: 3000; transition: transform 0.3s;
+            font-size: 28px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 3000; transition: 0.3s;
         }
-        #bot-launcher:hover { transform: scale(1.12) rotate(-5deg); }
+        #bot-launcher:hover { transform: scale(1.1); }
 
         #chat-window {
-            position: fixed; bottom: 105px; left: 30px;
-            width: 320px; height: 450px;
-            background: white; border-radius: 18px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.18);
-            display: none; flex-direction: column;
-            z-index: 3000; overflow: hidden;
-            border: 1px solid #e5e7eb;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            position: fixed; bottom: 100px; left: 30px; width: 320px; height: 450px;
+            background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: none; flex-direction: column; z-index: 3000; overflow: hidden;
+            border: 1px solid #ddd; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .chat-header {
-            background: linear-gradient(135deg,#00c79c,#009e7c);
-            color: white; padding: 15px 18px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .chat-body { flex:1; padding:15px; overflow-y:auto; background:#f9fafb; display:flex; flex-direction:column; gap:10px; }
-        .chat-footer { padding:10px; border-top:1px solid #eee; display:flex; gap:6px; }
-        .chat-footer input { flex:1; padding:9px 12px; border:1.5px solid #e5e7eb; border-radius:8px; outline:none; font-size:13px; font-family:inherit; }
-        .chat-footer input:focus { border-color: #00c79c; }
-        .chat-footer button { background:linear-gradient(135deg,#00c79c,#009e7c); color:white; border:none; padding:9px 13px; border-radius:8px; cursor:pointer; }
-        .msg { max-width:85%; padding:9px 13px; border-radius:14px; font-size:13.5px; line-height:1.45; }
-        .bot-msg { background:#e8f5f0; align-self:flex-start; color:#1a1a2e; border-bottom-left-radius:3px; }
-        .user-msg { background:linear-gradient(135deg,#00c79c,#009e7c); align-self:flex-end; color:white; border-bottom-right-radius:3px; }
+        .chat-header { background: #00a650; color: white; padding: 15px; display: flex; align-items: center; gap: 10px; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+        .chat-footer { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
+        .chat-footer input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
+        .chat-footer button { background: #00a650; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
 
-        /* ─── CART SIDEBAR ─────────────────────────────────────────── */
+        .msg { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 14px; line-height: 1.4; position: relative; }
+        .bot-msg { background: #e8e8e8; align-self: flex-start; color: #333; border-bottom-left-radius: 2px; }
+        .user-msg { background: #00a650; align-self: flex-end; color: white; border-bottom-right-radius: 2px; }
+
+        /* --- CART SIDEBAR STYLES --- */
         .cart-sidebar {
-            position:fixed; top:0; right:-420px; width:370px; height:100%;
-            background:white;
-            box-shadow:-6px 0 30px rgba(0,0,0,0.15);
-            z-index:2000; transition:right 0.4s cubic-bezier(0.4,0,0.2,1);
-            display:flex; flex-direction:column;
-            font-family:'Plus Jakarta Sans',sans-serif;
+            position: fixed; top: 0; right: -400px; width: 350px; height: 100%;
+            background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+            z-index: 2000; transition: 0.4s ease-in-out; display: flex; flex-direction: column;
         }
-        .cart-sidebar.active { right:0; }
+        .cart-sidebar.active { right: 0; }
         .cart-overlay {
-            position:fixed; inset:0;
-            background:rgba(0,0,0,0.45);
-            display:none; z-index:1999;
-            backdrop-filter:blur(2px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; z-index: 1999;
         }
-        .cart-overlay.active { display:block; }
-
-        .cart-header {
-            padding:20px 22px;
-            background:#f8f9fa;
-            display:flex; justify-content:space-between; align-items:center;
-            border-bottom:1px solid #eee;
-        }
-        .cart-header h3 { font-size:1.1rem; font-weight:700; }
-        .cart-close-btn { background:none; border:none; font-size:1.6rem; cursor:pointer; color:#6b7280; line-height:1; }
-        .cart-close-btn:hover { color:#1a1a2e; }
-
-        .cart-items-container { flex:1; overflow-y:auto; padding:15px; }
-        .cart-footer { padding:18px 22px; border-top:1px solid #eee; background:#fff; }
-
-        .checkout-btn {
-            display:block; width:100%;
-            background:linear-gradient(135deg,#ee4d2d,#c0392b);
-            color:white; text-align:center; padding:13px;
-            border-radius:10px; text-decoration:none;
-            font-weight:700; font-size:0.95rem;
-            box-shadow:0 4px 15px rgba(238,77,45,0.3);
-            transition:transform 0.2s;
-        }
-        .checkout-btn:hover { transform:translateY(-2px); }
-
-        /* Cart item rows with qty controls */
-        .cart-item-row {
-            display:flex; align-items:center; gap:12px;
-            margin-bottom:14px; padding-bottom:14px;
-            border-bottom:1px solid #f1f1f1;
-        }
-        .cart-item-row:last-child { border-bottom:none; }
-        .cart-item-row img { width:56px; height:56px; object-fit:cover; border-radius:10px; background:#f5f5f5; flex-shrink:0; }
-        .cart-item-info { flex:1; min-width:0; }
-        .cart-item-info h4 { font-size:0.83rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; }
-        .cart-item-info .item-price { font-size:0.8rem; color:#6b7280; }
-
-        /* ── Quantity stepper ── */
-        .qty-controls {
-            display:flex; align-items:center; gap:0;
-            background:#f5f5f5; border-radius:8px;
-            overflow:hidden; margin-top:6px;
-        }
-        .qty-btn {
-            background:none; border:none; width:28px; height:28px;
-            font-size:1rem; cursor:pointer; color:#1a1a2e;
-            display:flex; align-items:center; justify-content:center;
-            transition:background 0.15s;
-        }
-        .qty-btn:hover { background:#e0e0e0; }
-        .qty-num { font-size:0.85rem; font-weight:700; min-width:24px; text-align:center; }
-
-        .cart-remove-btn { background:none; border:none; color:#d1d5db; cursor:pointer; font-size:1.1rem; padding:4px; transition:color 0.2s; flex-shrink:0; }
-        .cart-remove-btn:hover { color:#ee4d2d; }
-
-        .search-dropdown {
-            position:absolute; top:100%; left:0; width:100%;
-            background:white; z-index:1000;
-            box-shadow:0 6px 20px rgba(0,0,0,0.12);
-            border-radius:0 0 10px 10px;
-            display:none; max-height:300px; overflow-y:auto;
-        }
-
-        /* ─── FOOTER ───────────────────────────────────────────────── */
-        .footer {
-            background: #0f172a;
-            color: #94a3b8;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin-top: 3rem;
-        }
-        .footer-top {
-            display: grid;
-            grid-template-columns: 1.4fr 1fr 1fr 1fr;
-            gap: 40px;
-            padding: 60px 60px 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        @media(max-width:768px) {
-            .footer-top { grid-template-columns: 1fr 1fr; padding: 40px 24px 30px; }
-        }
-        @media(max-width:480px) {
-            .footer-top { grid-template-columns: 1fr; }
-        }
-        .footer-brand .brand-name {
-            font-size: 1.4rem; font-weight: 800;
-            color: white; margin-bottom: 10px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .footer-brand .brand-name span { color: #00c79c; }
-        .footer-brand p { font-size: 0.85rem; line-height: 1.7; max-width: 220px; }
-
-        .social-row { display:flex; gap:10px; margin-top:18px; }
-        .social-btn {
-            width:38px; height:38px;
-            background:rgba(255,255,255,0.07);
-            border-radius:10px;
-            display:flex; align-items:center; justify-content:center;
-            color:#94a3b8; font-size:16px;
-            text-decoration:none; transition:all 0.25s;
-        }
-        .social-btn:hover { background:#00c79c; color:white; transform:translateY(-3px); }
-
-        .footer-col h4 {
-            color: white; font-size: 0.9rem; font-weight: 700;
-            margin-bottom: 18px; letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-        .footer-col a, .footer-col p {
-            display: block; font-size: 0.85rem;
-            color: #94a3b8; text-decoration: none;
-            margin-bottom: 10px; transition: color 0.2s;
-        }
-        .footer-col a:hover { color: #00c79c; }
-        .footer-col .contact-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-        .footer-col .contact-row i { color:#00c79c; width:16px; }
-
-        .footer-badge {
-            display:inline-flex; align-items:center; gap:6px;
-            background:rgba(0,199,156,0.1); color:#00c79c;
-            padding:5px 12px; border-radius:20px;
-            font-size:0.78rem; font-weight:600; margin-bottom:8px;
-        }
-
-        .footer-bottom {
-            display:flex; justify-content:space-between; align-items:center;
-            padding:20px 60px;
-            font-size:0.8rem; color:#475569;
-            flex-wrap:wrap; gap:10px;
-        }
-        @media(max-width:768px) { .footer-bottom { padding:20px 24px; } }
-        .footer-bottom a { color:#00c79c; text-decoration:none; }
+        .cart-overlay.active { display: block; }
+        .cart-header { padding: 20px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .cart-items-container { flex: 1; overflow-y: auto; padding: 15px; }
+        .cart-footer { padding: 20px; border-top: 1px solid #eee; background: #fff; }
+        .checkout-btn { display: block; width: 100%; background: #ee4d2d; color: white !important; text-align: center; padding: 12px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+        .cart-item-row { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #f1f1f1; padding-bottom: 10px; }
+        .cart-item-row img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        
+        .search-dropdown { position: absolute; top: 100%; left: 0; width: 100%; background: white; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: none; }
     </style>
 </head>
 <body>
@@ -223,51 +74,46 @@
     {% endfor %}
 {% endif %}
 
-<!-- ─── CHATBOT ─────────────────────────────────────────────────────────── -->
 <div id="bot-launcher" onclick="toggleChat()">
     <i class="fas fa-robot"></i>
 </div>
 
 <div id="chat-window">
     <div class="chat-header">
-        <i class="fas fa-robot fa-lg"></i>
+        <i class="fas fa-robot"></i>
         <div>
             <strong>SokoBot</strong><br>
-            <small style="opacity:0.85">Online · Virtual Assistant</small>
+            <small>Online | Virtual Assistant</small>
         </div>
-        <span onclick="toggleChat()" style="margin-left:auto;cursor:pointer;font-size:22px;opacity:0.8">&times;</span>
+        <span onclick="toggleChat()" style="margin-left:auto; cursor:pointer; font-size: 20px;">&times;</span>
     </div>
     <div class="chat-body" id="chatBody">
-        <div class="msg bot-msg">Hello! I'm SokoBot. I can help with delivery, payments, and gadget advice. What's on your mind?</div>
+        <div class="msg bot-msg">Hello! I am SokoBot. I can help you with delivery info, payments, and gadget advice. What's on your mind?</div>
     </div>
     <div class="chat-footer">
-        <input type="text" id="chatInput" placeholder="Type a message…">
+        <input type="text" id="chatInput" placeholder="Type a message...">
         <button onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 
-<!-- ─── CART SIDEBAR ─────────────────────────────────────────────────────── -->
 <div id="cartOverlay" class="cart-overlay" onclick="toggleCart()"></div>
 <div class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
-        <h3><i class="fas fa-shopping-cart" style="color:#00c79c;margin-right:8px"></i> Your Cart</h3>
-        <button class="cart-close-btn" onclick="toggleCart()">&times;</button>
+        <h3>Your Cart</h3>
+        <span onclick="toggleCart()" style="cursor:pointer; font-size: 24px;">&times;</span>
     </div>
     <div class="cart-items-container" id="cartSlides">
-        <p style="text-align:center;padding:30px 20px;color:#6b7280;">Your cart is empty</p>
+        <p style="text-align:center; padding:20px;">Your cart is empty</p>
     </div>
     <div class="cart-footer">
-        <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
-            <span style="color:#6b7280;font-size:0.9rem">Total</span>
-            <span id="sidebarTotal" style="font-weight:800;font-size:1.1rem">KES {{ cart_total }}</span>
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:bold;">
+            <span>Total:</span>
+            <span id="sidebarTotal">KES {{ cart_total }}</span>
         </div>
-        <a href="{% url 'check' %}" class="checkout-btn">
-            <i class="fas fa-lock" style="margin-right:6px"></i> Proceed to Checkout
-        </a>
+        <a href="{% url 'check' %}" class="checkout-btn">Checkout</a>
     </div>
 </div>
 
-<!-- ─── HEADER ───────────────────────────────────────────────────────────── -->
 <header class="header">
     <div class="topbar">
         <div>Language</div>
@@ -299,46 +145,33 @@
         </nav>
 
         <div class="search-box" style="position:relative;">
-            <input type="text" id="liveSearchInput" placeholder="Search products…">
+            <input type="text" id="liveSearchInput" placeholder="Search products...">
             <button>🔍</button>
             <div id="search-results" class="search-dropdown"></div>
         </div>
 
-        <a href="javascript:void(0)" class="cart-icon" onclick="toggleCart()" style="position:relative;text-decoration:none;color:inherit;">
+        <a href="javascript:void(0)" class="cart-icon" onclick="toggleCart()" style="position:relative; text-decoration:none; color:inherit;">
             <i class="fa fa-shopping-cart"></i>
-            <sup class="cart-count" style="background:#ee4d2d;color:white;border-radius:50%;padding:2px 6px;font-size:10px;">
+            <sup class="cart-count" style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:10px;">
                 {% if request.user.is_authenticated %}{{ cart_count }}{% else %}0{% endif %}
             </sup>
         </a>
     </div>
 </header>
 
-<!-- ─── BANNER (instant display) ─────────────────────────────────────────── -->
 <section class="banner">
-    <!--  src is set immediately via inline attribute — no JS delay on first load -->
-    <img id="bannerImage" src="{% static 'images/photo1.jpg' %}" alt="Gadget Soko Kenya Banner">
+    <img id="bannerImage" src="{% static 'images/photo1.jpg' %}" alt="Banner" style="width:100%; height:auto;">
 </section>
-<<<<<<< HEAD
-=======
 
-<!-- ─── CATEGORIES ───────────────────────────────────────────────────────── -->
->>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
 <section id="categories" class="section">
-    <h2>Shop by Brand</h2>
+    <h2>SHOP BY BRAND</h2>
     <div class="category-grid">
         {% for brand in brands %}
-            <a href="{% url 'products_by_brand' brand.id %}">
-                <span>{{ brand.name }}</span>
-            </a>
+            <a href="{% url 'products_by_brand' brand.id %}">{{ brand.name }}</a>
         {% endfor %}
     </div>
 </section>
 
-<<<<<<< HEAD
-
-=======
-<!-- ─── FEATURED PRODUCTS ─────────────────────────────────────────────────── -->
->>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
 <section class="products">
     <h2>Featured Products</h2>
     <div class="product-grid">
@@ -365,7 +198,6 @@
     </div>
 </section>
 
-<!-- ─── RECOMMENDED ───────────────────────────────────────────────────────── -->
 <section class="products">
     <h2>Recommended for You</h2>
     <div class="product-grid">
@@ -385,7 +217,6 @@
     </div>
 </section>
 
-<!-- ─── QUICK SALES ────────────────────────────────────────────────────────── -->
 <section class="products">
     <h2>🔥 Quick Sales</h2>
     <div class="product-grid">
@@ -406,12 +237,11 @@
             </div>
         </div>
         {% empty %}
-            <p style="padding-left:20px">No discounted products available.</p>
+            <p style="padding-left: 20px;">No discounted products available.</p>
         {% endfor %}
     </div>
 </section>
 
-<!-- ─── SERVICES ──────────────────────────────────────────────────────────── -->
 <section id="services" class="section">
     <h2>Our Services</h2>
     <div class="services">
@@ -422,168 +252,125 @@
     </div>
 </section>
 
-<!-- ─── FOOTER ────────────────────────────────────────────────────────────── -->
 <footer id="contact" class="footer">
-    <div class="footer-top">
-
-        <!-- Brand col -->
-        <div class="footer-brand footer-col">
-            <div class="brand-name">
-                <i class="fas fa-bolt"></i> Gadget<span>Soko</span>
+    <div class="footer-container">
+        <div class="footer-column">
+            <h3>Socials</h3>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+                <a href="#"><i class="fab fa-tiktok"></i></a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-telegram"></i></a>
             </div>
-            <p>Kenya's premier online gadget store. Quality electronics delivered straight to your doorstep.</p>
-            <div class="social-row">
-                <a href="#" class="social-btn"><i class="fab fa-whatsapp"></i></a>
-                <a href="#" class="social-btn"><i class="fab fa-tiktok"></i></a>
-                <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="social-btn"><i class="fab fa-telegram"></i></a>
-                <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
-            </div>
+            <h3>Contacts</h3>
+            <p>📞 0727698319</p>
+            <p>📧 support@gadgetsoko.co.ke</p>
         </div>
-
-        <!-- Quick Links -->
-        <div class="footer-col">
-            <h4>Quick Links</h4>
-            <a href="{% url 'index' %}"><i class="fas fa-chevron-right" style="font-size:10px;margin-right:6px;color:#00c79c"></i>Home</a>
-            <a href="{% url 'products' %}"><i class="fas fa-chevron-right" style="font-size:10px;margin-right:6px;color:#00c79c"></i>Products</a>
-            <a href="#categories"><i class="fas fa-chevron-right" style="font-size:10px;margin-right:6px;color:#00c79c"></i>Categories</a>
-            <a href="#services"><i class="fas fa-chevron-right" style="font-size:10px;margin-right:6px;color:#00c79c"></i>Services</a>
+        <div class="footer-column">
+            <h3>Quick Links</h3>
+            <a href="{% url 'index' %}">Home</a>
+            <a href="{% url 'products' %}">Products</a>
+            <a href="#categories">Categories</a>
+            <a href="#services">Services</a>
         </div>
-
-        <!-- Contact -->
-        <div class="footer-col">
-            <h4>Contact Us</h4>
-            <div class="contact-row"><i class="fas fa-phone-alt"></i><span>0727 698 319</span></div>
-            <div class="contact-row"><i class="fas fa-envelope"></i><span>support@gadgetsoko.co.ke</span></div>
-            <div class="contact-row"><i class="fas fa-map-marker-alt"></i><span>Nairobi, Kenya</span></div>
-            <div class="contact-row"><i class="fas fa-truck"></i><span>Delivery across Kenya</span></div>
-        </div>
-
-        <!-- Trust badges -->
-        <div class="footer-col">
-            <h4>We Offer</h4>
-            <div class="footer-badge"><i class="fas fa-shield-alt"></i> Secure Payments</div>
-            <div class="footer-badge"><i class="fas fa-undo"></i> Easy Returns</div>
-            <div class="footer-badge"><i class="fas fa-truck"></i> Free Delivery</div>
-            <div class="footer-badge"><i class="fas fa-headset"></i> 24/7 Support</div>
-            <div style="margin-top:14px;">
-                <img src="{% static 'images/mpesa-logo.png' %}" alt="M-Pesa" style="height:28px;opacity:0.7;margin-right:8px;" onerror="this.style.display='none'">
-            </div>
+        <div class="footer-column">
+            <h3>Locations</h3>
+            <p>📍 Nairobi, Kenya</p>
+            <p>🚚 Delivery across Kenya</p>
         </div>
     </div>
-
     <div class="footer-bottom">
-        <span>© 2025 <strong style="color:white">GadgetSoko Kenya</strong>. All rights reserved.</span>
-        <span>Developed by <a href="#">Sammy Tings</a> · <a href="#">TingsTech Technologies</a></span>
+        <p>Developed and Designed by <strong>Sammy Tings</strong> at <strong>TingsTech Technologies</strong></p>
+        <p>📞 0727698319 | 📧 sammytings@tingstech.com</p>
     </div>
 </footer>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-/* ─── BANNER: preload & crossfade ─────────────────────────────────────── */
-const rotatingPhotos = [
-    "{% static 'images/photo1.jpg' %}",
-    "{% static 'images/f.png' %}",
-    "{% static 'images/photo2.png' %}",
-    "{% static 'images/repl.png' %}"
-];
-// Preload all images so rotation is instant
-rotatingPhotos.slice(1).forEach(src => { const img = new Image(); img.src = src; });
-
-let bannerIdx = 0;
-const bannerEl = document.getElementById('bannerImage');
-setInterval(() => {
-    bannerEl.style.opacity = '0';
-    setTimeout(() => {
-        bannerIdx = (bannerIdx + 1) % rotatingPhotos.length;
-        bannerEl.src = rotatingPhotos[bannerIdx];
-        bannerEl.style.opacity = '1';
-    }, 500);
-}, 4000);
-
-/* ─── CHATBOT ─────────────────────────────────────────────────────────── */
-function toggleChat() {
-    const win = $('#chat-window');
-    if (win.is(':visible')) { win.fadeOut(200); }
-    else { win.fadeIn(200).css('display','flex'); }
-}
-
-function sendMsg() {
-    let input = $('#chatInput'), text = input.val().trim();
-    if (!text) return;
-    $('#chatBody').append(`<div class="msg user-msg">${text}</div>`);
-    input.val('');
-    $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
-    setTimeout(() => {
-        let r = getBotResponse(text.toLowerCase());
-        $('#chatBody').append(`<div class="msg bot-msg">${r}</div>`);
-        $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
-    }, 700);
-}
-
-function getBotResponse(q) {
-    if (q.includes("delivery") || q.includes("shipping"))
-        return "We offer free delivery within Nairobi. Outside Nairobi takes 24–48 hours via G4S or Wells Fargo.";
-    if (q.includes("pay") || q.includes("mpesa") || q.includes("payment"))
-        return "We accept M-Pesa and Cash on Delivery within Nairobi.";
-    if (q.includes("warranty") || q.includes("guarantee"))
-        return "All gadgets carry a 6-month to 1-year TingsTech warranty against technical faults.";
-    if (q.includes("location") || q.includes("where"))
-        return "We're based in Nairobi, Kenya and deliver nationwide!";
-    if (q.includes("hi") || q.includes("hello") || q.includes("hey"))
-        return "Hey there! 👋 Looking for a new phone, laptop, or accessory?";
-    return "For specific help, contact us at <strong>0727698319</strong> or WhatsApp!";
-}
-$('#chatInput').on('keypress', e => { if (e.which === 13) sendMsg(); });
-
-/* ─── CART ────────────────────────────────────────────────────────────── */
-function toggleCart() {
-    if ("{{ request.user.is_authenticated }}" === "False") {
-        window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
-        return;
+    /* --- SOKOBOT LOGIC --- */
+    function toggleChat() { 
+        $('#chat-window').fadeToggle(300).css('display', 'flex'); 
     }
-    $('#cartSidebar').toggleClass('active');
-    $('#cartOverlay').toggleClass('active');
-    if ($('#cartSidebar').hasClass('active')) updateCartSidebar();
-}
 
-function addToCart(productId) {
-    $.get(`/add-to-cart/${productId}/`, function(res) {
-        if (res.error === 'not_logged_in') {
+    function sendMsg() {
+        let inputField = $('#chatInput');
+        let text = inputField.val().trim();
+        if (!text) return;
+
+        $('#chatBody').append(`<div class="msg user-msg">${text}</div>`);
+        inputField.val('');
+        $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
+
+        setTimeout(() => {
+            let response = getBotResponse(text.toLowerCase());
+            $('#chatBody').append(`<div class="msg bot-msg">${response}</div>`);
+            $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
+        }, 700);
+    }
+
+    function getBotResponse(query) {
+        if (query.includes("delivery") || query.includes("shipping")) 
+            return "We offer free delivery within Nairobi. Deliveries outside Nairobi take 24-48 hours via G4S or Wells Fargo.";
+        if (query.includes("pay") || query.includes("mpesa") || query.includes("payment")) 
+            return "We accept M-Pesa (Till Number) and Cash on Delivery within Nairobi.";
+        if (query.includes("warranty") || query.includes("guarantee")) 
+            return "All gadgets carry a 6-month to 1-year TingsTech warranty against technical faults.";
+        if (query.includes("location") || query.includes("where")) 
+            return "We are based in Nairobi, Kenya. We deliver gadgets straight to your doorstep!";
+        if (query.includes("hi") || query.includes("hello") || query.includes("hey")) 
+            return "Hello! I'm SokoBot. Looking for a new phone, laptop, or accessory?";
+        return "That sounds interesting! For more specific details, please chat with our human support at 0727698319.";
+    }
+
+    $('#chatInput').on('keypress', function(e) { if(e.which === 13) sendMsg(); });
+
+    /* --- CART & UI LOGIC --- */
+    function toggleCart() {
+        // Prevent opening empty cart sidebar if not logged in
+        if ("{{ request.user.is_authenticated }}" === "False") {
             window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
             return;
         }
-        $('.cart-count').text(res.cart_count);
-        updateCartSidebar();
-        if (!$('#cartSidebar').hasClass('active')) {
+        $('#cartSidebar').toggleClass('active');
+        $('#cartOverlay').toggleClass('active');
+        if ($('#cartSidebar').hasClass('active')) updateCartSidebar();
+    }
+
+    function addToCart(productId) {
+        $.get(`/add-to-cart/${productId}/`, function(res) {
+            // 🚫 NOT LOGGED IN → Automatically Redirect
+            if (res.error === 'not_logged_in') {
+                window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
+                return;
+            }
+
+            // ✅ LOGGED IN FLOW
+            $('.cart-count').text(res.cart_count);
+            updateCartSidebar();
             $('#cartSidebar').addClass('active');
             $('#cartOverlay').addClass('active');
-        }
-    }).fail(() => {
-        window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
-    });
-}
+        }).fail(function() {
+            // If the server returns a 401 or 403, redirect to login
+            window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
+        });
+    }
 
-function updateCartSidebar() {
-    if ("{{ request.user.is_authenticated }}" === "False") return;
-    $.get("{% url 'view_cart' %}?ajax=1", function(data) {
-        let html = "";
-        if (!data.items || data.items.length === 0) {
-            html = "<p style='text-align:center;padding:30px 20px;color:#6b7280;'>Your cart is empty</p>";
-        } else {
-            data.items.forEach(item => {
-                html += `
-                <div class="cart-item-row">
-                    <img src="${item.image}" alt="${item.name}">
-                    <div class="cart-item-info">
-                        <h4>${item.name}</h4>
-                        <div class="item-price">KES ${item.price}</div>
-                        <div class="qty-controls">
-                            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
-                            <span class="qty-num" id="qty-${item.id}">${item.quantity}</span>
-                            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+    function updateCartSidebar() {
+        if ("{{ request.user.is_authenticated }}" === "False") return;
+
+        $.get("{% url 'view_cart' %}?ajax=1", function(data) {
+            let html = "";
+            if(!data.items || data.items.length === 0) {
+                html = "<p style='text-align:center; padding:20px;'>Your cart is empty</p>";
+            } else {
+                data.items.forEach(item => {
+                    html += `
+                    <div class="cart-item-row">
+                        <img src="${item.image}">
+                        <div style="flex:1;">
+                            <span style="font-weight:bold; font-size:14px;">${item.name}</span><br>
+                            <small>KES ${item.price} x ${item.quantity}</small>
                         </div>
-<<<<<<< HEAD
                         <button onclick="removeItem(${item.id})" style="color:red; border:none; background:none; cursor:pointer;">✕</button>
                     </div>`;
                 });
@@ -639,27 +426,11 @@ setInterval(rotateBanner, 4000);
             data: {'q': query},
             success: function(data){ $('#search-results').html(data.html).show(); }
         });
-=======
-                    </div>
-                    <button class="cart-remove-btn" onclick="removeItem(${item.id})" title="Remove">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>`;
-            });
-        }
-        $('#cartSlides').html(html);
-        $('#sidebarTotal').text("KES " + (data.total || 0));
-        $('.cart-count').text(data.items ? data.items.reduce((s, i) => s + i.quantity, 0) : 0);
->>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
     });
-}
 
-function changeQty(itemId, delta) {
-    // Call your backend update-quantity URL
-    $.get(`/update-cart/${itemId}/${delta > 0 ? 'add' : 'remove'}/`, function() {
-        updateCartSidebar();
+    $(document).on('click', function(e){
+        if(!$(e.target).closest('.search-box').length) $('#search-results').hide();
     });
-<<<<<<< HEAD
 
     window.onload = function() {
     const badge = document.getElementById('loginBadge');
@@ -675,27 +446,6 @@ function changeQty(itemId, delta) {
         }, 5500);
     }
 };
-=======
-}
-
-function removeItem(id) {
-    $.get(`/remove-cart/${id}/`, function() { updateCartSidebar(); });
-}
-
-/* ─── LIVE SEARCH ─────────────────────────────────────────────────────── */
-$('#liveSearchInput').on('keyup', function(){
-    let q = $(this).val();
-    if (q.length < 2) { $('#search-results').hide(); return; }
-    $.ajax({
-        url: "{% url 'live_search' %}",
-        data: { q },
-        success: function(data) { $('#search-results').html(data.html).show(); }
-    });
-});
-$(document).on('click', function(e){
-    if (!$(e.target).closest('.search-box').length) $('#search-results').hide();
-});
->>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
 </script>
 </body>
 </html>
