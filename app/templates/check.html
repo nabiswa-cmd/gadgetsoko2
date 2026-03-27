@@ -2,7 +2,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<<<<<<< HEAD
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | Gadget Soko Kenya</title>
@@ -339,54 +338,6 @@ button:hover{
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="header">
-    <div class="topbar">
-        <div>Language</div>
-        <div>
-            <a href="{% url 'login' %}">Login</a> |
-            <a href="#contact">Contact</a>
-        </div>
-    </div>
-    <div class="navbar">
-        <div class="logo">
-            <a href="{% url 'index' %}"><img src="{% static 'images/logo.png' %}"></a>
-        </div>
-        <nav class="menu">
-            <a href="{% url 'index' %}">Home</a>
-            <a href="{% url 'products' %}">Products</a>
-            <a href="#services">Services</a>
-            <a href="#contact">Contact</a>
-        </nav>
-        <div class="cart">
-            <a href="{% url 'view_cart' %}">🛒</a>
->>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
-        </div>
-    </div>
-</div>
-
-<form method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="items" id="itemsInput">
-    <input type="hidden" name="total" id="totalInput">
-
-    <h3>Customer Details</h3>
-    <input type="text" name="name" placeholder="Full Name" required>
-    <input type="email" name="email" placeholder="Email Address" required>
-    <input type="text" name="phone" placeholder="Phone Number" required>
-    <textarea name="address" placeholder="Delivery Address" required></textarea>
-
-    <h3>Payment Method</h3>
-    <div class="payment-options">
-        <label><input type="radio" name="payment_method" value="card" disabled> Card (coming soon)</label>
-        <label><input type="radio" name="payment_method" value="mpesa" checked> M-Pesa</label>
-        <label><input type="radio" name="payment_method" value="paypal" disabled> PayPal (coming soon)</label>
-    </div>
-
-    <button type="submit">Place Order & Pay via M-Pesa</button>
-</form>
-
-</div>
 {% for item in cart_items %}
 <div class="cart-item">
     <span>{{ item.product.name }}</span>
@@ -395,7 +346,7 @@ button:hover{
 {% endfor %}
 
 <script>
-<<<<<<< HEAD
+ HEAD
     // Pull the subtotal directly from Django context
     const baseTotal = parseInt("{{ subtotal }}");
 
@@ -406,25 +357,11 @@ button:hover{
         const shippingFeeLabel = document.getElementById('shipping-fee');
         const grandTotalLabel = document.getElementById('grand-total');
         const regionInput = document.getElementById('region-input');
-=======
 // Load cart from localStorage
 
 let cartItems = document.getElementById("cartItems");
 let total = 0;
->>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
 
-// Display cart items
-cart.forEach(item => {
-    total += parseFloat(item.price);
-    cartItems.innerHTML += `
-    <div class="cart-item">
-        <span>${item.name}</span>
-        <span>KSh ${item.price}</span>
-    </div>
-    `;
-});
-
-<<<<<<< HEAD
         if(loc === 'nairobi') {
             document.getElementById('btn-nairobi').classList.add('active');
             nairobiSection.classList.remove('hidden');
@@ -464,12 +401,12 @@ cart.forEach(item => {
 
     // Run on load
     window.onload = () => setLocation('nairobi');
-=======
+
 // Set total and form hidden inputs
 document.getElementById("cartTotal").innerText = total;
 document.getElementById("itemsInput").value = JSON.stringify(cart);
 document.getElementById("totalInput").value = total;
->>>>>>> a135f594cc7fff4606ece25bf906adc2076f46e4
+
 </script>
 </body>
 </html>
