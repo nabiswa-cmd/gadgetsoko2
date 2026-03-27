@@ -283,51 +283,62 @@ def remove_cart(request, item_id):
     return JsonResponse({"status": "ok"})
 
 from .models import UserActivity
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import CartItem, Order, OrderItem, UserActivity
+# Assuming your M-Pesa function is imported from a utility file
+from .utils import lipa_na_mpesa 
 
-@login_required
-@login_required
 def check(request):
+    # 1. Fetch Cart Items
     cart_items = CartItem.objects.filter(user=request.user)
+    
     if not cart_items:
         messages.warning(request, "Your cart is empty.")
         return redirect('view_cart')
 
-    # Calculate subtotal from cart items
+    # 2. Calculate Subtotal (using discounted_price as requested)
     subtotal = sum(item.quantity * item.product.discounted_price for item in cart_items)
 
     if request.method == "POST":
-        # 1. GET FORM DATA
+        # --- GET FORM DATA ---
         name = request.POST.get("name")
         email = request.POST.get("email")
         phone = request.POST.get("phone")
         address = request.POST.get("address")
-        region = request.POST.get("region") # 'nairobi' or 'outside'
-        payment_method = request.POST.get("payment_method") # 'mpesa', 'equity', 'pochi', 'pod'
-        
-        # 2. CALCULATE TOTALS
+        region = request.POST.get("region")  # 'nairobi' or 'outside'
+        payment_method = request.POST.get("payment_method")
+
+        # --- PHONE NUMBER FORMATTING (M-PESA REQUIREMENT) ---
+        # Converts 07... or +254... to 2547...
+        clean_phone = phone.strip().replace("+", "")
+        if clean_phone.startswith("0"):
+            clean_phone = "254" + clean_phone[1:]
+        elif not clean_phone.startswith("254"):
+            clean_phone = "254" + clean_phone
+
+        # --- CALCULATE SHIPPING & FINAL TOTAL ---
         shipping_fee = 300 if region == "outside" else 0
         final_total = subtotal + shipping_fee
 
-        # Determine location area for the destination string
-        if region == "nairobi":
-            location_area = request.POST.get("nairobi_area")
-        else:
-            location_area = request.POST.get("outside_town")
+        # --- DETERMINE DESTINATION STRING ---
+        location_area = request.POST.get("nairobi_area") if region == "nairobi" else request.POST.get("outside_town")
+        full_destination = f"{location_area} - {address}"
 
-        # 3. CREATE THE ORDER RECORD
-        # Note: Ensure these fields (destination, payment_status) exist in your Order model
+        # --- 3. CREATE THE ORDER RECORD ---
         order = Order.objects.create(
             user=request.user,
             name=name,
             email=email,
-            phone=phone,
-            destination=f"{location_area} - {address}",
+            phone=clean_phone,
+            destination=full_destination,
             total=final_total,
+            shipping_fee=shipping_fee, # Recommended to add this field to your Model
             status="Pending",
             payment_status="Awaiting Payment"
         )
 
-        # 4. CREATE ORDER ITEMS
+        # --- 4. CREATE ORDER ITEMS ---
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
@@ -336,46 +347,50 @@ def check(request):
                 price=item.product.discounted_price
             )
 
-        # 5. LOG ACTIVITY
+        # --- 5. LOG ACTIVITY ---
         UserActivity.objects.create(
             user=request.user,
             action='CHECKOUT',
-            extra_info=f"Order #{order.id} Created | Method: {payment_method} | Total: KES {final_total}"
+            extra_info=f"Order #{order.id} | {region} | Total: KES {final_total}"
         )
 
-        # 6. HANDLE SPECIFIC PAYMENT LOGIC
-        
+        # --- 6. HANDLE PAYMENT LOGIC ---
         if payment_method == "mpesa":
-            # Trigger STK Push
-            response = lipa_na_mpesa(
-                phone_number=phone,
-                amount=final_total,
-                account_ref=f"GSK{order.id}",
-                transaction_desc="Gadget Purchase"
-            )
+            try:
+                response = lipa_na_mpesa(
+                    phone_number=clean_phone,
+                    amount=int(final_total), # M-Pesa API expects Integers
+                    account_ref=f"GSK{order.id}",
+                    transaction_desc="Gadget Purchase"
+                )
 
-            if response.get('ResponseCode') == '0':
-                order.mpesa_checkout_id = response.get('CheckoutRequestID')
-                order.status = 'STK_Sent'
-                order.save()
-                messages.success(request, "M-Pesa prompt sent to your phone.")
-            else:
-                messages.error(request, "M-Pesa push failed. Please use the manual instructions below.")
+                if response.get('ResponseCode') == '0':
+                    order.mpesa_checkout_id = response.get('CheckoutRequestID')
+                    order.status = 'STK_Sent'
+                    order.save()
+                    messages.success(request, f"Hambo {name}, M-Pesa prompt sent! Complete it to finish your shopping.")
+                else:
+                    messages.error(request, "STK Push failed. Please follow manual Paybill instructions.")
+            except Exception as e:
+                messages.error(request, "Payment gateway error. Please try again.")
 
         elif payment_method == "pod":
             order.payment_status = "Pay on Delivery"
             order.status = "Confirmed"
             order.save()
-            messages.success(request, f"Order #{order.id} confirmed for delivery.")
+            messages.success(request, f"Hello {name}, your order #{order.id} is confirmed! We'll call you for delivery.")
 
-        # 7. FINAL STEPS
-        cart_items.delete() # Clear the cart after order is safely in DB
-        
-        # This redirect provides the order_id that your URL pattern requires
+        # --- 7. CLEAR CART & REDIRECT ---
+        cart_items.delete() 
         return redirect('payment_instructions', order_id=order.id)
 
-    # GET request: Show the checkout page
-    return render(request, 'check.html', {'total': subtotal})
+    # --- GET REQUEST: RENDER PAGE ---
+    context = {
+        'subtotal': subtotal,
+        'cart_items': cart_items,
+        'shipping_outside': 300
+    }
+    return render(request, 'check.html', context)
 
 def payment_instructions(request, order_id):
     # Fetch the order and ensure it belongs to the logged-in user
@@ -535,7 +550,7 @@ def userlog_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect('index')
 
 from django.db.models import Count, Sum
 from django.contrib.auth.models import User

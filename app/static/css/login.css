@@ -309,11 +309,60 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* =======================
-   RESPONSIVE
+   RESPONSIVE (Mobile Fix)
 ======================= */
 @media (max-width: 768px) {
-    .navbar { flex-direction: column; }
-    .menu { order: 3; width: 100%; justify-content: space-around; }
-    .search-box { width: 100%; order: 2; }
-    .product-grid { grid-template-columns: 1fr 1fr; }
+    /* Stack topbar items */
+    .topbar {
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 5%;
+    }
+
+    /* Stack navbar items */
+    .navbar {
+        flex-direction: column;
+        padding: 15px 5%;
+        gap: 15px;
+        height: auto; /* Ensure it expands to fit content */
+    }
+
+    /* Make logo center */
+    .logo img {
+        height: 40px;
+    }
+
+    /* Search box takes full width */
+    .search-box {
+        width: 100%;
+        max-width: none;
+        order: 2;
+    }
+
+    /* Menu links - scrollable or wrapped */
+    .menu {
+        width: 100%;
+        order: 3;
+        justify-content: center;
+        flex-wrap: wrap; /* Allows links to go to next line if too many */
+        gap: 10px;
+    }
+
+    .menu a {
+        font-size: 12px;
+        padding: 5px;
+    }
+
+    /* Adjust product grid for smaller screens */
+    .product-grid {
+        grid-template-columns: 1fr 1fr; /* Two products side-by-side */
+        gap: 10px;
+        padding: 0 10px;
+    }
+
+    .product h3 {
+        font-size: 13px;
+        height: 45px;
+    }
 }
