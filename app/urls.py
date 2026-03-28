@@ -13,6 +13,7 @@ urlpatterns = [
 
     # App routes
     path('products/', views.products_view, name='products'),
+    path('category/<int:category_id>/', views.products_view, name='products_by_category'),
     path('products/<int:pk>/', views.product_detail, name='product_detail'),
     path('cart/', views.view_cart, name='view_cart'),                       
 

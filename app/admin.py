@@ -12,7 +12,7 @@ class CategoryAdmin(admin.ModelAdmin):
 # Product Image Inline
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
-    extra = 1
+    extra = 4
 
 # Product Admin (ONLY ONE)
 @admin.register(Product)

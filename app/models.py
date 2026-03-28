@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
+from django.db import models
+from django.utils import timezone
+from datetime import timedelta
 
 
 class Category(models.Model):
@@ -30,6 +33,13 @@ class Product(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    discount_expiry = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def is_on_sale(self):
+        if self.discount_expiry and self.discount_expiry > timezone.now():
+            return True
+        return False
 
     @property
     def discounted_price(self):
@@ -43,6 +53,8 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='products/')
     views = models.IntegerField(default=0)
+    class Meta :
+        ordering = ['id'] 
 
 
 # CART (SIMPLIFIED — WORKS WITH YOUR CURRENT SYSTEM)

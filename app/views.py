@@ -49,27 +49,32 @@ def index_view(request):
         'cart_count': cart_count
     })
 
-def products_view(request):
-    category_id = request.GET.get('category')
-
-    if category_id:
-        products = Product.objects.filter(category_id=category_id)
-    else:
-        products = Product.objects.all()
-
+# Make sure category_id is included here!
+def products_view(request, brand_id=None, category_id=None):
+    products = Product.objects.all()
     categories = Category.objects.all()
-    brands = Brand.objects.all()  # ✅ ADD THIS
+    brands = Brand.objects.all()
+    
+    if brand_id:
+        products = products.filter(brand_id=brand_id)
+    
+    if category_id:
+        products = products.filter(category_id=category_id)
 
-    return render(request, 'products.html', {
+    # ... rest of your view logic
+    context = {
         'products': products,
         'categories': categories,
-        'brands': brands  # ✅ CRITICAL
-    })
+        'brands': brands,
+        'current_brand_id': brand_id,
+        'current_cat_id': category_id,
+    }
+    return render(request, 'products.html', context)
+
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import JsonResponse
-@login_required
 @login_required
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user)
@@ -158,22 +163,86 @@ def customers(request):
         'orders': orders
     })
 from .models import ProductView, UserActivity  # add this
+from django.shortcuts import render# Ensure Category and Brand are imported
+
+def products_by_category_view(request, brand_id=None, category_id=None):
+    products = Product.objects.all()
+    categories = Category.objects.all()
+    brands = Brand.objects.all()
+    
+    current_brand_id = brand_id
+    current_cat_id = category_id
+
+    # Filter by Brand if ID is provided
+    if brand_id:
+        products = products.filter(brand_id=brand_id)
+    
+    # Filter by Category if ID is provided
+    if category_id:
+        products = products.filter(category_id=category_id)
+
+    context = {
+        'products': products,
+        'categories': categories,
+        'brands': brands,
+        'current_brand_id': current_brand_id,
+        'current_cat_id': current_cat_id,
+        # add cart_count here as well if needed
+    }
+    return render(request, 'products.html', context)
+import random
+from datetime import datetime
+from django.shortcuts import render, get_object_or_404
+from .models import Product, ProductView, UserActivity # Ensure these are imported
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, id=pk)
     
+    # --- DYNAMIC REVIEWS & RATINGS LOGIC ---
+    # Create a seed based on product ID and the 12-hour block (AM/PM)
+    now = datetime.now()
+    time_chunk = 0 if now.hour < 12 else 1
+    seed_value = int(f"{pk}{now.year}{now.month}{now.day}{time_chunk}")
+    random.seed(seed_value)
+
+    # Generate consistent "fake" data for this 12-hour window
+    fake_rating = round(random.uniform(4.4, 5.0), 1)
+    fake_count = random.randint(28, 145)
+    
+    potential_comments = [
+        "Best quality in Nairobi! Delivery was super fast.",
+        "Authentic gadget, TingsTech never disappoints.",
+        "Value for money. Using it for 2 weeks now, no issues.",
+        "The packaging was professional. Highly recommended!",
+        "Cheaper than other shops and works perfectly.",
+        "Great customer service, SokoBot helped me track my order.",
+        "Original product. I was skeptical but Gadget Soko is legit.",
+        "Fast shipping to Mombasa, received in 24 hours!"
+    ]
+    
+    # Pick 3 random reviews for variety
+    selected_reviews = random.sample(potential_comments, 3)
+    
+    social_proof = {
+        'rating': fake_rating,
+        'count': fake_count,
+        'reviews': selected_reviews,
+        'stars': '★' * int(fake_rating) + '☆' * (5 - int(fake_rating))
+    }
+    # ---------------------------------------
+
     # Increment product views safely
     product.views += 1
     product.save(update_fields=['views'])
 
     if request.user.is_authenticated:
-        # OLD SYSTEM (keep it)
+        # OLD SYSTEM
         ProductView.objects.create(
             user=request.user,
             product=product
         )
 
-        # NEW SYSTEM (powerful tracking)
+        # NEW SYSTEM
         UserActivity.objects.create(
             user=request.user,
             action='VIEW',
@@ -181,7 +250,10 @@ def product_detail(request, pk):
             extra_info=f"Viewed {product.name}"
         )
 
-    return render(request, 'product_detail.html', {'product': product})
+    return render(request, 'product_detail.html', {
+        'product': product,
+        'social_proof': social_proof  # Pass the new data to the template
+    })
 def products_by_brand(request, brand_id):
     products = Product.objects.filter(brand__id=brand_id)
     brands = Brand.objects.all()
@@ -193,9 +265,10 @@ def products_by_brand(request, brand_id):
         'categories': categories
     })
 from .models import Brand
+from django.utils import timezone
+from datetime import timedelta
+@login_required
 
-@login_required
-@login_required
 def add_product(request):
     create_default_categories()
     categories = Category.objects.all()
@@ -209,25 +282,24 @@ def add_product(request):
         brand_id = request.POST.get("brand")
         category_id = request.POST.get("category")
         new_category = request.POST.get("new_category")
+        offer_days = request.POST.get('offer_days')  # <--- Get the days
         specifications = request.POST.get("specifications")
 
-        # ✅ Validate brand
         if not brand_id:
             messages.error(request, "Please select a brand.")
             return redirect("add_product")
 
         brand = Brand.objects.get(id=brand_id)
 
-        # ✅ Handle category safely
         if new_category:
-            category = Category.objects.create(name=new_category)
+            category, created = Category.objects.get_or_create(name=new_category)
         else:
             if not category_id:
                 messages.error(request, "Please select or create a category.")
                 return redirect("add_product")
             category = Category.objects.get(id=category_id)
 
-        # ✅ Create product
+        # ✅ Create product with expiry logic
         product = Product.objects.create(
             name=name,
             price=price,
@@ -238,21 +310,21 @@ def add_product(request):
             specifications=specifications
         )
 
-        # ✅ Save images
+        # ✅ Set the expiry date if offer_days exists
+        if offer_days and int(offer_days) > 0:
+            product.discount_expiry = timezone.now() + timedelta(days=int(offer_days))
+            product.save()
+
         images = request.FILES.getlist('images')
         for img in images:
             ProductImage.objects.create(product=product, image=img)
 
+        messages.success(request, f"{product.name} added successfully with a {offer_days}-day offer!")
         return redirect("products")
 
     return render(request, "add_product.html", {
         "categories": categories,
         "brands": brands
-    })
-
-    return render(request, "add_product.html", {
-        "categories": categories,
-        "brands": brands  # ✅ CRITICAL
     })
 
 @login_required
@@ -524,30 +596,39 @@ def login_view(request):
     return render(request, 'login.html')
 
 from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from django.contrib import messages
 
 def userlog_view(request):
     if request.method == "POST":
-        username = request.POST['username']
-        email = request.POST['email']
-        password1 = request.POST['password1']
-        password2 = request.POST['password2']
+        # Using .get() prevents the MultiValueDictKeyError crash
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+
+        # Basic validation to ensure fields aren't empty
+        if not all([username, email, password1, password2]):
+            messages.error(request, "All fields are required.")
+            return render(request, 'usersignup.html')
 
         if password1 != password2:
             messages.error(request, "Passwords do not match")
         elif User.objects.filter(username=username).exists():
-            messages.error(request, "Username exists")
+            messages.error(request, "Username already exists")
         else:
             user = User.objects.create_user(
                 username=username,
                 email=email,
                 password=password1,
-                is_staff=False  # ✅ ensure user is not staff
+                is_staff=False
             )
-            login(request, user)  # ✅ log them in immediately
-            return redirect('index')  # ✅ redirect to normal homepage
+            login(request, user)
+            return redirect('index')
 
     return render(request, 'usersignup.html')
-
 def logout_view(request):
     logout(request)
     return redirect('index')
@@ -947,4 +1028,37 @@ def google_login_callback(request):
     # ... your login logic ...
     messages.success(request, f"Hello, {request.user.username}!")
     return redirect('dashboard') # or wherever your dashboard is
-           
+
+
+import random
+from datetime import datetime
+
+def get_dynamic_reviews(product_id):
+    # Create a seed based on product ID and the 12-hour window
+    # (0 for AM, 1 for PM)
+    now = datetime.now()
+    time_seed = f"{now.year}{now.month}{now.day}{0 if now.hour < 12 else 1}"
+    random.seed(int(f"{product_id}{time_seed}"))
+
+    # Generate fake but realistic data
+    rating = round(random.uniform(4.2, 5.0), 1)
+    count = random.randint(15, 150)
+    
+    comments = [
+        "Best quality in Nairobi! Delivery was super fast.",
+        "Authentic gadget, TingsTech never disappoints.",
+        "Value for money. Using it for 2 weeks now, no issues.",
+        "The packaging was professional. Highly recommended!",
+        "Cheaper than other shops and works perfectly.",
+        "Great customer service, SokoBot helped me track my order."
+    ]
+    
+    # Pick 2-3 random reviews
+    selected_reviews = random.sample(comments, random.randint(2, 3))
+    
+    return {
+        'rating': rating,
+        'count': count,
+        'reviews': selected_reviews,
+        'stars_html': '★' * int(rating) + '☆' * (5 - int(rating))
+    }

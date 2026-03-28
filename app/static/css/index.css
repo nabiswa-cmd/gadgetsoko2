@@ -1,23 +1,20 @@
-/* Gadget Soko Kenya - Main Stylesheet
-    Developed by: Sammy Tings (TingsTech)
-    Style: Modern eCommerce / Clean Tech
+/* Gadget Soko Kenya - Main Stylesheet 
+    Theme: Modern Tech eCommerce 
+    Primary Color: #ee4d2d (Orange)
+    Secondary Color: #0b3a63 (Navy)
+    Chatbot Color: #00a650 (Green)
 */
 
 :root {
-    /* Brand Identity */
-    --primary: #ee4d2d;         /* Gadget Soko Orange */
+    --primary: #ee4d2d;
     --primary-hover: #d73d1f;
-    --navy: #0b3a63;            /* Topbar Navy */
-    --success: #00a650;         /* SokoBot Green */
-    
-    /* UI Colors */
+    --navy: #0b3a63;
+    --success: #00a650;
     --bg-light: #f4f6f8;
     --white: #ffffff;
     --text-main: #1e293b;
     --text-muted: #64748b;
     --border: #e2e8f0;
-    
-    /* Effects & Spacing */
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
     --shadow-md: 0 10px 25px rgba(0,0,0,0.1);
     --radius-sm: 8px;
@@ -25,7 +22,7 @@
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 1. RESET & GLOBALS */
+/* --- 1. GLOBAL RESET --- */
 * {
     margin: 0;
     padding: 0;
@@ -42,15 +39,8 @@ body {
 
 a { text-decoration: none; color: inherit; transition: var(--transition); }
 button { cursor: pointer; border: none; outline: none; transition: var(--transition); }
-ul { list-style: none; }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #f1f1f1; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--navy); }
-
-/* 2. HEADER & NAVIGATION */
+/* --- 2. NAVIGATION & HEADER --- */
 .header {
     position: sticky;
     top: 0;
@@ -66,7 +56,6 @@ ul { list-style: none; }
     justify-content: space-between;
     padding: 8px 8%;
     font-size: 13px;
-    font-weight: 500;
 }
 
 .navbar {
@@ -78,21 +67,15 @@ ul { list-style: none; }
     gap: 20px;
 }
 
-.logo img { 
-    height: 45px; 
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-}
+.logo img { height: 45px; }
 
-.menu { display: flex; gap: 24px; }
+.menu { display: flex; gap: 20px; }
 .menu a {
     color: var(--white);
     font-weight: 600;
     font-size: 14px;
-    letter-spacing: 0.5px;
 }
-.menu a:hover { opacity: 0.8; transform: translateY(-1px); }
 
-/* Search Box Interface */
 .search-box {
     flex: 1;
     max-width: 400px;
@@ -102,337 +85,310 @@ ul { list-style: none; }
     overflow: hidden;
 }
 
-.search-box input {
-    flex: 1;
-    padding: 10px 15px;
-    border: none;
-    font-size: 14px;
-}
+.search-box input { flex: 1; padding: 10px 15px; border: none; outline: none; }
+.search-box button { background: #333; color: white; padding: 0 15px; }
 
-.search-box button {
-    background: #f97316;
-    color: var(--white);
-    padding: 0 18px;
-    font-size: 16px;
-}
-
-.cart-icon {
-    color: var(--white);
-    font-size: 22px;
-    position: relative;
-    padding: 5px;
-}
-
-.cart-count {
+.search-dropdown {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--white);
-    color: var(--primary);
-    font-size: 10px;
-    font-weight: 800;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+    border-radius: 0 0 8px 8px;
+    display: none;
+}
+
+/* --- 3. BRAND PILLS SECTION --- */
+#categories { padding: 40px 8%; background: white; text-align: center; }
+#categories h2 { margin-bottom: 20px; color: var(--navy); font-size: 1.4rem; }
+
+.category-grid {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    gap: 12px;
 }
 
-/* 3. PRODUCT CARDS & GRID */
-.products { padding: 40px 8%; }
-.products h2 { 
-    margin-bottom: 25px; 
-    font-size: 1.5rem; 
+.category-grid a {
+    background: var(--bg-light);
     color: var(--navy);
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid var(--border);
 }
 
+.category-grid a:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* --- 4. PRODUCT CARDS --- */
+.products { padding: 40px 8%; }
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
 }
 
 .product {
-    background: var(--white);
+    background: white;
     border-radius: var(--radius-md);
+    padding: 15px;
     border: 1px solid var(--border);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    position: relative;
     transition: var(--transition);
+    position: relative;
 }
 
-.product:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary);
+.product:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+
+.img-container { height: 180px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.product h3 { font-size: 15px; margin-bottom: 8px; height: 40px; overflow: hidden; }
+.price { margin-bottom: 15px; }
+.old-price { text-decoration: line-through; color: var(--text-muted); font-size: 12px; margin-right: 5px; }
+.new-price { color: var(--primary); font-weight: bold; font-size: 18px; }
+
+.product-actions { display: flex; gap: 5px; }
+.btn-view, .btn-add {
+    flex: 1; padding: 8px; font-size: 12px; font-weight: bold;
+    border-radius: 5px; text-align: center;
+}
+.btn-view { background: var(--bg-light); color: var(--navy); }
+.btn-add { background: var(--primary); color: white; }
+
+/* --- 5. MOBILE RESPONSIVENESS (THE FIX) --- */
+@media (max-width: 768px) {
+    .topbar { display: none; } /* Hide clutter on mobile */
+    
+    .navbar {
+        flex-wrap: wrap; /* Allows menu and search to stack */
+        padding: 10px 5%;
+        justify-content: space-between;
+    }
+
+    .logo { width: 60%; }
+    .cart-icon { width: 20%; text-align: right; font-size: 24px; }
+
+    .search-box {
+        order: 3; /* Push search to the second line */
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .menu {
+        order: 4; /* Push links to the third line */
+        width: 100%;
+        justify-content: space-around;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .menu a { font-size: 12px; }
+
+    .product-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .product h3 { font-size: 13px; }
+    
+    #categories { padding: 20px 5%; }
+    .category-grid a { padding: 8px 15px; font-size: 12px; }
 }
 
-.img-container {
-    height: 220px;
-    background: #fdfdfd;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid #f1f5f9;
+/* --- 6. UTILITIES (Badges & Banners) --- */
+.login-badge {
+    position: fixed; top: 20px; right: -400px;
+    background: white; padding: 15px; border-radius: 10px;
+    box-shadow: var(--shadow-md); border-left: 5px solid var(--success);
+    transition: 0.5s; z-index: 5000;
+}
+.login-badge.show { right: 20px; }
+
+.banner { width: 100%; overflow: hidden; background: #eee; min-height: 200px; }
+.banner img { width: 100%; height: auto; display: block; }
+
+/* --- 7. MODERN SERVICES SECTION --- */
+#services {
+    padding: 60px 8%;
+    background: var(--white);
 }
 
-.img-container img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    transition: transform 0.5s ease;
+#services h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: var(--navy);
+    font-size: 1.8rem;
+    letter-spacing: 1px;
 }
 
-.product:hover .img-container img {
-    transform: scale(1.1);
+.services {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
 }
 
-.product h3 {
-    padding: 15px 15px 5px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.price {
-    padding: 0 15px 15px;
+.service {
+    background: var(--bg-light);
+    padding: 30px 20px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    font-weight: 700;
+    color: var(--navy);
+    transition: var(--transition);
+    border: 1px solid transparent;
     display: flex;
     flex-direction: column;
-}
-
-.old-price {
-    text-decoration: line-through;
-    color: var(--text-muted);
-    font-size: 12px;
-}
-
-.new-price, .price strong {
-    color: var(--primary);
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.product-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    padding: 12px;
-    background: #fafafa;
-}
-
-.btn-view, .btn-add {
-    padding: 10px;
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    font-weight: 700;
-    text-align: center;
-    display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
+    gap: 15px;
 }
 
-.btn-view {
-    background: #f1f5f9;
-    color: var(--text-main);
-    border: 1px solid var(--border);
+/* Adding subtle icons via CSS if not in HTML */
+.service::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 2rem;
+    color: var(--primary);
 }
 
-.btn-add {
-    background: var(--primary);
-    color: var(--white);
+.service:nth-child(1)::before { content: "\f0d1"; } /* Truck */
+.service:nth-child(2)::before { content: "\f53d"; } /* Money Bill */
+.service:nth-child(3)::before { content: "\f466"; } /* Box */
+.service:nth-child(4)::before { content: "\f3cd"; } /* Phone */
+
+.service:hover {
+    background: var(--white);
+    border-color: var(--primary);
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-md);
 }
 
-.btn-add:hover { background: var(--primary-hover); }
-
-/* 4. CHATBOT (SOKOBOT) */
-#bot-launcher {
-    position: fixed; bottom: 30px; left: 30px; 
-    width: 60px; height: 60px;
-    background: var(--success); color: var(--white);
-    border-radius: 50%; display: flex;
-    align-items: center; justify-content: center;
-    font-size: 26px; z-index: 3000;
-    box-shadow: 0 8px 20px rgba(0,166,80,0.3);
-}
-
-#chat-window {
-    position: fixed; bottom: 100px; left: 30px;
-    width: 320px; height: 450px;
-    background: var(--white); border-radius: 20px;
-    box-shadow: var(--shadow-md); z-index: 3000;
-    display: none; flex-direction: column; overflow: hidden;
-}
-
-.chat-header {
-    background: var(--success); color: var(--white);
-    padding: 18px; display: flex; align-items: center; gap: 12px;
-}
-
-.chat-body {
-    flex: 1; padding: 15px; overflow-y: auto;
-    background: #f8fafc; display: flex; flex-direction: column; gap: 10px;
-}
-
-.msg {
-    max-width: 85%; padding: 10px 14px;
-    border-radius: 15px; font-size: 13px;
-}
-
-.bot-msg { 
-    background: var(--white); border: 1px solid var(--border);
-    align-self: flex-start; border-bottom-left-radius: 2px;
-}
-
-.user-msg { 
-    background: var(--success); color: var(--white);
-    align-self: flex-end; border-bottom-right-radius: 2px;
-}
-
-.chat-footer {
-    padding: 12px; border-top: 1px solid var(--border);
-    display: flex; gap: 8px;
-}
-
-.chat-footer input {
-    flex: 1; padding: 10px; border: 1px solid var(--border);
-    border-radius: 20px; outline: none; font-size: 13px;
-}
-
-/* 5. CART SIDEBAR */
-.cart-sidebar {
-    position: fixed; top: 0; right: -400px;
-    width: 360px; height: 100%; background: var(--white);
-    box-shadow: -10px 0 30px rgba(0,0,0,0.1);
-    z-index: 2001; transition: 0.4s ease;
-    display: flex; flex-direction: column;
-}
-
-.cart-sidebar.active { right: 0; }
-
-.cart-header {
-    padding: 20px; background: #f8fafc;
-    display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid var(--border);
-}
-
-.cart-items-container { flex: 1; overflow-y: auto; padding: 20px; }
-
-.cart-item-row {
-    display: flex; align-items: center; gap: 15px;
-    margin-bottom: 15px; padding-bottom: 15px;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.cart-item-row img { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; }
-
-.checkout-btn {
-    display: block; width: 100%; background: var(--primary);
-    color: var(--white); text-align: center; padding: 15px;
-    border-radius: var(--radius-sm); font-weight: 700;
-}
-
-/* 6. FOOTER */
+/* --- 8. CREATIVE FOOTER & CONTACTS --- */
 .footer {
     background: var(--navy);
     color: var(--white);
-    padding: 60px 8% 20px;
+    padding: 80px 8% 20px;
+    margin-top: 50px;
+    position: relative;
+    border-top: 5px solid var(--primary);
 }
 
 .footer-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 40px;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 50px;
 }
 
 .footer-column h3 {
-    margin-bottom: 20px;
-    font-size: 16px;
-    text-transform: uppercase;
-    color: var(--primary);
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+    position: relative;
+    padding-bottom: 10px;
 }
 
+/* The "Classy" Underline */
+.footer-column h3::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 3px;
+    background: var(--primary);
+}
+
+/* Social Icons Styling */
 .social-icons {
-    display: flex; gap: 15px; margin-top: 10px;
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
 }
 
 .social-icons a {
-    width: 35px; height: 35px; background: rgba(255,255,255,0.1);
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; font-size: 18px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 18px;
 }
 
-.social-icons a:hover { background: var(--primary); }
+.social-icons a:hover {
+    background: var(--primary);
+    transform: rotate(360deg);
+}
 
+/* CREATIVE QUICK LINKS - "The Special Style" */
+.footer-column .quick-links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-column a {
+    display: block;
+    width: fit-content;
+    font-weight: 400;
+    color: rgba(255,255,255,0.8);
+    position: relative;
+    padding-left: 0;
+}
+
+/* Animated sliding link effect */
+.footer-column a:hover {
+    color: var(--white);
+    padding-left: 15px;
+}
+
+.footer-column a::before {
+    content: '→';
+    position: absolute;
+    left: -10px;
+    opacity: 0;
+    transition: var(--transition);
+    color: var(--primary);
+}
+
+.footer-column a:hover::before {
+    left: 0;
+    opacity: 1;
+}
+
+/* --- 9. FOOTER BOTTOM (Designer Credit) --- */
 .footer-bottom {
-    margin-top: 40px; padding-top: 20px;
+    margin-top: 60px;
+    padding-top: 20px;
     border-top: 1px solid rgba(255,255,255,0.1);
-    text-align: center; font-size: 13px; color: #94a3b8;
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
 }
+
+.footer-bottom strong {
+    color: var(--primary);
+    letter-spacing: 0.5px;
+}
+
+/* Mobile Adjustments */
 @media (max-width: 768px) {
-    /* Stack topbar items */
-    .topbar {
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-        padding: 8px 5%;
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        text-align: center;
     }
-
-    /* Stack navbar items */
-    .navbar {
-        flex-direction: column;
-        padding: 15px 5%;
-        gap: 15px;
-        height: auto; /* Ensure it expands to fit content */
+    .footer-column h3::after {
+        left: 50%;
+        transform: translateX(-50%);
     }
-
-    /* Make logo center */
-    .logo img {
-        height: 40px;
+    .footer-column a {
+        margin: 0 auto;
     }
-
-    /* Search box takes full width */
-    .search-box {
-        width: 100%;
-        max-width: none;
-        order: 2;
-    }
-
-    /* Menu links - scrollable or wrapped */
-    .menu {
-        width: 100%;
-        order: 3;
+    .social-icons {
         justify-content: center;
-        flex-wrap: wrap; /* Allows links to go to next line if too many */
-        gap: 10px;
-    }
-
-    .menu a {
-        font-size: 12px;
-        padding: 5px;
-    }
-
-    /* Adjust product grid for smaller screens */
-    .product-grid {
-        grid-template-columns: 1fr 1fr; /* Two products side-by-side */
-        gap: 10px;
-        padding: 0 10px;
-    }
-
-    .product h3 {
-        font-size: 13px;
-        height: 45px;
     }
 }
-style the css brands  section

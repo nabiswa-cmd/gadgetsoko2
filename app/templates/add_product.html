@@ -2,36 +2,89 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Product</title>
-    <link rel="stylesheet" href="{% static 'css/addProducts.css' %}">
+    <title>Add Product | Gadget Soko Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        :root { --soko-orange: #ee4d2d; --soko-black: #1a1a1a; }
+        body { font-family: 'Inter', sans-serif; background: #f9f9f9; padding: 40px; }
+        form { max-width: 600px; background: #fff; padding: 30px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin: auto; }
+        label { font-weight: 800; text-transform: uppercase; font-size: 12px; display: block; margin-top: 20px; color: var(--soko-black); }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 2px; box-sizing: border-box; }
+        
+        /* IMAGE UPLOAD BOX */
+        .upload-container { 
+            border: 2px dashed #ccc; padding: 20px; text-align: center; 
+            margin-top: 10px; cursor: pointer; transition: 0.3s; 
+        }
+        .upload-container:hover { border-color: var(--soko-orange); background: #fff8f7; }
+        
+        #image-preview-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
+            gap: 15px; margin-top: 15px; 
+        }
+
+        /* Container for each preview image + delete button */
+        .preview-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .preview-img { 
+            width: 100%; height: 100%; object-fit: cover; 
+            border-radius: 4px; border: 1px solid #eee; 
+        }
+        .remove-btn {
+            position: absolute; top: -5px; right: -5px;
+            background: #ff4444; color: white; border-radius: 50%;
+            width: 20px; height: 20px; font-size: 12px; line-height: 20px;
+            text-align: center; cursor: pointer; font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn { 
+            background: var(--soko-orange); color: white; border: none; 
+            padding: 18px; width: 100%; font-weight: 800; margin-top: 30px; 
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Add New Product</h2>
+<h2 style="text-align: center; font-weight: 900; text-transform: uppercase;">New Product Entry</h2>
 
-<form method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data" id="productForm">
     {% csrf_token %}
 
     <label>Product Name</label>
-    <input type="text" name="name" required>
+    <input type="text" name="name" placeholder="e.g. Samsung Galaxy S24" required>
 
-    <label>Brand</label>
-<select name="brand" required>
-    <option value="">Select Brand</option>
-    {% for brand in brands %}
-        <option value="{{ brand.id }}">{{ brand.name }}</option>
-    {% endfor %}
-</select>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+            <label>Brand</label>
+            <select name="brand" required>
+                <option value="">Select Brand</option>
+                {% for brand in brands %}
+                    <option value="{{ brand.id }}">{{ brand.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Stock Quantity</label>
+            <input type="number" name="stock" required>
+        </div>
+    </div>
 
-
-    <label>Price (KES)</label>
-    <input type="number" name="price" required step="0.01">
-
-    <label>Discount (%)</label>
-    <input type="number" name="discount" value="0" step="0.01">
-
-    <label>Stock</label>
-    <input type="number" name="stock" required>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+            <label>Price (KES)</label>
+            <input type="number" name="price" required step="0.01">
+        </div>
+        <div>
+            <label>Discount (%)</label>
+            <input type="number" name="discount" value="0" step="0.01">
+        </div>
+    </div>
 
     <label>Category</label>
     <select name="category">
@@ -40,19 +93,87 @@
             <option value="{{ cat.id }}">{{ cat.name }}</option>
         {% endfor %}
     </select>
+    <input type="text" name="new_category" placeholder="Or type a new category name..." style="margin-top: 10px;">
 
-    <label>Or Add New Category</label>
-    <input type="text" name="new_category">
+    <label><i class="fas fa-images"></i> Product Gallery (Add Multiple Photos)</label>
+    <div class="upload-container" onclick="document.getElementById('file-input').click()">
+        <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #ccc;"></i>
+        <p style="font-size: 13px; color: #777;">Click to add photos (can select multiple times)</p>
+        
+        <input type="file" id="file-input" name="images" multiple style="display: none;" onchange="handleFileSelect(event)">
+        
+        <div id="image-preview-grid"></div>
+    </div>
 
-    <label>Product Images (2+)</label>
-    <input type="file" name="images" multiple required>
+    <label>Specifications & Details</label>
+    <textarea name="specifications" rows="5" placeholder="Display: 6.8 inch... RAM: 12GB..."></textarea>
 
-    <label>Specifications</label>
-    <textarea name="specifications"></textarea>
-
-    <button type="submit" class="btn">Add Product</button>
+    <button type="submit" class="btn">Confirm & Publish</button>
 </form>
 
+<script>
+    // Global array to hold all files across multiple selection clicks
+    let fileBuffer = [];
+
+    function handleFileSelect(event) {
+        const previewGrid = document.getElementById('image-preview-grid');
+        const files = Array.from(event.target.files);
+
+        files.forEach(file => {
+            // 1. Check if it's an image
+            if (!file.type.startsWith('image/')) {
+                alert(file.name + " is not an image file.");
+                return;
+            }
+
+            // 2. Add to our global buffer
+            fileBuffer.append = fileBuffer.push(file);
+
+            // 3. Create the UI preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'preview-wrapper';
+
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-img';
+
+                const removeBtn = document.createElement('div');
+                removeBtn.innerHTML = '&times;';
+                removeBtn.className = 'remove-btn';
+                
+                // Handle removing an image from the selection
+                removeBtn.onclick = function(ex) {
+                    ex.stopPropagation(); // Stop click from opening file picker
+                    wrapper.remove();
+                    // Remove from array
+                    fileBuffer = fileBuffer.filter(f => f !== file);
+                    updateInput();
+                };
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(removeBtn);
+                previewGrid.appendChild(wrapper);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // 4. Sync the buffer to the actual input field
+        updateInput();
+    }
+
+    function updateInput() {
+        const fileInput = document.getElementById('file-input');
+        const dataTransfer = new DataTransfer();
+        
+        fileBuffer.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+
+        fileInput.files = dataTransfer.files;
+    }
+</script>
 
 </body>
 </html>
