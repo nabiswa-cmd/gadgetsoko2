@@ -1,0 +1,933 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gadget Soko Kenya{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{% static 'images/logo-32x32.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+      
+        :root {  /* ==========from Nabiswa It matches styles of index exactly=====================*/
+            --primary:        #ee4d2d;
+            --primary-hover:  #d73d1f;
+            --navy:           #0b3a63;
+            --success:        #00a650;
+            --bg-light:       #f4f6f8;
+            --white:          #ffffff;
+            --text-main:      #1e293b;
+            --text-muted:     #64748b;
+            --border:         #e2e8f0;
+            --shadow-sm:      0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md:      0 10px 25px rgba(0,0,0,0.1);
+            --radius-sm:      8px;
+            --radius-md:      14px;
+            --nav-h:          68px;
+            --transition:     all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a { text-decoration: none; color: inherit; transition: var(--transition); }
+        button { cursor: pointer; border: none; outline: none; transition: var(--transition); }
+
+        /* ============================================================
+           TOPBAR
+        ============================================================ */
+        .gs-topbar {
+            background: var(--navy);
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 8%;
+            font-size: 12.5px;
+            gap: 10px;
+        }
+        .gs-topbar a { color: rgba(255,255,255,0.75); }
+        .gs-topbar a:hover { color: var(--white); }
+        .gs-topbar-right { display: flex; gap: 14px; align-items: center; }
+
+        /* ============================================================
+           NAVBAR — orange bg matching original
+        ============================================================ */
+        .gs-navbar {
+            background: var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 8%;
+            gap: 20px;
+            box-shadow: 0 2px 10px rgba(238,77,45,0.3);
+        }
+
+        .gs-logo img { height: 45px; display: block; }
+
+        /* Desktop menu */
+        .gs-menu {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .gs-menu a {
+    position: relative;
+    color: rgba(255,255,255,0.92);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.gs-menu a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--white), gold, var(--white));
+    transition: width 0.4s ease-in-out;
+}
+
+.gs-menu a:hover::after {
+    width: 100%;
+}
+@keyframes sparkle {
+    0% { background-position: 0 0; }
+    100% { background-position: 200% 0; }
+}
+
+.gs-menu a::after {
+    background: linear-gradient(90deg, var(--white), gold, var(--white));
+    background-size: 200% auto;
+    animation: sparkle 1.5s linear infinite;
+}
+
+       
+
+        /* Search box */
+        .gs-search {
+            flex: 1;
+            max-width: 380px;
+            display: flex;
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            overflow: visible;
+            position: relative;
+        }
+        .gs-search input {
+            flex: 1; padding: 10px 14px;
+            border: none; outline: none;
+            font-size: 14px; font-family: inherit;
+            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+        }
+        .gs-search button {
+            background: #333; color: white;
+            padding: 0 15px; font-size: 14px;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+        .gs-search button:hover { background: var(--navy); }
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0; width: 100%;
+            background: var(--white);
+            z-index: 200;
+            box-shadow: var(--shadow-md);
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+            display: none;
+            overflow: hidden;
+        }
+
+        /* Cart icon */
+        .gs-cart-icon {
+            position: relative;
+            color: var(--white);
+            font-size: 23px;
+            cursor: pointer;
+            flex-shrink: 0;
+            padding: 4px 2px;
+        }
+        .cart-count {
+            position: absolute;
+            top: -6px; right: -10px;
+            background: var(--white);
+            color: var(--primary);
+            font-size: 10px; font-weight: 700;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Hamburger */
+        .gs-hamburger {
+            display: none;
+            background: rgba(255,255,255,0.15);
+            border: none; border-radius: 6px;
+            padding: 8px; cursor: pointer;
+            flex-direction: column; gap: 5px;
+        }
+        .gs-hamburger span {
+            display: block; width: 22px; height: 2.5px;
+            background: var(--white); border-radius: 2px;
+            transition: var(--transition);
+        }
+        .gs-hamburger.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+        .gs-hamburger.open span:nth-child(2) { opacity: 0; }
+        .gs-hamburger.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+        /* Mobile drawer */
+        .gs-mobile-menu {
+            display: none;
+            background: var(--primary);
+            border-top: 1px solid rgba(255,255,255,0.15);
+            flex-direction: column;
+            padding: 10px 5% 14px;
+            gap: 2px;
+            position: sticky;
+            top: var(--nav-h);
+            z-index: 999;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .gs-mobile-menu.open { display: flex; }
+        .gs-mobile-menu a {
+            display: block;
+            color: rgba(255,255,255,0.9);
+            font-size: 14px; font-weight: 600;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+        }
+        .gs-mobile-menu a:hover { background: rgba(255,255,255,0.15); color: var(--white); }
+        .gs-mobile-search {
+            display: flex;
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .gs-mobile-search input {
+            flex: 1; padding: 10px 14px;
+            border: none; outline: none;
+            font-size: 14px; font-family: inherit;
+        }
+        .gs-mobile-search button {
+            background: #333; color: white; padding: 0 14px;
+        }
+
+        /* ============================================================
+           MAIN CONTENT
+        ============================================================ */
+        .gs-main { flex: 1; }
+
+        /* ============================================================
+           SHARED PRODUCT CARD STYLES
+           Both .product-card (index) and .product (products page) get same treatment
+        ============================================================ */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card, .product {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            position: relative;
+        }
+        .product-card:hover, .product:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Fixed image container — consistent height, centered, no cropping */
+        .img-container {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            overflow: hidden;
+        }
+        .img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+            display: block;
+        }
+        .product-card:hover .img-container img,
+        .product:hover .img-container img {
+            transform: scale(1.06);
+        }
+
+        .product-card h3, .product h3 {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 14px 4px;
+            line-height: 1.35;
+            min-height: 46px;
+            color: var(--text-main);
+        }
+
+        .price { padding: 4px 14px 10px; }
+        .old-price {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .new-price { color: var(--primary); font-weight: 700; font-size: 17px; }
+
+        .product-actions {
+            display: flex;
+            gap: 8px;
+            padding: 0 12px 14px;
+            margin-top: auto;
+        }
+        .btn-view, .btn-add {
+            flex: 1; padding: 9px 6px;
+            font-size: 12px; font-weight: 700;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .btn-view {
+            background: var(--bg-light);
+            color: var(--navy);
+            border: 1px solid var(--border);
+        }
+        .btn-view:hover { background: var(--navy); color: var(--white); border-color: var(--navy); }
+        .btn-add { background: var(--primary); color: var(--white); }
+        .btn-add:hover { background: var(--primary-hover); }
+
+        /* Countdown / discount badges */
+        .timer-container {
+            position: absolute; top: 10px; left: 10px; z-index: 10;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .timer-badge {
+            background: var(--success); color: white;
+            padding: 4px 8px; border-radius: 4px;
+            font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; gap: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+        .sale-badge, .discount-tag {
+            background: var(--primary); color: white;
+            padding: 4px 8px; border-radius: 4px;
+            font-size: 11px; font-weight: 700;
+            width: fit-content;
+        }
+
+        /* ============================================================
+           FOOTER — matches index.css exactly (hover arrows, underlines)
+        ============================================================ */
+        .gs-footer {
+            background: var(--navy);
+            color: var(--white);
+            padding: 70px 8% 0;
+            margin-top: 50px;
+            border-top: 5px solid var(--primary);
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 50px;
+            padding-bottom: 50px;
+        }
+
+        .footer-column h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            color: var(--white);
+            margin-bottom: 22px;
+            position: relative;
+            padding-bottom: 12px;
+        }
+        /* Orange underline accent */
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0; bottom: 0;
+            width: 40px; height: 3px;
+            background: var(--primary);
+        }
+
+        .footer-column p {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            line-height: 2;
+        }
+
+        /* Sliding arrow hover links */
+        .footer-column a {
+            display: block;
+            width: fit-content;
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            line-height: 2.1;
+            padding-left: 0;
+            position: relative;
+        }
+        .footer-column a::before {
+            content: '→';
+            position: absolute;
+            left: -12px;
+            opacity: 0;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+        .footer-column a:hover {
+            color: var(--white);
+            padding-left: 14px;
+        }
+        .footer-column a:hover::before {
+            left: 0;
+            opacity: 1;
+        }
+
+        /* Social icons — override arrow for icon links */
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            margin-top: 6px;
+        }
+        .social-icons a {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            font-size: 17px;
+            padding-left: 0 !important;  /* cancel sliding effect */
+            width: fit-content !important;
+            min-width: 40px;
+        }
+        .social-icons a::before { display: none; }   /* no arrow on icons */
+        .social-icons a:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: rotate(360deg);
+            padding-left: 0 !important;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 0;
+            text-align: center;
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+        }
+        .footer-bottom strong { color: var(--primary); }
+
+        /* ============================================================
+           SHARED COMPONENTS
+        ============================================================ */
+
+        /* Cart sidebar */
+        .cart-sidebar {
+            position: fixed; top: 0; right: -400px; width: 350px; height: 100%;
+            background: var(--white); box-shadow: -5px 0 20px rgba(0,0,0,0.15);
+            z-index: 2000; transition: right 0.4s ease; display: flex; flex-direction: column;
+        }
+        .cart-sidebar.active { right: 0; }
+        .cart-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45); display: none; z-index: 1999;
+        }
+        .cart-overlay.active { display: block; }
+        .cart-header {
+            padding: 18px 20px;
+            background: var(--bg-light);
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .cart-header h3 { font-size: 17px; color: var(--navy); font-family: 'Syne', sans-serif; }
+        .close-cart { background: none; font-size: 26px; color: var(--text-muted); cursor: pointer; line-height: 1; }
+        .cart-items-container { flex: 1; overflow-y: auto; padding: 14px; }
+        .cart-item-row {
+            display: flex; align-items: center; gap: 10px;
+            padding-bottom: 12px; margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .cart-item-row img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+        .cart-item-row .item-info { flex: 1; }
+        .cart-item-row .item-info b { font-size: 13px; display: block; }
+        .cart-item-row .item-info small { color: var(--text-muted); font-size: 12px; }
+        .cart-footer-panel {
+            padding: 18px 20px; border-top: 1px solid var(--border); background: var(--white);
+        }
+        .cart-footer-panel .total-row {
+            display: flex; justify-content: space-between;
+            font-weight: 700; margin-bottom: 14px; font-size: 15px;
+        }
+        .cart-footer-panel .total-row span:last-child { color: var(--primary); }
+        .checkout-btn {
+            display: block; width: 100%;
+            background: var(--primary); color: var(--white) !important;
+            text-align: center; padding: 13px;
+            border-radius: var(--radius-sm);
+            font-weight: 700; font-size: 15px;
+        }
+        .checkout-btn:hover { background: var(--primary-hover); }
+
+        /* SokoBot */
+        #bot-launcher {
+            position: fixed; bottom: 28px; left: 28px;
+            width: 56px; height: 56px;
+            background: var(--success); color: var(--white);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; cursor: pointer;
+            box-shadow: 0 4px 18px rgba(0,166,80,0.4);
+            z-index: 3000; transition: transform 0.3s ease;
+        }
+        #bot-launcher:hover { transform: scale(1.1); }
+        #chat-window {
+            position: fixed; bottom: 96px; left: 28px;
+            width: 310px; height: 420px;
+            background: var(--white); border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            display: none; flex-direction: column;
+            z-index: 3000; overflow: hidden; border: 1px solid var(--border);
+        }
+        .chat-header {
+            background: var(--success); color: var(--white);
+            padding: 14px 16px; display: flex; align-items: center; gap: 10px;
+        }
+        .chat-header strong { font-size: 14px; }
+        .chat-header small { font-size: 10px; opacity: 0.75; }
+        .chat-close { margin-left: auto; cursor: pointer; font-size: 20px; line-height: 1; }
+        .chat-body {
+            flex: 1; padding: 14px; overflow-y: auto;
+            background: #f9f9f9; display: flex; flex-direction: column; gap: 8px;
+        }
+        .msg {
+            max-width: 85%; padding: 8px 12px; border-radius: 12px;
+            font-size: 13px; line-height: 1.5;
+        }
+        .bot-msg { background: #e8e8e8; align-self: flex-start; color: #333; border-bottom-left-radius: 2px; }
+        .user-msg { background: var(--success); align-self: flex-end; color: white; border-bottom-right-radius: 2px; }
+        .chat-footer-bar {
+            padding: 10px 12px; border-top: 1px solid var(--border);
+            display: flex; gap: 8px;
+        }
+        .chat-footer-bar input {
+            flex: 1; padding: 8px 12px;
+            border: 1.5px solid var(--border); border-radius: 20px;
+            font-size: 13px; outline: none; font-family: inherit;
+        }
+        .chat-footer-bar input:focus { border-color: var(--success); }
+        .chat-footer-bar button {
+            background: var(--success); color: white;
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Activity popup */
+        #live-activity-box {
+            position: fixed; bottom: 28px; left: -420px; width: 295px;
+            background: var(--white); border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            display: flex; align-items: center; padding: 12px 14px;
+            z-index: 5000;
+            transition: left 0.7s cubic-bezier(0.175,0.885,0.32,1.275);
+            border: 1px solid var(--border);
+        }
+        .activity-icon {
+            width: 42px; height: 42px; background: var(--bg-light);
+            border-radius: 8px; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 12px; flex-shrink: 0;
+        }
+        .activity-icon i { color: #555; font-size: 17px; }
+        .activity-body { flex: 1; }
+        #activity-msg { margin: 0; font-size: 12px; color: #333; line-height: 1.4; }
+        .activity-meta { display: flex; align-items: center; gap: 5px; margin-top: 4px; }
+        .verified-badge {
+            background: #e1f5fe; color: #0288d1;
+            font-size: 9px; padding: 2px 6px; border-radius: 4px;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        #activity-time { color: #bbb; font-size: 10px; }
+        .activity-dismiss { cursor: pointer; font-size: 18px; color: #ccc; margin-left: 8px; line-height: 1; }
+
+        /* Login badge */
+        .login-badge {
+            position: fixed; top: 20px; right: -420px;
+            background: var(--white); padding: 15px 18px;
+            border-radius: 10px; box-shadow: var(--shadow-md);
+            border-left: 5px solid var(--success);
+            display: flex; align-items: center; gap: 12px;
+            z-index: 9000; transition: right 0.5s ease;
+        }
+        .login-badge.show { right: 20px; }
+        .badge-icon {
+            width: 36px; height: 36px;
+            background: var(--success); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--white); flex-shrink: 0;
+        }
+        .badge-content h4 { font-size: 13px; margin-bottom: 2px; }
+        .badge-content p { font-size: 11px; color: var(--text-muted); }
+
+        /* ============================================================
+           RESPONSIVE
+        ============================================================ */
+        @media (max-width: 960px) {
+            .gs-menu { display: none; }
+            .gs-hamburger { display: flex; }
+            .gs-search { max-width: 240px; }
+            .footer-container { grid-template-columns: 1fr 1fr; gap: 35px; }
+        }
+
+        @media (max-width: 600px) {
+            .gs-topbar { display: none; }
+            .gs-navbar { padding: 10px 4%; }
+            .gs-logo img { height: 38px; }
+            .gs-search { display: none; }
+            .product-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .img-container { height: 155px; padding: 10px; }
+            .product-card h3, .product h3 { font-size: 12.5px; min-height: 38px; }
+            .footer-container { grid-template-columns: 1fr; gap: 28px; text-align: center; }
+            .footer-column h3::after { left: 50%; transform: translateX(-50%); }
+            .footer-column a { margin: 0 auto; }
+            .social-icons { justify-content: center; }
+            .gs-footer { padding-top: 42px; }
+            .cart-sidebar { width: 100%; right: -100%; }
+            #bot-launcher { bottom: 16px; left: 12px; width: 48px; height: 48px; font-size: 20px; }
+            #chat-window { left: 8px; width: calc(100vw - 16px); bottom: 74px; }
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- ===== LOGIN BADGE ===== -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="login-badge" id="loginBadge">
+            <div class="badge-icon"><i class="fa fa-check"></i></div>
+            <div class="badge-content">
+                <h4>Hello, {{ request.user.username }}!</h4>
+                <p>Login successful. Ready to shop Gadget Soko Kenya?</p>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ===== ACTIVITY POPUP ===== -->
+    <div id="live-activity-box">
+        <div class="activity-icon"><i class="fas fa-box-open"></i></div>
+        <div class="activity-body">
+            <p id="activity-msg"></p>
+            <div class="activity-meta">
+                <span class="verified-badge">Verified Order</span>
+                <small id="activity-time"></small>
+            </div>
+        </div>
+        <span class="activity-dismiss" onclick="dismissActivity()">&times;</span>
+    </div>
+
+    <!-- ===== SOKOBOT ===== -->
+    <div id="bot-launcher" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
+    <div id="chat-window">
+        <div class="chat-header">
+            <i class="fas fa-robot"></i>
+            <div><strong>SokoBot</strong><br><small>Online | Assistant</small></div>
+            <span class="chat-close" onclick="toggleChat()">&times;</span>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="msg bot-msg">Hello! I'm SokoBot. Need help with delivery, payments, or product advice?</div>
+        </div>
+        <div class="chat-footer-bar">
+            <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMsg()">
+            <button onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- ===== CART SIDEBAR ===== -->
+    <div id="cartOverlay" class="cart-overlay" onclick="toggleCart()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3><i class="fa fa-shopping-cart"></i> Your Cart</h3>
+            <button class="close-cart" onclick="toggleCart()">&times;</button>
+        </div>
+        <div class="cart-items-container" id="cartSlides">
+            <p style="text-align:center; padding:30px; color:var(--text-muted);">Your cart is empty</p>
+        </div>
+        <div class="cart-footer-panel">
+            <div class="total-row">
+                <span>Total:</span>
+                <span id="sidebarTotal">KES {% if cart_total %}{{ cart_total }}{% else %}0{% endif %}</span>
+            </div>
+            <a href="{% url 'check' %}" class="checkout-btn">Checkout</a>
+        </div>
+    </div>
+
+    <!-- ===== TOPBAR ===== -->
+    <div class="gs-topbar">
+        <div>English | Swahili</div>
+        <div class="gs-topbar-right">
+            <a href="{% url 'login' %}?next=/dashboard/">Admin Login</a>
+            <span style="opacity:0.3;">|</span>
+            <a href="#contact">Contact</a>
+        </div>
+    </div>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="gs-navbar">
+        <div class="gs-logo">
+            <a href="{% url 'index' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Gadget Soko">
+            </a>
+        </div>
+
+        <div class="gs-menu">
+            <a href="{% url 'index' %}#categories">Categories</a>
+            <a href="{% url 'products' %}">Products</a>
+            <a href="{% url 'index' %}#services">Services</a>
+            <a href="#contact">Contact</a>
+            {% if not request.user.is_authenticated %}
+                <a href="{% url 'userlog' %}" class="login-link">Login</a>
+            {% else %}
+                <a href="{% url 'logout' %}">Logout</a>
+            {% endif %}
+        </div>
+
+        <div class="gs-search">
+            <input type="text" id="liveSearchInput" placeholder="Search gadgets...">
+            <button><i class="fas fa-search"></i></button>
+            <div id="search-results" class="search-dropdown"></div>
+        </div>
+
+        <a href="javascript:void(0)" class="gs-cart-icon" onclick="toggleCart()">
+            <i class="fa fa-shopping-cart"></i>
+            <span class="cart-count">{% if request.user.is_authenticated %}{{ cart_count }}{% else %}0{% endif %}</span>
+        </a>
+
+        <button class="gs-hamburger" id="gsHamburger" onclick="toggleMobileMenu()">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- Mobile Drawer -->
+    <div class="gs-mobile-menu" id="gsMobileMenu">
+        <a href="{% url 'index' %}#categories" onclick="closeMobileMenu()"> Categories</a>
+        <a href="{% url 'products' %}" onclick="closeMobileMenu()"> Products</a>
+        <a href="{% url 'index' %}#services" onclick="closeMobileMenu()"> Services</a>
+        <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+        {% if not request.user.is_authenticated %}
+            <a href="{% url 'userlog' %}" onclick="closeMobileMenu()" style="font-weight:700; color:white !important;">→ Login</a>
+        {% else %}
+            <a href="{% url 'logout' %}" onclick="closeMobileMenu()">Logout</a>
+        {% endif %}
+        <div class="gs-mobile-search">
+            <input type="text" id="mobileSearchInput" placeholder=" Search gadgets...">
+            <button><i class="fas fa-search"></i></button>
+        </div>
+    </div>
+
+    <!-- ===== PAGE CONTENT ===== -->
+    <main class="gs-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="gs-footer" id="contact">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3>Socials</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                </div>
+                <h3 style="margin-top:24px;">Contacts</h3>
+                <p>📞 0727698319</p>
+                <p>📧 support@gadgetsoko.co.ke</p>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'products' %}">Products</a>
+                <a href="{% url 'index' %}#categories">Categories</a>
+                <a href="{% url 'index' %}#services">Services</a>
+            </div>
+            <div class="footer-column">
+                <h3>Customer Care</h3>
+                <a href="#">Order Tracking</a>
+                <a href="#">Returns Policy</a>
+                <a href="#">Delivery Info</a>
+                <a href="#">FAQs</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Developed and Designed by <strong>Sammy Tings</strong> at <strong>TingsTech Technologies</strong></p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        /* ---- MOBILE MENU ---- */
+        function toggleMobileMenu() {
+            $('#gsMobileMenu').toggleClass('open');
+            $('#gsHamburger').toggleClass('open');
+        }
+        function closeMobileMenu() {
+            $('#gsMobileMenu').removeClass('open');
+            $('#gsHamburger').removeClass('open');
+        }
+
+        /* ---- SOKOBOT ---- */
+        function toggleChat() {
+            $('#chat-window').fadeToggle(300).css('display', 'flex');
+        }
+        function sendMsg() {
+            let input = $('#chatInput');
+            let text = input.val().trim();
+            if (!text) return;
+            $('#chatBody').append(`<div class="msg user-msg">${text}</div>`);
+            input.val('');
+            $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
+            setTimeout(() => {
+                let r = "Hello! I'm SokoBot. I can help with delivery and payment info.";
+                if (text.toLowerCase().includes('delivery')) r = 'Nairobi delivery is same-day. Upcountry takes 24–48 hours.';
+                else if (text.toLowerCase().includes('pay')) r = 'We accept M-Pesa, Equity Bank, Pochi la Biashara & Cash on Delivery.';
+                else if (text.toLowerCase().includes('return')) r = '7-day return policy for faulty items. Contact support@gadgetsoko.co.ke';
+                $('#chatBody').append(`<div class="msg bot-msg">${r}</div>`);
+                $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
+            }, 700);
+        }
+
+        /* ---- CART ---- */
+        function toggleCart() {
+            {% if not request.user.is_authenticated %}
+            window.location.href = "{% url 'userlog' %}?next={{ request.path }}"; return;
+            {% endif %}
+            $('#cartSidebar').toggleClass('active');
+            $('#cartOverlay').toggleClass('active');
+            if ($('#cartSidebar').hasClass('active')) updateCartSidebar();
+        }
+        function updateCartSidebar() {
+            $.get("{% url 'view_cart' %}?ajax=1", function(data) {
+                let h = '';
+                if (!data.items || data.items.length === 0) {
+                    h = '<p style="text-align:center; padding:30px; color:#888;">Your cart is empty</p>';
+                } else {
+                    data.items.forEach(i => {
+                        h += `<div class="cart-item-row">
+                            <img src="${i.image}" alt="${i.name}">
+                            <div class="item-info">
+                                <b>${i.name}</b>
+                                <small>KES ${i.price} &times; ${i.quantity}</small>
+                            </div>
+                        </div>`;
+                    });
+                }
+                $('#cartSlides').html(h);
+                $('#sidebarTotal').text('KES ' + (data.total || 0));
+            });
+        }
+        function addToCart(pId) {
+            $.get(`/add-to-cart/${pId}/`, function(res) {
+                if (res.error === 'not_logged_in') { window.location.href = "{% url 'userlog' %}"; return; }
+                $('.cart-count').text(res.cart_count);
+                updateCartSidebar();
+                if (!$('#cartSidebar').hasClass('active')) {
+                    $('#cartSidebar').addClass('active');
+                    $('#cartOverlay').addClass('active');
+                }
+            });
+        }
+
+        /* ---- ACTIVITY BOX ---- */
+        const actNames   = ["Mama Stacey","Brian O.","Kevin Omari","Sarah W.","Amina Hussein","Derrick M.","Eng. Mike","Purity K.","Otieno J.","Cynthia N."];
+        const actTowns   = ["Nairobi West","Mombasa Road","Eldoret","Kisumu CBD","Nakuru","Thika","Kitale","Machakos","Ruiru","Syokimau"];
+        const actGadgets = ["iPhone 15 Pro","Samsung S24 Ultra","HP EliteBook","Oraimo FreePods","MacBook Air","JBL Flip 6","Tecno Camon 30"];
+
+        function triggerActivity() {
+            const p = actNames[Math.floor(Math.random() * actNames.length)];
+            const t = actTowns[Math.floor(Math.random() * actTowns.length)];
+            const g = actGadgets[Math.floor(Math.random() * actGadgets.length)];
+            const r = Math.random();
+            let msg, time;
+            if (r > 0.6) {
+                msg  = `<strong>${g}</strong> dispatched to <strong>${p}</strong> in ${t}.`;
+                time = `${Math.floor(Math.random() * 3) + 1} hours ago`;
+            } else if (r > 0.3) {
+                msg  = `New order by <strong>${p}</strong> (${t}) for 1× <strong>${g}</strong>.`;
+                time = 'Just now';
+            } else {
+                msg  = `<strong>${p}</strong> from ${t} confirmed receipt of their <strong>${g}</strong>.`;
+                time = `Today, ${Math.floor(Math.random()*10+8)}:${String(Math.floor(Math.random()*59)).padStart(2,'0')} AM`;
+            }
+            $('#activity-msg').html(msg);
+            $('#activity-time').text(time);
+            $('#live-activity-box').css('left', '20px');
+            setTimeout(dismissActivity, 8000);
+        }
+        function dismissActivity() { $('#live-activity-box').css('left', '-420px'); }
+
+        /* ---- LIVE SEARCH ---- */
+        $(document).ready(function() {
+            function doSearch(val) {
+                if (val.length < 2) { $('#search-results').hide(); return; }
+                $.ajax({
+                    url: "{% url 'live_search' %}",
+                    data: { 'q': val },
+                    success: function(d) { $('#search-results').html(d.html).show(); }
+                });
+            }
+            $('#liveSearchInput').on('keyup', function() { doSearch($(this).val()); });
+            $('#mobileSearchInput').on('keyup', function() { doSearch($(this).val()); });
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.gs-search, .gs-mobile-search').length) $('#search-results').hide();
+            });
+
+            // Login badge slide-in then slide-out
+            if ($('#loginBadge').length) {
+                setTimeout(() => $('#loginBadge').addClass('show'), 300);
+                setTimeout(() => $('#loginBadge').removeClass('show'), 4500);
+            }
+
+            // Activity notifications
+            setTimeout(triggerActivity, 12000);
+            setInterval(() => { setTimeout(triggerActivity, Math.floor(Math.random() * 20000)); }, 45000);
+        });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

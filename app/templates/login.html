@@ -1,62 +1,151 @@
+{% extends 'base_site.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
 
-<title>Login | Gadget Soko Kenya</title>
+{% block title %}Login | Gadget Soko Kenya{% endblock %}
+
+{% block content %}
 
 <link rel="stylesheet" href="{% static 'css/login.css' %}">
 
-</head>
+<style>
+    .login-wrapper {
+        background: linear-gradient(135deg, #0b3a63, #ee4d2d);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
 
-<body>
+    .login-container {
+        width: 100%;
+        max-width: 380px;
+        background: #fff;
+        padding: 30px 25px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        text-align: center;
+        animation: fadeIn 0.6s ease-in-out;
+    }
 
-<div class="login-container">
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(20px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
 
-     <div class="logo">
-      <a href="{% url 'login' %}">
-        <img src="{% static 'images/logo.png' %}">
-      </a>
+    .login-container .logo img {
+        width: 70px;
+        margin-bottom: 10px;
+    }
+
+    .login-container .subtitle {
+        font-size: 14px;
+        color: #777;
+        margin-bottom: 20px;
+    }
+
+    .login-container form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: left;
+    }
+
+    .login-container label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .login-container input,
+    .login-container select {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        outline: none;
+        font-size: 13px;
+        transition: 0.3s;
+    }
+
+    .login-container input:focus,
+    .login-container select:focus {
+        border-color: #ee4d2d;
+        box-shadow: 0 0 0 2px rgba(238,77,45,0.15);
+    }
+
+    .login-container button {
+        margin-top: 10px;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: #ee4d2d;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .login-container button:hover {
+        background: #d84324;
+    }
+
+    .login-container .register-link {
+        margin-top: 15px;
+        font-size: 13px;
+        color: #555;
+    }
+
+    .login-container .register-link a {
+        color: #0b3a63;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .login-container .register-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="login-wrapper">
+
+    <div class="login-container">
+
+        <div class="logo">
+            <a href="{% url 'login' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Logo">
+            </a>
+        </div>
+
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Login to your account</p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <label>Select Login Type</label>
+            <select name="role">
+                <option value="client">Client</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Enter username" required>
+
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p class="register-link">
+            Don't have an account?
+            <a href="{% url 'signup' %}">Register</a>
+        </p>
+
     </div>
-
-    <p class="subtitle">Login to your account</p>
-
-    <form method="POST">
-
-        {% csrf_token %}
-
-        <!-- Select Role -->
-        <label>Select Login Type</label>
-
-        <select name="role" id="roleSelect">
-            <option value="client">Client</option>
-            <option value="admin">Admin</option>
-        </select>
-
-
-        <!-- Username -->
-        <label>Username</label>
-        <input type="text" name="username" placeholder="Enter username" required>
-
-
-        <!-- Password -->
-        <label>Password</label>
-        <input type="password" name="password" placeholder="Enter password" required>
-
-
-        <!-- Login button -->
-        <button type="submit">Login</button>
-
-    </form>
-
-    <p class="register-link">
-        Don't have an account?
-        <a href="{% url 'signup' %}">register</a>
-    </p>
 
 </div>
 
 <script src="{% static 'js/login.js' %}"></script>
 
-</body>
-</html>
+{% endblock %}

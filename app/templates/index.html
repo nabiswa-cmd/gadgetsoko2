@@ -1,13 +1,16 @@
+{% extends 'base_site.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
+
+{% block title %}Gadget Soko Kenya | Home{% endblock %}
+{% block content %}
+  <!-- your page content here -->
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gadget Soko Kenya | Home</title>
+    <title></title>
 
     <link rel="icon" type="image/png" href="{% static 'images/logo-32x32.png' %}">
-    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+   
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
@@ -131,66 +134,7 @@
         </div>
     </div>
 
-    <div id="cartOverlay" class="cart-overlay" onclick="toggleCart()"></div>
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h3>Your Cart</h3>
-            <span onclick="toggleCart()" style="cursor:pointer; font-size: 24px;">&times;</span>
-        </div>
-        <div class="cart-items-container" id="cartSlides">
-            <p style="text-align:center; padding:20px;">Your cart is empty</p>
-        </div>
-        <div class="cart-footer">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:bold;">
-                <span>Total:</span>
-                <span id="sidebarTotal">KES {{ cart_total }}</span>
-            </div>
-            <a href="{% url 'check' %}" class="checkout-btn">Checkout</a>
-        </div>
-    </div>
 
-    <header class="header">
-        <div class="topbar">
-            <div>English | Swahili</div>
-            <div>
-                <a href="{% url 'login' %}?next=/dashboard/">Admin Login</a> |
-                <a href="#contact">Contact</a>
-            </div>
-        </div>
-
-        <div class="navbar">
-            <div class="logo">
-                <a href="{% url 'index' %}">
-                    <img src="{% static 'images/logo.png' %}" alt="Gadget Soko">
-                </a>
-            </div>
-
-            <nav class="menu">
-                <a href="#categories">Categories</a>
-                <a href="{% url 'products' %}">Products</a>
-                <a href="#services">Services</a>
-                <a href="#contact">Contact</a>
-                {% if not request.user.is_authenticated %}
-                    <a href="{% url 'userlog' %}">Login</a>
-                {% else %}
-                    <a href="{% url 'logout' %}">Logout</a>
-                {% endif %}
-            </nav>
-
-            <div class="search-box" style="position:relative;">
-                <input type="text" id="liveSearchInput" placeholder="Search gadgets...">
-                <button>🔍</button>
-                <div id="search-results" class="search-dropdown"></div>
-            </div>
-
-            <a href="javascript:void(0)" class="cart-icon" onclick="toggleCart()" style="position:relative; text-decoration:none; color:inherit;">
-                <i class="fa fa-shopping-cart"></i>
-                <sup class="cart-count" style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:10px;">
-                    {% if request.user.is_authenticated %}{{ cart_count }}{% else %}0{% endif %}
-                </sup>
-            </a>
-        </div>
-    </header>
 
     <section class="banner">
         <img id="bannerImage" src="{% static 'images/photo1.jpg' %}" alt="Banner" style="width:100%; height:auto;">
@@ -281,38 +225,12 @@
     <section id="services" class="section">
         <h2>Our Services</h2>
         <div class="services">
-            <div class="service">🚚 Quick Delivery</div>
-            <div class="service">💰 Money Back</div>
-            <div class="service">📦 Pay on Delivery</div>
-            <div class="service">📞 Support 24/7</div>
+            <div class="service"> Quick Delivery</div>
+            <div class="service"> Money Back</div>
+            <div class="service"> Pay on Delivery within Nairobi</div>
+            <div class="service"> Support 24/7</div>
         </div>
     </section>
-
-    <footer id="contact" class="footer">
-        <div class="footer-container">
-            <div class="footer-column">
-                <h3>Socials</h3>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-whatsapp"></i></a>
-                    <a href="#"><i class="fab fa-tiktok"></i></a>
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                </div>
-                <h3>Contacts</h3>
-                <p>📞 0727698319</p>
-                <p>📧 support@gadgetsoko.co.ke</p>
-            </div>
-            <div class="footer-column">
-                <h3>Quick Links</h3>
-                <a href="{% url 'index' %}">Home</a>
-                <a href="{% url 'products' %}">Products</a>
-                <a href="#categories">Categories</a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>Developed and Designed by <strong>Sammy Tings</strong> at <strong>TingsTech Technologies</strong></p>
-        </div>
-    </footer>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         /* --- ORGANIC ACTIVITY LOGIC --- */
@@ -449,5 +367,4 @@
             });
         });
     </script>
-</body>=
-</html>
+{% endblock %}

@@ -1,10 +1,8 @@
+{% extends 'base_site.html' %}
+{% block title %}Product | Gadget Soko Kenya {% endblock %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products | Gadget Soko Kenya</title>
+
+{% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/products.css' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/logo-32x32.png' %}">
@@ -137,35 +135,6 @@
     </div>
 </div>
 
-<header class="header">
-    <div class="topbar">
-        <div><i class="fas fa-truck"></i> Fast Delivery Kenya-wide</div>
-        <div>
-            <a href="{% url 'index' %}" style="color:white; text-decoration:none;">Home</a> |
-            <a href="#contact" style="color:white; text-decoration:none;">Help</a>
-        </div>
-    </div>
-
-    <div class="navbar">
-        <div class="logo">
-            <a href="{% url 'index' %}">
-                <img src="{% static 'images/logo.png' %}" alt="Gadget Soko" style="height:45px;">
-            </a>
-        </div>
-        
-        <div class="search-box">
-            <input type="text" id="liveSearchInput" placeholder="Search for gadgets...">
-            <button><i class="fas fa-search"></i></button>
-            <div id="search-results" class="search-dropdown"></div>
-        </div>
-
-        <div class="cart" onclick="toggleCart()" style="cursor:pointer; color:white; font-size:22px; position:relative;">
-            <i class="fa fa-shopping-cart"></i>
-            <span class="cart-count" style="position:absolute; top:-8px; right:-10px; background:white; color:var(--primary-orange); padding:2px 6px; border-radius:50%; font-size:10px; font-weight:bold;">{{ cart_count }}</span>
-        </div>
-    </div>
-</header>
-
 <div class="filter-nav">
     <div class="filter-group">
         <label><i class="fas fa-tag"></i> Brand:</label>
@@ -236,12 +205,6 @@
     {% endfor %}
 </section>
 
-<footer id="contact" class="footer">
-    <div class="footer-bottom" style="background: var(--navy-blue); color: white; padding: 30px; text-align: center;">
-        <p>Built by Hand | &copy; 2026 <strong>Gadget Soko Kenya</strong></p>
-        <p style="font-size:11px; margin-top:10px; opacity:0.7;">Developed by Sammy Tings | TingsTech Technologies | 0727698319</p>
-    </div>
-</footer>
 
 <script>
     /* --- HUMANIZED ACTIVITY LOGIC --- */
@@ -346,5 +309,4 @@
         }, 5000);
     });
 </script>
-</body>
-</html>
+{% endblock %}
