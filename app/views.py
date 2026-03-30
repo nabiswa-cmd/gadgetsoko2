@@ -526,18 +526,34 @@ def add_to_cart(request, product_id):
         'cart_count': total,
         'product_name': product.name
     })
+from django import forms
+from django.contrib.auth.models import User
 
-# ================= AUTH =================
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from .forms import SignupForm
+
+
 def signup_view(request):
-    if request.method == 'POST':
-        User.objects.create_user(
-            username=request.POST.get('username'),
-            email=request.POST.get('email'),
-            password=request.POST.get('password')
-        )
-        return redirect('login')
+    if request.method == "POST":
+        form = SignupForm(request.POST)
 
-    return render(request, 'signup.html')
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password1"]
+
+            # username will be email
+            user = User.objects.create_user(username=email, email=email, password=password)
+
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            return redirect("index")  # redirect after signup
+
+    else:
+        form = SignupForm()
+
+    return render(request, "signup.html", {"form": form})
 
 from django.http import JsonResponse
 from django.conf import settings
@@ -577,23 +593,51 @@ def usersignup_view(request):
             messages.error(request, "Passwords do not match")
 
     return render(request, 'usersignup.html')
-
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
 
 def login_view(request):
     if request.method == 'POST':
-        user = authenticate(
-            request,
-            username=request.POST.get('username'),
-            password=request.POST.get('password')
-        )
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        if not username or not password:
+            messages.error(request, "Please enter both username and password.")
+            return redirect('login')
+
+        user = authenticate(request, username=username, password=password)
 
         if user:
-            login(request, user)
-            return redirect('dashboard' if user.is_staff else 'index')
-
-        messages.error(request, "Invalid credentials")
+            if user.is_staff:  # ✅ Only staff/admin can access dashboard
+                login(request, user)
+                messages.success(request, f"Welcome {user.username}! You are logged in as admin.")
+                return redirect('dashboard')
+            else:
+                # ❌ Non-staff trying to access admin
+                messages.error(request, "You are not authorized to access the admin dashboard.")
+                return redirect('index')  # Redirect normal users
+        else:
+            messages.error(request, "Invalid username or password.")
+            return redirect('login')
 
     return render(request, 'login.html')
+    
+from django.db.models import Q
+from .models import Product, Brand
+from django.shortcuts import render
+
+def search_view(request):
+    query = request.GET.get('q')
+    results = []
+    if query:
+        results = Product.objects.filter(
+            Q(name__icontains=query) | 
+            Q(brand__name__icontains=query) |
+            Q(specifications__icontains=query)
+        ).distinct()
+    
+    return render(request, 'search_results.html', {'results': results, 'query': query})
 
 from django.contrib.auth import login
 from django.shortcuts import render, redirect

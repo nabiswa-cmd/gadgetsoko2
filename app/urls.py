@@ -56,5 +56,6 @@ urlpatterns = [
     path('add_admin/',views.add_admin_view,name="add_admin"),
     path('increase-cart/<int:item_id>/', views.increase_cart, name='increase_cart'),
     path('decrease-cart/<int:item_id>/', views.decrease_cart, name='decrease_cart'),
-    path('remove-cart/<int:item_id>/', views.remove_cart, name='remove_cart')
+    path('remove-cart/<int:item_id>/', views.remove_cart, name='remove_cart'),
+    path('search/',views.search_view,name="search")
 ]

@@ -1,0 +1,48 @@
+{% extends 'base_site.html' %}
+{% load static %}
+
+{% block title %}Search Results for "{{ query }}" | Gadget Soko{% endblock %}
+
+{% block content %}
+<section class="products" style="padding-top: 50px; min-height: 60vh;">
+    <div style="margin-bottom: 30px; padding: 0 20px;">
+        <h2>Search Results for: <span style="color: #00a650;">"{{ query }}"</span></h2>
+        <p style="color: #666;">Found {{ results|length }} gadget(s)</p>
+    </div>
+
+    <div class="product-grid">
+        {% for product in results %}
+        <div class="product-card">
+            <div class="img-container">
+                {% if product.images.exists %}
+                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'images/default.png' %}" alt="Default Image">
+                {% endif %}
+            </div>
+            <h3>{{ product.name }}</h3>
+            <div class="price">
+                {% if product.discount > 0 %}
+                    <span class="old-price">KES {{ product.price }}</span>
+                    <strong class="new-price">KES {{ product.discounted_price }}</strong>
+                {% else %}
+                    <strong>KES {{ product.price }}</strong>
+                {% endif %}
+            </div>
+            <div class="product-actions">
+                <a href="{% url 'product_detail' product.id %}" class="btn-view"><i class="fa fa-eye"></i> VIEW</a>
+                <button class="btn-add" onclick="addToCart({{ product.id }})"><i class="fa fa-shopping-cart"></i> ADD</button>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+            <i class="fas fa-search" style="font-size: 50px; color: #ddd; margin-bottom: 20px;"></i>
+            <h3>Oops! We couldn't find any gadgets matching that.</h3>
+            <p>Try searching for a brand like "iPhone" or a category like "Laptop".</p>
+            <br>
+            <a href="{% url 'index' %}" style="background: #00a650; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">Back to Shopping</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
