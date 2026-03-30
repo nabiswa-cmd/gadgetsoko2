@@ -1,12 +1,12 @@
+{% extends "baseadmin.html" %}
+
+{% block title %}Customers | Gadget Soko{% endblock %}
+{% block header %}Customers{% endblock %}
+
+{% block content %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Customers | Dashboard</title>
+    
     <link rel="stylesheet" href="{% static 'css/customers.css' %}">
-</head>
-<body>
 
 <div class="container">
     <h1>Customer Orders</h1>
@@ -51,6 +51,4 @@
         
     </table>
 </div>
-
-</body>
-</html>
+{%endblock%}

@@ -1,0 +1,51 @@
+{% extends "baseadmin.html" %}
+
+{% block title %}Analytics | Gadget Soko{% endblock %}
+{% block header %}Analytics{% endblock %}
+
+{% block content %}
+<h2>Business Insights</h2>
+
+<div class="cards">
+  <!-- You can optionally put summary cards here -->
+</div>
+
+<div style="margin-top: 20px; margin-bottom: 40px;">
+  <canvas id="revenueChart"></canvas>
+</div>
+
+<div>
+  <canvas id="topProductsChart"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+        labels: {{ revenue_labels|safe|default:"[]" }},
+        datasets: [{
+            label: 'Revenue (KES)',
+            data: {{ revenue_values|safe|default:"[]" }},
+            borderColor: '#ff5a2c',
+            backgroundColor: 'rgba(255,90,44,0.1)',
+            fill: true
+        }]
+    }
+});
+
+new Chart(document.getElementById('topProductsChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ top_products_labels|safe|default:"[]" }},
+        datasets: [{
+            label: 'Units Sold',
+            data: {{ top_products_values|safe|default:"[]" }},
+            backgroundColor: '#111'
+        }]
+    },
+    options: { indexAxis: 'y' }
+});
+</script>
+{% endblock %}

@@ -526,18 +526,34 @@ def add_to_cart(request, product_id):
         'cart_count': total,
         'product_name': product.name
     })
+from django import forms
+from django.contrib.auth.models import User
 
-# ================= AUTH =================
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from .forms import SignupForm
+
+
 def signup_view(request):
-    if request.method == 'POST':
-        User.objects.create_user(
-            username=request.POST.get('username'),
-            email=request.POST.get('email'),
-            password=request.POST.get('password')
-        )
-        return redirect('login')
+    if request.method == "POST":
+        form = SignupForm(request.POST)
 
-    return render(request, 'signup.html')
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password1"]
+
+            # username will be email
+            user = User.objects.create_user(username=email, email=email, password=password)
+
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            return redirect("index")  # redirect after signup
+
+    else:
+        form = SignupForm()
+
+    return render(request, "signup.html", {"form": form})
 
 from django.http import JsonResponse
 from django.conf import settings
@@ -577,23 +593,51 @@ def usersignup_view(request):
             messages.error(request, "Passwords do not match")
 
     return render(request, 'usersignup.html')
-
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
 
 def login_view(request):
     if request.method == 'POST':
-        user = authenticate(
-            request,
-            username=request.POST.get('username'),
-            password=request.POST.get('password')
-        )
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        if not username or not password:
+            messages.error(request, "Please enter both username and password.")
+            return redirect('login')
+
+        user = authenticate(request, username=username, password=password)
 
         if user:
-            login(request, user)
-            return redirect('dashboard' if user.is_staff else 'index')
-
-        messages.error(request, "Invalid credentials")
+            if user.is_staff:  # ✅ Only staff/admin can access dashboard
+                login(request, user)
+                messages.success(request, f"Welcome {user.username}! You are logged in as admin.")
+                return redirect('dashboard')
+            else:
+                # ❌ Non-staff trying to access admin
+                messages.error(request, "You are not authorized to access the admin dashboard.")
+                return redirect('index')  # Redirect normal users
+        else:
+            messages.error(request, "Invalid username or password.")
+            return redirect('login')
 
     return render(request, 'login.html')
+    
+from django.db.models import Q
+from .models import Product, Brand
+from django.shortcuts import render
+
+def search_view(request):
+    query = request.GET.get('q')
+    results = []
+    if query:
+        results = Product.objects.filter(
+            Q(name__icontains=query) | 
+            Q(brand__name__icontains=query) |
+            Q(specifications__icontains=query)
+        ).distinct()
+    
+    return render(request, 'search_results.html', {'results': results, 'query': query})
 
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
@@ -652,6 +696,13 @@ from django.db.models import Sum, Count
 from collections import defaultdict
 from datetime import datetime
 from .models import Product, Order, ProductView, User # Make sure all are imported
+from collections import defaultdict
+from datetime import datetime
+from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Sum
+from django.shortcuts import render
+from .models import Product, Order, UserActivity
+from django.contrib.auth.models import User
 
 @staff_member_required
 def dashboard_view(request):
@@ -664,19 +715,13 @@ def dashboard_view(request):
     # Recent orders
     recent_orders = Order.objects.order_by('-id')[:5]
 
-    # --- NEW: CUSTOMER ACTIVITY LOGS ---
-    # Fetch the last 15 product views, including the User and Product info
+    # Customer activity logs (last 20)
     activity_logs = UserActivity.objects.select_related('user', 'product').order_by('-timestamp')[:20]
 
     for log in activity_logs:
-        # For each log, find the most recent order by this specific user
-        # to see where their transaction currently stands
+        # Fetch last order of the user
         latest_order = Order.objects.filter(user=log.user).order_by('-created_at').first()
-        if latest_order:
-            log.last_order_status = latest_order.status
-        else:
-            log.last_order_status = "Browsing Only"
-    # ------------------------------------
+        log.last_order_status = latest_order.status if latest_order else "Browsing Only"
 
     # Revenue per month (last 6 months)
     today = datetime.today()
@@ -692,8 +737,7 @@ def dashboard_view(request):
 
     # Top products by total sold
     top_products = Product.objects.annotate(
-        total_sold=Sum('orderitem__quantity'),
-        # total_sold=Sum('items__quantity'), # Use 'items' if that is your related_name
+        total_sold=Sum('orderitem__quantity')  # Adjust related_name if needed
     ).order_by('-total_sold')[:5]
 
     top_products_labels = [p.name for p in top_products]
@@ -709,12 +753,74 @@ def dashboard_view(request):
         "revenue_values": revenue_values,
         "top_products_labels": top_products_labels,
         "top_products_values": top_products_values,
-        "customer_activity": activity_logs, # New context for the table
+        "customer_activity": activity_logs,
         "products": Product.objects.all(),
     }
 
     return render(request, "dashboard.html", context)
 
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
+from .models import UserActivity, Order
+from django.db.models import Sum
+
+@staff_member_required
+def activity_view(request):
+    # Fetch last 20 activity logs
+    activity_logs = UserActivity.objects.select_related('user', 'product').order_by('-timestamp')[:20]
+
+    for log in activity_logs:
+        # Find the latest order of each user
+        latest_order = Order.objects.filter(user=log.user).order_by('-created_at').first()
+        log.last_order_status = latest_order.status if latest_order else "Browsing Only"
+
+    context = {
+        "customer_activity": activity_logs,
+    }
+    return render(request, "activity.html", context)
+
+from collections import defaultdict
+from datetime import datetime
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
+from .models import Product, Order
+from django.db.models import Sum
+
+@staff_member_required
+def analytics_view(request):
+    # Revenue per month (last 6 months)
+    today = datetime.today()
+    revenue_data = defaultdict(int)
+    for i in range(6, 0, -1):
+        month = (today.month - i) % 12 or 12
+        orders_in_month = Order.objects.filter(created_at__month=month)
+        month_name = datetime(1900, month, 1).strftime('%b')
+        revenue_data[month_name] = sum(o.total for o in orders_in_month if o.total)
+
+    revenue_labels = list(revenue_data.keys())
+    revenue_values = list(revenue_data.values())
+
+    # Top products by units sold
+    top_products = Product.objects.annotate(total_sold=Sum('orderitem__quantity')).order_by('-total_sold')[:5]
+    top_products_labels = [p.name for p in top_products]
+    top_products_values = [p.total_sold or 0 for p in top_products]
+
+    context = {
+        "revenue_labels": revenue_labels,
+        "revenue_values": revenue_values,
+        "top_products_labels": top_products_labels,
+        "top_products_values": top_products_values,
+    }
+
+    return render(request, "analytics.html", context)
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
+
+@staff_member_required
+def settings_view(request):
+    # You can pass forms here if needed
+    context = {}
+    return render(request, "settings.html", context)
 @staff_member_required
 def manage_products(request):
     products = Product.objects.all().order_by('-id')

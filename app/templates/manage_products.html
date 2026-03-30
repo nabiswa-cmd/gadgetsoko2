@@ -1,7 +1,10 @@
+{% extends "baseadmin.html" %}
+
+{% block title %}Manage products | Gadget Soko{% endblock %}
+{% block header %}Manage products{% endblock %}
+
+{% block content %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <title>Manage Products</title>
     <link rel="stylesheet" href="{% static 'css/manage_products.css' %}">
@@ -60,6 +63,4 @@
         </tbody>
     </table>
 </div>
-
-</body>
-</html>
+{%endblock%}

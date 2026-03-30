@@ -148,17 +148,6 @@
         }
     </style>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div id="loginBadge" class="login-badge">
-                <div class="badge-icon"><i class="fa fa-check"></i></div>
-                <div class="badge-content">
-                    <h4>Hello, {{ request.user.username }}!</h4>
-                    <p>Login successful. Ready to shop Gadget Soko Kenya?</p>
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <div id="live-activity-box">
         <div style="width: 45px; height: 45px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; border: 1px solid #efefef;">
@@ -350,7 +339,7 @@
             const photos = [
                 "{% static 'images/photo1.png' %}", 
                 "{% static 'images/photo2.png' %}",
-                "{% static 'images/photo3.png %'}"
+                "{% static 'images/photo3.png' %}"
 
             ];
             
@@ -392,5 +381,41 @@
                 });
             }, 1000);
         });
+
+        /* --- LIVE SEARCH LOGIC --- */
+$('#searchInput').on('keyup', function() {
+    let query = $(this).val();
+    if (query.length > 1) {
+        $.ajax({
+            url: "{% url 'live_search' %}", // Create this URL/View for JSON results
+            data: { 'q': query },
+            success: function(data) {
+                let dropdown = $('#search-results');
+                dropdown.empty().show();
+                
+                if (data.results.length > 0) {
+                    data.results.forEach(item => {
+                        dropdown.append(`
+                            <a href="/product/${item.id}/" style="display:block; padding:10px; border-bottom:1px solid #eee; color:#333; text-decoration:none;">
+                                <strong>${item.name}</strong> <small>in ${item.brand}</small>
+                            </a>
+                        `);
+                    });
+                } else {
+                    dropdown.append('<p style="padding:10px;">No gadgets found.</p>');
+                }
+            }
+        });
+    } else {
+        $('#search-results').hide();
+    }
+});
+
+// Hide dropdown when clicking outside
+$(document).on('click', function(e) {
+    if (!$(e.target).closest('.search-form').length) {
+        $('#search-results').hide();
+    }
+});
     </script>
 {% endblock %}

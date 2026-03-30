@@ -1,8 +1,10 @@
+{% extends "baseadmin.html" %}
+
+{% block title %}Add Product | Gadget Soko Admin{% endblock %}
+{% block header %}Add Product{% endblock %}
+
+{% block content %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Product | Gadget Soko Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <style>
@@ -174,6 +176,4 @@
         fileInput.files = dataTransfer.files;
     }
 </script>
-
-</body>
-</html>
+{%endblock%}

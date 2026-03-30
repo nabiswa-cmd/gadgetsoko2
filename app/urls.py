@@ -33,11 +33,13 @@ urlpatterns = [
 
     # Dashboard
     path('dashboard/', views.dashboard_view, name='dashboard'),
-    path('add_product/',views.add_product,name='add_product'),
-    path('manage_products',views.manage_products,name='manage_products'),
-    path('manage_orders/',views.manage_orders,name='manage_orders'),
-    path('customers/',views.customers,name='customers'),
-
+    path('activity/', views.activity_view, name='activity'),
+    path('analytics/', views.analytics_view, name='analytics'),
+    path('settings/', views.settings_view, name='settings'),
+    path('add_product/', views.add_product, name='add_product'),
+    path('manage_products/', views.manage_products, name='manage_products'),
+    path('manage_orders/', views.manage_orders, name='manage_orders'),
+    path('customers/', views.customers, name='customers'),
     # M-Pesa callback
     path('payment_callback/', views.mpesa_callback, name='mpesa_callback'),
     path('mpesa/register/', views.register_mpesa_urls, name='register_mpesa_urls'),
@@ -56,5 +58,8 @@ urlpatterns = [
     path('add_admin/',views.add_admin_view,name="add_admin"),
     path('increase-cart/<int:item_id>/', views.increase_cart, name='increase_cart'),
     path('decrease-cart/<int:item_id>/', views.decrease_cart, name='decrease_cart'),
-    path('remove-cart/<int:item_id>/', views.remove_cart, name='remove_cart')
+    path('remove-cart/<int:item_id>/', views.remove_cart, name='remove_cart'),
+    path('search/',views.search_view,name="search")
+
+    
 ]

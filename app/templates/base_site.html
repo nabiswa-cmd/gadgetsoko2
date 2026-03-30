@@ -721,7 +721,7 @@
 <div class="gs-topbar">
     <div>English | Swahili</div>
     <div class="gs-topbar-right">
-        <a href="{% url 'admin:index' %}">Admin Login</a>
+        <a href="{% url 'login' %}">Admin Login</a>
         <span>|</span>
         <a href="#">Contact</a>
     </div>
@@ -744,6 +744,7 @@
             <a href="{% url 'products' %}">Products</a>
             <a href="{% url 'index' %}#services">Services</a>
             <a href="{% url 'index' %}#contacts">Contact</a>
+            
 
             {% if not request.user.is_authenticated %}
                 <a href="{% url 'userlog' %}">Login</a>
@@ -756,11 +757,11 @@
     <!-- RIGHT -->
     <div class="nav-right">
 
-        <form class="gs-search" method="GET" action="{% url 'products' %}">
-            <input type="text" name="q" id="liveSearchInput" placeholder="Search gadgets...">
-            <button type="submit"><i class="fa fa-search"></i></button>
-            <div class="search-dropdown" id="search-results"></div>
-        </form>
+        
+<form action="{% url 'search' %}" method="GET" class="search-form">
+    <input type="text" name="q" id="searchInput" placeholder="Search gadgets or brands..." autocomplete="off">
+    <button type="submit"><i class="fa fa-search"></i></button>
+    <div id="search-results" class="search-dropdown"></div> </form>
 
         <div class="gs-cart-icon" onclick="toggleCart()">
             <i class="fa fa-shopping-cart"></i>
