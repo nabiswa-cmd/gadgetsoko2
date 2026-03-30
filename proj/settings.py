@@ -174,7 +174,6 @@ MPESA_ENV = os.getenv("MPESA_ENV")  # 'sandbox' or 'production'
 MPESA_CALLBACK_URL = os.getenv("MPESA_CALLBACK_URL")  # We'll generate this later
 SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'https://your-app-name.onrender.com')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
