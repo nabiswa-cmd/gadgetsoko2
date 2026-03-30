@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -8,6 +9,8 @@
 
     <link rel="icon" type="image/png" href="{% static 'images/logo-32x32.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -69,30 +72,30 @@
         ============================================================ */
         .gs-navbar {
             background: var(--primary);
-            position: sticky;
+            
             top: 0;
             z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 8%;
-            gap: 20px;
             box-shadow: 0 2px 10px rgba(238,77,45,0.3);
         }
 
-        .nav-left {
+        /* ── DESKTOP ROW: logo | links (centre) | search | cart ── */
+        .nav-desktop {
             display: flex;
             align-items: center;
-            gap: 25px;
+            padding: 10px 8%;
+            gap: 16px;
         }
 
-        .gs-logo img { height: 45px; display: block; }
+        .gs-logo { flex-shrink: 0; }
+        .gs-logo img { height: 42px; display: block; }
 
-        /* Menu */
+        /* Links fill the middle and centre themselves */
         .gs-menu {
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 4px;
+            flex: 1;
         }
 
         .gs-menu a {
@@ -100,93 +103,38 @@
             color: rgba(255,255,255,0.92);
             font-weight: 600;
             font-size: 14px;
-            padding: 7px 12px;
+            padding: 7px 11px;
             border-radius: var(--radius-sm);
             white-space: nowrap;
         }
 
-        /* underline hover */
         .gs-menu a::after {
             content: "";
             position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 0%;
+            left: 0; bottom: 0;
+            width: 0;
             height: 2px;
             background: linear-gradient(90deg, var(--white), gold, var(--white));
-            transition: width 0.35s ease-in-out;
+            transition: width 0.35s ease;
         }
 
-        .gs-menu a:hover::after {
-            width: 100%;
+        .gs-menu a:hover::after { width: 100%; }
+
+        /* Search — right side, fixed width */
+        .nav-search-desktop {
+            width: 100px;
+            flex-shrink: 0;
+
         }
 
-        /* NAV RIGHT */
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex: 1;
-            justify-content: flex-end;
-        }
-
-        /* Search */
-        .gs-search {
-            width: 380px;
-            max-width: 100%;
-            display: flex;
-            background: var(--white);
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-            position: relative;
-            border: 2px solid rgba(255,255,255,0.35);
-        }
-
-        .gs-search input {
-            flex: 1;
-            padding: 10px 14px;
-            border: none;
-            outline: none;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        /* SEARCH BUTTON (THEMED) */
-        .gs-search button {
-            background: var(--primary);
-            color: var(--white);
-            padding: 0 16px;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .gs-search button:hover {
-            background: var(--primary-hover);
-        }
-
-        .search-dropdown {
-            position: absolute;
-            top: calc(100% + 4px);
-            left: 0;
-            width: 100%;
-            background: var(--white);
-            z-index: 200;
-            box-shadow: var(--shadow-md);
-            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-            display: none;
-            overflow: hidden;
-        }
-
-        /* Cart icon */
+        /* Cart — far right */
         .gs-cart-icon {
             position: relative;
             color: var(--white);
-            font-size: 23px;
+            font-size: 22px;
             cursor: pointer;
             flex-shrink: 0;
-            padding: 4px 2px;
+            padding: 4px 4px;
         }
 
         .cart-count {
@@ -203,6 +151,87 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        /* Mobile navbar — hidden on desktop */
+        .nav-mobile { display: none; }
+        .nav-search-mobile { display: none; }
+
+        /* ============================================================
+           SEARCH BAR STYLING (shared)
+        ============================================================ */
+        .gs-search {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50px;
+            overflow: hidden;
+            position: relative;
+            border: 1.5px solid rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(4px);
+            transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .gs-search:focus-within {
+            background: var(--white);
+            border-color: var(--white);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+        }
+
+        .gs-search input {
+            flex: 1;
+            padding: 9px 6px 9px 16px;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            font-family: inherit;
+            background: transparent;
+            color: var(--white);
+            min-width: 0;
+        }
+
+        .gs-search input::placeholder {
+            color: rgba(255,255,255,0.75);
+        }
+
+        .gs-search:focus-within input { color: var(--text-main); }
+        .gs-search:focus-within input::placeholder { color: var(--text-muted); }
+
+        .gs-search button {
+            background: transparent;
+            color: rgba(255,255,255,0.9);
+            padding: 0 14px;
+            font-size: 15px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid rgba(255,255,255,0.25);
+            transition: color 0.2s ease, background 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .gs-search button:hover { background: rgba(255,255,255,0.15); }
+
+        .gs-search:focus-within button {
+            color: var(--primary);
+            border-left-color: var(--border);
+        }
+
+        .gs-search:focus-within button:hover { background: var(--bg-light); }
+
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: var(--white);
+            z-index: 200;
+            box-shadow: var(--shadow-md);
+            border-radius: var(--radius-sm);
+            display: none;
+            overflow: hidden;
         }
 
         /* ============================================================
@@ -586,66 +615,54 @@
         /* ============================================================
            RESPONSIVE
         ============================================================ */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
 
-            /* TOPBAR stays visible */
+            /* TOPBAR */
             .gs-topbar {
                 padding: 8px 4%;
                 font-size: 12px;
             }
 
-            .gs-navbar {
+            /* Hide desktop row, show mobile block */
+            .nav-desktop { display: none; }
+            .nav-mobile  {
+                display: flex;
                 flex-direction: column;
-                align-items: stretch;
-                padding: 12px 4%;
-                gap: 12px;
+                padding: 10px 4%;
+                gap: 8px;
             }
 
-            .nav-left {
-                flex-direction: column;
-                gap: 10px;
+            /* Row 1: logo left, cart right */
+            .nav-mob-top {
+                display: flex;
                 align-items: center;
+                justify-content: space-between;
             }
 
-            .gs-logo img {
-                height: 38px;
-            }
+            .gs-logo img { height: 36px; }
 
-            .nav-right {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .gs-search {
-                width: 100%;
-            }
-
-            /* Menu scrollable without button look */
-            .gs-menu {
-                width: 100%;
+            /* Row 2: links centred, scrollable */
+            .gs-menu-mob {
                 justify-content: flex-start;
                 overflow-x: auto;
                 white-space: nowrap;
-                gap: 14px;
-                padding: 6px 0;
+                gap: 2px;
+                padding: 2px 0;
                 scrollbar-width: none;
+                -ms-overflow-style: none;
             }
 
-            .gs-menu::-webkit-scrollbar {
-                display: none;
+            .gs-menu-mob::-webkit-scrollbar { display: none; }
+
+            .gs-menu-mob a {
+                font-size: 13px;
+                padding: 6px 10px;
             }
 
-            .gs-menu a {
-                background: transparent !important;
-                padding: 6px 4px;
-                border-radius: 0;
-            }
-
-            /* Cart stays top right */
-            .gs-cart-icon {
-                position: absolute;
-                top: 12px;
-                right: 16px;
+            /* Row 3: search full width */
+            .nav-search-mobile {
+                display: flex;
+                width: 100%;
             }
 
             /* Banner full width */
@@ -653,13 +670,11 @@
                 padding: 15px 0;
             }
 
-            .banner,
-            .slider {
+            .banner, .slider {
                 border-radius: 0;
             }
 
-            .banner img,
-            .slider img {
+            .banner img, .slider img {
                 height: 200px;
                 object-fit: contain;
             }
@@ -730,43 +745,80 @@
 <!-- NAVBAR -->
 <nav class="gs-navbar">
 
-    <!-- LEFT -->
-    <div class="nav-left">
+    <!-- ══ DESKTOP: single row ══ -->
+    <div class="nav-desktop">
 
+        <!-- Logo — left -->
         <div class="gs-logo">
             <a href="{% url 'index' %}">
                 <img src="{% static 'images/logo.png' %}" alt="Gadget Soko Logo">
             </a>
         </div>
 
+        <!-- Nav links — centre -->
         <div class="gs-menu">
             <a href="{% url 'index' %}#categories">Categories</a>
             <a href="{% url 'products' %}">Products</a>
             <a href="{% url 'index' %}#services">Services</a>
             <a href="{% url 'index' %}#contacts">Contact</a>
-            
-
             {% if not request.user.is_authenticated %}
                 <a href="{% url 'userlog' %}">Login</a>
             {% else %}
                 <a href="{% url 'logout' %}">Logout</a>
             {% endif %}
         </div>
-    </div>
 
-    <!-- RIGHT -->
-    <div class="nav-right">
+        <!-- Search — right -->
+        <form style="width: 400px; margin: 0px; padding: 0%;" action="{% url 'search' %}" method="GET" class="gs-search search-form nav-search-desktop">
+            <input type="text" name="q" id="searchInput" placeholder="Search gadgets..." autocomplete="off">
+            <button type="submit"><i class="bi bi-search"></i></button>
+            <div id="search-results" class="search-dropdown"></div>
+        </form>
 
-        
-<form action="{% url 'search' %}" method="GET" class="search-form">
-    <input type="text" name="q" id="searchInput" placeholder="Search gadgets or brands..." autocomplete="off">
-    <button type="submit"><i class="fa fa-search"></i></button>
-    <div id="search-results" class="search-dropdown"></div> </form>
-
+        <!-- Cart — far right -->
         <div class="gs-cart-icon" onclick="toggleCart()">
             <i class="fa fa-shopping-cart"></i>
             <span class="cart-count">{% if request.user.is_authenticated %}{{ cart_count }}{% else %}0{% endif %}</span>
         </div>
+
+    </div>
+
+    <!-- ══ MOBILE: three rows (hidden on desktop) ══ -->
+    <div class="nav-mobile">
+
+        <!-- Row 1: Logo left | Cart right -->
+        <div class="nav-mob-top">
+            <div class="gs-logo">
+                <a href="{% url 'index' %}">
+                    <img src="{% static 'images/logo.png' %}" alt="Gadget Soko Logo">
+                </a>
+            </div>
+            <div class="gs-cart-icon" onclick="toggleCart()">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="cart-count">{% if request.user.is_authenticated %}{{ cart_count }}{% else %}0{% endif %}</span>
+            </div>
+        </div>
+
+        <!-- Row 2: Nav links centre -->
+        <div class="gs-menu gs-menu-mob">
+            <a href="{% url 'index' %}#categories">Categories</a>
+            <a href="{% url 'products' %}">Products</a>
+            <a href="{% url 'index' %}#services">Services</a>
+            <a href="{% url 'index' %}#contacts">Contact</a>
+            {% if not request.user.is_authenticated %}
+                <a href="{% url 'userlog' %}">Login</a>
+            {% else %}
+                <a href="{% url 'logout' %}">Logout</a>
+            {% endif %}
+        </div>
+
+        <!-- Row 3: Search bar full width -->
+        <form action="{% url 'search' %}" method="GET" class="gs-search search-form nav-search-mobile">
+            <input type="text" name="q" placeholder="Search gadgets or brands..." autocomplete="off">
+            <button type="submit"><i class="bi bi-search"></i></button>
+            <div class="search-dropdown"></div>
+        </form>
+
     </div>
 
 </nav>
@@ -790,8 +842,8 @@
             </div>
 
             <h3 style="margin-top:20px;">Contacts</h3>
-            <p>📞 0727698319</p>
-            <p>📧 support@gadgetsoko.co.ke</p>
+            <p><i class="bi bi-telephone-fill" style="color:var(--primary);margin-right:6px;"></i> 0727698319</p>
+            <p><i class="bi bi-envelope-fill" style="color:var(--primary);margin-right:6px;"></i> support@gadgetsoko.co.ke</p>
         </div>
 
         <div class="footer-column">
