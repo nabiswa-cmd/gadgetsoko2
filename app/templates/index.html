@@ -2,17 +2,8 @@
 {% load static %}
 
 {% block title %}Gadget Soko Kenya | Home{% endblock %}
+
 {% block content %}
-  <!-- your page content here -->
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
-
-    <link rel="icon" type="image/png" href="{% static 'images/logo-32x32.png' %}">
-   
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
     <style>
         /* --- ROBOT CHATBOT STYLES --- */
         #bot-launcher {
@@ -77,7 +68,7 @@
         }
         .product { position: relative; }
 
-        /* --- HUMANIZED ACTIVITY BOX (NO AI GREEN) --- */
+        /* --- HUMANIZED ACTIVITY BOX --- */
         #live-activity-box {
             position: fixed; bottom: 25px; left: -450px; width: 300px; 
             background: #ffffff; border-radius: 8px; 
@@ -85,21 +76,88 @@
             display: flex; align-items: center; padding: 12px; 
             z-index: 5000; transition: 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             border: 1px solid #eee;
+            /* --- MOBILE HORIZONTAL NAVBAR --- */
+@media (max-width: 768px) {
+    /* 1. Force the navbar to stay in a single row */
+    .navbar {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important; /* Prevents items from dropping to next line */
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px !important;
+        gap: 8px !important;
+    }
+
+    /* 2. Ensure all items are visible */
+    .nav-links, .nav-actions, .search-form {
+        display: flex !important; 
+        flex-direction: row !important;
+        align-items: center;
+    }
+
+    /* 3. Make Search bar flexible but prioritized */
+    .search-form {
+        flex: 1; /* Allows search to take up remaining space */
+        min-width: 80px; /* Ensures it doesn't vanish entirely */
+    }
+
+    .search-form input {
+        width: 100%;
+        padding: 6px;
+        font-size: 13px;
+    }
+
+    /* 4. Keep Cart and Admin Login small and side-by-side */
+    .nav-actions {
+        gap: 10px;
+        flex-shrink: 0; /* Prevents them from getting squashed */
+    }
+
+    .nav-actions a {
+        font-size: 18px; /* Bigger icons for easier tapping */
+    }
+
+    /* 5. Hide labels if they are too long, show icons only to save space */
+    .nav-actions span, .nav-links span {
+        display: none; 
+    }
+
+    /* 6. Logo sizing for mobile */
+    .nav-logo {
+        font-size: 14px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .banner img,
+.slider img {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+}
+
+@media (max-width: 600px) {
+    .banner img,
+    .slider img {
+        height: 180px;
+        object-fit: contain; /* no cropping on phone */
+        background: #000; /* optional for nice look */
+    }
+}
+}
         }
     </style>
-</head>
-<body>
 
     {% if messages %}
-    {% for message in messages %}
-        <div id="loginBadge" class="login-badge">
-            <div class="badge-icon"><i class="fa fa-check"></i></div>
-            <div class="badge-content">
-                <h4>Hello, {{ request.user.username }}!</h4>
-                <p>Login successful. Ready to shop Gadget Soko Kenya?</p>
+        {% for message in messages %}
+            <div id="loginBadge" class="login-badge">
+                <div class="badge-icon"><i class="fa fa-check"></i></div>
+                <div class="badge-content">
+                    <h4>Hello, {{ request.user.username }}!</h4>
+                    <p>Login successful. Ready to shop Gadget Soko Kenya?</p>
+                </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
     {% endif %}
 
     <div id="live-activity-box">
@@ -107,8 +165,7 @@
             <i class="fas fa-box-open" style="color: #444; font-size: 18px;"></i>
         </div>
         <div style="flex: 1;">
-            <p id="activity-msg" style="margin: 0; font-size: 12.5px; color: #333; line-height: 1.4; font-family: 'Segoe UI', sans-serif;">
-                </p>
+            <p id="activity-msg" style="margin: 0; font-size: 12.5px; color: #333; line-height: 1.4; font-family: 'Segoe UI', sans-serif;"></p>
             <div style="display: flex; align-items: center; gap: 5px; margin-top: 4px;">
                 <span style="background: #e1f5fe; color: #0288d1; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Verified Order</span>
                 <small id="activity-time" style="color: #999; font-size: 10.5px;"></small>
@@ -118,7 +175,6 @@
     </div>
 
     <div id="bot-launcher" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
-
     <div id="chat-window">
         <div class="chat-header">
             <i class="fas fa-robot"></i>
@@ -134,10 +190,8 @@
         </div>
     </div>
 
-
-
     <section class="banner">
-        <img id="bannerImage" src="{% static 'images/photo1.jpg' %}" alt="Banner" style="width:100%; height:auto;">
+        <img id="bannerImage" src="{% static 'images/photo.png' %}" alt="Banner" style="width:100%; height:auto; display:block;">
     </section>
 
     <section id="categories" class="section">
@@ -148,6 +202,7 @@
             {% endfor %}
         </div>
     </section>   
+
     <section class="products">
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
             <h2>Featured Products</h2>
@@ -165,9 +220,7 @@
                         <img src="{% static 'images/default.png' %}" alt="Default Image">
                     {% endif %}
                 </div>
-                
                 <h3>{{ product.name }}</h3>
-                
                 <div class="price">
                     {% if product.discount > 0 %}
                         <span class="old-price">KES {{ product.price }}</span>
@@ -176,7 +229,6 @@
                         <strong>KES {{ product.price }}</strong>
                     {% endif %}
                 </div>
-
                 <div class="product-actions">
                     <a href="{% url 'product_detail' product.id %}" class="btn-view"><i class="fa fa-eye"></i> VIEW</a>
                     <button class="btn-add" onclick="addToCart({{ product.id }})"><i class="fa fa-shopping-cart"></i> ADD</button>
@@ -202,7 +254,6 @@
                         </div>
                     {% endif %}
                 </div>
-
                 <div class="img-container">
                     <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
                 </div>
@@ -231,6 +282,7 @@
             <div class="service"> Support 24/7</div>
         </div>
     </section>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         /* --- ORGANIC ACTIVITY LOGIC --- */
@@ -243,9 +295,7 @@
             const town = towns[Math.floor(Math.random() * towns.length)];
             const gadget = gadgets[Math.floor(Math.random() * gadgets.length)];
             const roll = Math.random();
-
-            let msg = "";
-            let time = "";
+            let msg = ""; let time = "";
 
             if (roll > 0.6) {
                 msg = `<strong>${gadget}</strong> package successfully dispatched to <strong>${person}</strong> in ${town}.`;
@@ -261,7 +311,6 @@
             $('#activity-msg').html(msg);
             $('#activity-time').text(time);
             $('#live-activity-box').css('left', '20px');
-
             setTimeout(dismissActivity, 8000);
         }
 
@@ -285,86 +334,63 @@
         }
 
         /* --- CART LOGIC --- */
-        function toggleCart() {
-            if ("{{ request.user.is_authenticated }}" === "False") {
-                window.location.href = "{% url 'userlog' %}?next={{ request.path }}"; return;
-            }
-            $('#cartSidebar').toggleClass('active');
-            $('#cartOverlay').toggleClass('active');
-            if ($('#cartSidebar').hasClass('active')) updateCartSidebar();
-        }
-        function updateCartSidebar() {
-            $.get("{% url 'view_cart' %}?ajax=1", function(data) {
-                let h = "";
-                if(!data.items || data.items.length === 0) { h = "<p style='text-align:center;'>Empty Cart</p>"; }
-                else {
-                    data.items.forEach(i => {
-                        h += `<div class="cart-item-row"><img src="${i.image}"><div style="flex:1;"><b>${i.name}</b><br><small>KES ${i.price} x ${i.quantity}</small></div></div>`;
-                    });
-                }
-                $('#cartSlides').html(h);
-                $('#sidebarTotal').text("KES " + (data.total || 0));
-            });
-        }
         function addToCart(pId) {
             $.get(`/add-to-cart/${pId}/`, function(res) {
                 if (res.error === 'not_logged_in') { window.location.href = "{% url 'userlog' %}"; return; }
                 $('.cart-count').text(res.cart_count);
-                updateCartSidebar();
-                $('#cartSidebar').addClass('active');
-                $('#cartOverlay').addClass('active');
+                // Trigger sidebar update logic here if sidebar exists in base template
             });
         }
 
-        /* --- BANNER ROTATION --- */
-        const photos = ["{% static 'images/photo1.jpg' %}", "{% static 'images/photo2.jpg' %}"];
-        let idx = 0;
-        setInterval(() => {
-            idx = (idx + 1) % photos.length;
-            $('#bannerImage').fadeOut(400, function() { $(this).attr('src', photos[idx]).fadeIn(400); });
-        }, 5000);
-
-        /* --- DOCUMENT READY --- */
+        /* --- DOCUMENT READY FUNCTIONS --- */
         $(document).ready(function() {
-            // Live Viewers logic
+            
+            /* --- BANNER ROTATION --- */
+            // IMPORTANT: Ensure these files are in static/images/ and have correct extensions
+            const photos = [
+                "{% static 'images/photo1.png' %}", 
+                "{% static 'images/photo2.png' %}",
+                "{% static 'images/photo3.png %'}"
+
+            ];
+            
+            let idx = 0;
+            if(photos.length > 1) {
+                setInterval(() => {
+                    idx = (idx + 1) % photos.length;
+                    $('#bannerImage').fadeOut(400, function() { 
+                        $(this).attr('src', photos[idx]).fadeIn(400); 
+                    });
+                }, 3500);
+            }
+
+            /* --- LIVE VIEWERS --- */
             setInterval(() => {
                 let current = parseInt($('#featured-viewers').text());
                 let change = Math.floor(Math.random() * 3) - 1; 
                 $('#featured-viewers').text(Math.max(12, current + change));
             }, 4500);
 
-            // Activity Notifications
+            /* --- ACTIVITY NOTIFICATIONS --- */
             setTimeout(triggerActivity, 12000); 
             setInterval(() => {
                 const delay = Math.floor(Math.random() * 20000); 
                 setTimeout(triggerActivity, delay);
             }, 45000);
 
-            // Timers
-            function updateTimers() {
+            /* --- TIMERS --- */
+            setInterval(function updateTimers() {
                 $('.timer-badge').each(function() {
                     const expiry = new Date($(this).attr('data-expiry')).getTime();
                     const now = new Date().getTime();
                     const diff = expiry - now;
                     if (diff <= 0) { $(this).html("Ended"); return; }
-                    const h = Math.floor((diff % (86400000)) / 3600000);
+                    const h = Math.floor((diff % 86400000) / 3600000);
                     const m = Math.floor((diff % 3600000) / 60000);
                     const s = Math.floor((diff % 60000) / 1000);
                     $(this).find('.countdown-text').text(`${h}h ${m}m ${s}s`);
                 });
-            }
-            setInterval(updateTimers, 1000);
-
-            // Live Search
-            $('#liveSearchInput').on('keyup', function(){
-                let q = $(this).val();
-                if(q.length < 2){ $('#search-results').hide(); return; }
-                $.ajax({
-                    url: "{% url 'live_search' %}",
-                    data: {'q': q},
-                    success: function(d){ $('#search-results').html(d.html).show(); }
-                });
-            });
+            }, 1000);
         });
     </script>
 {% endblock %}

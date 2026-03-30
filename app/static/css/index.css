@@ -1,10 +1,4 @@
-{% extends 'base_site.html' %}
-{% load static %}
 
-{% block title %}Gadget Soko Kenya | Home{% endblock %}
-
-{% block extra_head %}
-<style>
  
     .banner {
         width: 100%;
@@ -142,160 +136,21 @@
         .products { padding: 30px 4%; }
         #services { padding: 40px 5%; }
     }
-    
-</style>
-{% endblock %}
+    .banner img,
+.slider img {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+}
 
-{% block content %}
-
-    <!-- ===== BANNER ===== -->
-    <section class="banner">
-        <img id="bannerImage" src="{% static 'images/photo1.jpg' %}" alt="Gadget Soko Banner">
-    </section>
-
-    <!-- ===== SHOP BY BRAND ===== -->
-    <section id="categories" class="section">
-        <h2>SHOP BY BRAND</h2>
-        <div class="category-grid">
-            {% for brand in brands %}
-                <a href="{% url 'products_by_brand' brand.id %}">{{ brand.name }}</a>
-            {% endfor %}
-        </div>
-    </section>
-
-    <!-- ===== FEATURED PRODUCTS ===== -->
-    <section class="products">
-        <div class="section-heading">
-            <h2>Featured Products</h2>
-            <span class="live-counter">
-                <i class="fa fa-eye"></i>
-                <span id="featured-viewers">21</span> currently looking
-            </span>
-        </div>
-        <div class="product-grid">
-            {% for product in products %}
-            <div class="product-card">
-                <div class="img-container">
-                    {% if product.images.exists %}
-                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
-                    {% else %}
-                        <img src="{% static 'images/default.png' %}" alt="Default Image">
-                    {% endif %}
-                </div>
-                <h3>{{ product.name }}</h3>
-                <div class="price">
-                    {% if product.discount > 0 %}
-                        <span class="old-price">KES {{ product.price }}</span>
-                        <strong class="new-price">KES {{ product.discounted_price }}</strong>
-                    {% else %}
-                        <strong>KES {{ product.price }}</strong>
-                    {% endif %}
-                </div>
-                <div class="product-actions">
-                    <a href="{% url 'product_detail' product.id %}" class="btn-view"><i class="fa fa-eye"></i> VIEW</a>
-                    <button class="btn-add" onclick="addToCart({{ product.id }})"><i class="fa fa-shopping-cart"></i> ADD</button>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </section>
-
-    <!-- ===== QUICK SALES ===== -->
-    <section class="products" style="background: var(--white); padding-top: 45px; padding-bottom: 45px;">
-        <div class="section-heading">
-            <h2>🔥 Quick Sales</h2>
-        </div>
-        <div class="product-grid">
-            {% for product in quick_sales %}
-            <div class="product">
-                <div class="timer-container">
-                    {% if product.discount > 0 %}
-                        <div class="sale-badge">-{{ product.discount }}%</div>
-                    {% endif %}
-                    {% if product.discount_expiry %}
-                        <div class="timer-badge" data-expiry="{{ product.discount_expiry|date:'Y-m-d H:i:s' }}">
-                            <i class="fas fa-clock"></i>
-                            <span class="countdown-text">...</span>
-                        </div>
-                    {% endif %}
-                </div>
-                <div class="img-container">
-                    <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
-                </div>
-                <h3>{{ product.name }}</h3>
-                <div class="price">
-                    <span class="old-price">KES {{ product.price }}</span>
-                    <strong class="new-price">KES {{ product.discounted_price }}</strong>
-                </div>
-                <div class="product-actions">
-                    <a href="{% url 'product_detail' product.id %}" class="btn-view"><i class="fa fa-eye"></i> VIEW</a>
-                    <button class="btn-add" onclick="addToCart({{ product.id }})"><i class="fa fa-shopping-cart"></i> ADD</button>
-                </div>
-            </div>
-            {% empty %}
-                <p style="padding: 0 0 20px; color: var(--text-muted);">No discounts active right now.</p>
-            {% endfor %}
-        </div>
-<section id="services">
-    <h2>Our Services</h2>
-
-    <div class="services">
-
-        <div class="service">
-            <i class="fas fa-truck"></i>
-            <span>Quick Delivery</span>
-        </div>
-
-        <div class="service">
-            <i class="fas fa-undo-alt"></i>
-            <span>Money Back</span>
-        </div>
-
-        <div class="service">
-            <i class="fas fa-money-bill-wave"></i>
-            <span>Pay on Delivery</span>
-        </div>
-
-        <div class="service">
-            <i class="fas fa-headset"></i>
-            <span>Support 24/7</span>
-        </div>
-
-    </div>
-</section>
-
-{% block extra_scripts %}
-<script>
-    /* ---- BANNER ROTATION ---- */
-    const photos = ["{% static 'images/photo1.jpg' %}", "{% static 'images/photo2.jpg' %}"];
-    let idx = 0;
-    setInterval(() => {
-        idx = (idx + 1) % photos.length;
-        $('#bannerImage').fadeOut(400, function() {
-            $(this).attr('src', photos[idx]).fadeIn(400);
-        });
-    }, 5000);
-
-    /* ---- LIVE VIEWERS COUNTER ---- */
-    setInterval(() => {
-        let current = parseInt($('#featured-viewers').text());
-        let change  = Math.floor(Math.random() * 3) - 1;
-        $('#featured-viewers').text(Math.max(12, current + change));
-    }, 4500);
-
-    /* ---- COUNTDOWN TIMERS ---- */
-    function updateTimers() {
-        $('.timer-badge').each(function() {
-            const expiry = new Date($(this).attr('data-expiry')).getTime();
-            const diff   = expiry - Date.now();
-            if (diff <= 0) { $(this).find('.countdown-text').text('Ended'); return; }
-            const h = Math.floor((diff % 86400000) / 3600000);
-            const m = Math.floor((diff % 3600000)  / 60000);
-            const s = Math.floor((diff % 60000)    / 1000);
-            $(this).find('.countdown-text').text(`${h}h ${m}m ${s}s`);
-        });
+@media (max-width: 600px) {
+    .banner img,
+    .slider img {
+        height: 180px;
+        object-fit: contain; /* no cropping on phone */
+        background: #000; /* optional for nice look */
     }
-    updateTimers();
-    setInterval(updateTimers, 1000);
-</script>
-{% endblock %}
+}
+
+    
+    
