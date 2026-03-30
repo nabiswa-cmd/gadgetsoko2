@@ -34,8 +34,15 @@ SECRET_KEY = 'django-insecure-xmv2^pwsqiljxgn^$9fc3l&jy0)_9+f!ppalvsa_cwmyo3$-4f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*','http://gadgetsoko.vercel.app/','gadgetsoko-nzvzxzndg-nabiswa-cmds-projects.vercel.app']
-
+ALLOWED_HOSTS = [
+    '.vercel.app',
+    'localhost',
+    '127.0.0.1',
+]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = [
+    'https://gadgetsoko.vercel.app',
+]
 
 # Application definition
 
