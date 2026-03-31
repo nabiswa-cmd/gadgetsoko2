@@ -331,157 +331,148 @@
 </section>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        /* --- ORGANIC ACTIVITY LOGIC --- */
-        const names = ["Mama Stacey", "Brian O.", "Kevin Omari", "Sarah W.", "Amina Hussein", "Derrick M.", "Eng. Mike", "Purity K.", "Otieno J.", "Cynthia N."];
-        const towns = ["Nairobi West", "Mombasa Road", "Eldoret Town", "Kisumu CBD", "Nakuru", "Thika Section 9", "Kitale", "Machakos", "Ruiru", "Syokimau"];
-        const gadgets = ["iPhone 15 Pro", "Samsung S24 Ultra", "HP EliteBook", "Oraimo FreePods", "MacBook Air", "JBL Flip 6", "Tecno Camon 30"];
+  <script>
+    /* --- ORGANIC ACTIVITY LOGIC --- */
+    const names = ["Mama Stacey", "Brian O.", "Kevin Omari", "Sarah W.", "Amina Hussein", "Derrick M.", "Eng. Mike", "Purity K.", "Otieno J.", "Cynthia N. "];
+    const towns = ["Nairobi West", "Mombasa Road", "Eldoret Town", "Kisumu CBD", "Nakuru", "Thika Section 9", "Kitale", "Machakos", "Ruiru", "Syokimau"];
+    const gadgets = ["iPhone 15 Pro", "Samsung S24 Ultra", "HP EliteBook", "Oraimo FreePods", "MacBook Air", "JBL Flip 6", "Tecno Camon 30"];
 
-        function triggerActivity() {
-            const person = names[Math.floor(Math.random() * names.length)];
-            const town = towns[Math.floor(Math.random() * towns.length)];
-            const gadget = gadgets[Math.floor(Math.random() * gadgets.length)];
-            const roll = Math.random();
-            let msg = ""; let time = "";
+    function triggerActivity() {
+        const person = names[Math.floor(Math.random() * names.length)];
+        const town = towns[Math.floor(Math.random() * towns.length)];
+        const gadget = gadgets[Math.floor(Math.random() * gadgets.length)];
+        const roll = Math.random();
+        let msg = ""; let time = "";
 
-            if (roll > 0.6) {
-                msg = `<strong>${gadget}</strong> package successfully dispatched to <strong>${person}</strong> in ${town}.`;
-                time = `${Math.floor(Math.random() * 3) + 1} hours ago`;
-            } else if (roll > 0.3) {
-                msg = `New order placed by <strong>${person}</strong> (${town}) for 1x <strong>${gadget}</strong>.`;
-                time = `Just now`;
-            } else {
-                msg = `<strong>${person}</strong> from ${town} confirmed receipt of their <strong>${gadget}</strong>.`;
-                time = `Today, ${Math.floor(Math.random() * 10) + 8}:15 AM`;
-            }
-
-            $('#activity-msg').html(msg);
-            $('#activity-time').text(time);
-            $('#live-activity-box').css('left', '20px');
-            setTimeout(dismissActivity, 8000);
+        if (roll > 0.6) {
+            msg = `<strong>${gadget}</strong> package successfully dispatched to <strong>${person}</strong> in ${town}.`;
+            time = `${Math.floor(Math.random() * 3) + 1} hours ago`;
+        } else if (roll > 0.3) {
+            msg = `New order placed by <strong>${person}</strong> (${town}) for 1x <strong>${gadget}</strong>.`;
+            time = `Just now`;
+        } else {
+            msg = `<strong>${person}</strong> from ${town} confirmed receipt of their <strong>${gadget}</strong>.`;
+            time = `Today, ${Math.floor(Math.random() * 10) + 8}:15 AM`;
         }
 
-        function dismissActivity() { $('#live-activity-box').css('left', '-450px'); }
+        $('#activity-msg').html(msg);
+        $('#activity-time').text(time);
+        $('#live-activity-box').css('left', '20px');
+        setTimeout(dismissActivity, 8000);
+    }
 
-        /* --- SOKOBOT LOGIC --- */
-        function toggleChat() { $('#chat-window').fadeToggle(300).css('display', 'flex'); }
-        function sendMsg() {
-            let inputField = $('#chatInput');
-            let text = inputField.val().trim();
-            if (!text) return;
-            $('#chatBody').append(`<div class="msg user-msg">${text}</div>`);
-            inputField.val('');
+    function dismissActivity() { $('#live-activity-box').css('left', '-450px'); }
+
+    /* --- SOKOBOT LOGIC --- */
+    function toggleChat() { $('#chat-window').fadeToggle(300).css('display', 'flex'); }
+    function sendMsg() {
+        let inputField = $('#chatInput');
+        let text = inputField.val().trim();
+        if (!text) return;
+        $('#chatBody').append(`<div class="msg user-msg">${text}</div>`);
+        inputField.val('');
+        $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
+        setTimeout(() => {
+            let r = "Hello! I'm SokoBot. I can help with delivery and payment info.";
+            if(text.toLowerCase().includes("delivery")) r = "Nairobi delivery is same-day. Upcountry takes 24 hours.";
+            $('#chatBody').append(`<div class="msg bot-msg">${r}</div>`);
             $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
-            setTimeout(() => {
-                let r = "Hello! I'm SokoBot. I can help with delivery and payment info.";
-                if(text.toLowerCase().includes("delivery")) r = "Nairobi delivery is same-day. Upcountry takes 24 hours.";
-                $('#chatBody').append(`<div class="msg bot-msg">${r}</div>`);
-                $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
-            }, 700);
-        }
+        }, 700);
+    }
 
-        /* --- CART LOGIC --- */
-        function addToCart(pId) {
-            $.get(`/add-to-cart/${pId}/`, function(res) {
-                if (res.error === 'not_logged_in') { window.location.href = "{% url 'userlog' %}"; return; }
-                $('.cart-count').text(res.cart_count);
-                // Trigger sidebar update logic here if sidebar exists in base template
-            });
-        }
+    /* --- CART LOGIC --- */
+    function addToCart(pId) {
+        $.get(`/add-to-cart/${pId}/`, function(res) {
+            if (res.error === 'not_logged_in') { window.location.href = "{% url 'userlog' %}"; return; }
+            $('.cart-count').text(res.cart_count);
+        });
+    }
 
-        /* --- DOCUMENT READY FUNCTIONS --- */
-      /* --- FIXED BANNER ROTATION --- */
-const photos = [
-    "{% static 'images/photo1.png' %}", 
-    "{% static 'images/photo2.png' %}",
-    "{% static 'images/photo3.png' %}"
-];
-
-let idx = 0;
-if(photos.length > 1) {
-    setInterval(() => {
-        // Increment index
-        idx = (idx + 1) % photos.length;
+    /* --- DOCUMENT READY FUNCTIONS --- */
+    $(document).ready(function() {
         
-        // Smooth transition: Fade out, change source, fade back in
-        $('#bannerImage').animate({ opacity: 0 }, 400, function() {
-            $(this).attr('src', photos[idx]);
-            $(this).animate({ opacity: 1 }, 400);
-        });
-    }, 4000); // Rotates every 4 seconds
-}
-            if(photos.length > 1) {
-                setInterval(() => {
-                    idx = (idx + 1) % photos.length;
-                    $('#bannerImage').fadeOut(400, function() { 
-                        $(this).attr('src', photos[idx]).fadeIn(400); 
-                    });
-                }, 3500);
-            }
+        /* --- FIXED BANNER ROTATION --- */
+        const photos = [
+            "{% static 'images/photo1.png' %}", 
+            "{% static 'images/photo2.png' %}",
+            "{% static 'images/photo3.png' %}"
+        ];
 
-            /* --- LIVE VIEWERS --- */
+        let idx = 0;
+        if(photos.length > 1) {
             setInterval(() => {
-                let current = parseInt($('#featured-viewers').text());
-                let change = Math.floor(Math.random() * 3) - 1; 
-                $('#featured-viewers').text(Math.max(12, current + change));
-            }, 4500);
-
-            /* --- ACTIVITY NOTIFICATIONS --- */
-            setTimeout(triggerActivity, 12000); 
-            setInterval(() => {
-                const delay = Math.floor(Math.random() * 20000); 
-                setTimeout(triggerActivity, delay);
-            }, 45000);
-
-            /* --- TIMERS --- */
-            setInterval(function updateTimers() {
-                $('.timer-badge').each(function() {
-                    const expiry = new Date($(this).attr('data-expiry')).getTime();
-                    const now = new Date().getTime();
-                    const diff = expiry - now;
-                    if (diff <= 0) { $(this).html("Ended"); return; }
-                    const h = Math.floor((diff % 86400000) / 3600000);
-                    const m = Math.floor((diff % 3600000) / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
-                    $(this).find('.countdown-text').text(`${h}h ${m}m ${s}s`);
+                idx = (idx + 1) % photos.length;
+                // Fade out current image, swap src, then fade back in
+                $('#bannerImage').animate({ opacity: 0 }, 400, function() {
+                    $(this).attr('src', photos[idx]);
+                    $(this).animate({ opacity: 1 }, 400);
                 });
-            }, 1000);
-        });
+            }, 4000);
+        }
 
-        /* --- LIVE SEARCH LOGIC --- */
-$('#searchInput').on('keyup', function() {
-    let query = $(this).val();
-    if (query.length > 1) {
-        $.ajax({
-            url: "{% url 'live_search' %}", // Create this URL/View for JSON results
-            data: { 'q': query },
-            success: function(data) {
-                let dropdown = $('#search-results');
-                dropdown.empty().show();
-                
-                if (data.results.length > 0) {
-                    data.results.forEach(item => {
-                        dropdown.append(`
-                            <a href="/product/${item.id}/" style="display:block; padding:10px; border-bottom:1px solid #eee; color:#333; text-decoration:none;">
-                                <strong>${item.name}</strong> <small>in ${item.brand}</small>
-                            </a>
-                        `);
-                    });
-                } else {
-                    dropdown.append('<p style="padding:10px;">No gadgets found.</p>');
+        /* --- LIVE VIEWERS --- */
+        setInterval(() => {
+            let current = parseInt($('#featured-viewers').text());
+            let change = Math.floor(Math.random() * 3) - 1; 
+            $('#featured-viewers').text(Math.max(12, current + change));
+        }, 4500);
+
+        /* --- ACTIVITY NOTIFICATIONS --- */
+        setTimeout(triggerActivity, 12000); 
+        setInterval(() => {
+            const delay = Math.floor(Math.random() * 20000); 
+            setTimeout(triggerActivity, delay);
+        }, 45000);
+
+        /* --- TIMERS --- */
+        setInterval(function updateTimers() {
+            $('.timer-badge').each(function() {
+                const expiry = new Date($(this).attr('data-expiry')).getTime();
+                const now = new Date().getTime();
+                const diff = expiry - now;
+                if (diff <= 0) { $(this).html("Ended"); return; }
+                const h = Math.floor((diff % 86400000) / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                $(this).find('.countdown-text').text(`${h}h ${m}m ${s}s`);
+            });
+        }, 1000);
+    });
+
+    /* --- LIVE SEARCH LOGIC --- */
+    $('#searchInput').on('keyup', function() {
+        let query = $(this).val();
+        if (query.length > 1) {
+            $.ajax({
+                url: "{% url 'live_search' %}", 
+                data: { 'q': query },
+                success: function(data) {
+                    let dropdown = $('#search-results');
+                    dropdown.empty().show();
+                    
+                    if (data.results.length > 0) {
+                        data.results.forEach(item => {
+                            dropdown.append(`
+                                <a href="/product/${item.id}/" style="display:block; padding:10px; border-bottom:1px solid #eee; color:#333; text-decoration:none;">
+                                    <strong>${item.name}</strong> <small>in ${item.brand}</small>
+                                </a>
+                            `);
+                        });
+                    } else {
+                        dropdown.append('<p style="padding:10px;">No gadgets found.</p>');
+                    }
                 }
-            }
-        });
-    } else {
-        $('#search-results').hide();
-    }
-});
+            });
+        } else {
+            $('#search-results').hide();
+        }
+    });
 
-// Hide dropdown when clicking outside
-$(document).on('click', function(e) {
-    if (!$(e.target).closest('.search-form').length) {
-        $('#search-results').hide();
-    }
-});
-    </script>
+    // Hide dropdown when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.search-form').length) {
+            $('#search-results').hide();
+        }
+    });
+</script>
 {% endblock %}
