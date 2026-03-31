@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Sign In | Gadget Soko</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+
+<div class="login-container">
+    <div class="logo">
+        <img src="{% static 'images/logo.png' %}" alt="Logo">
+    </div>
+
+    <h1>Sign In Via Google</h1>
+    
+    <p class="subtitle">
+        You are about to sign in using your Google account. 
+        Click <strong>Continue</strong> to proceed to Google.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="google-btn">Continue to Google</button>
+    </form>
+
+    <p class="register-link">
+        <a href="{% url 'account_login' %}">Cancel and go back</a>
+    </p>
+</div>
+
+</body>
+</html>

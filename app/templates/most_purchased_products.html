@@ -1,0 +1,26 @@
+<table>
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Price</th>
+            <th>Brand</th>
+            <th>Number of Buyers</th>
+            <th>Total Purchased</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>KES {{ product.price }}</td>
+            <td>{{ product.brand.name }}</td>
+            <td>{{ product.buyers_count }}</td>
+            <td>{{ product.total_sold|default:0 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No products found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

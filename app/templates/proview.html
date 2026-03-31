@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Products | Gadget Soko Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; background:#f4f6f9; margin:0; }
+        .navbar { background:#ff5a2c; padding:15px; color:white; display:flex; justify-content:space-between; align-items:center;}
+        .navbar h2 { margin:0; }
+        .sidebar { width:220px; background:#111; color:white; height:100vh; position:fixed; padding-top:20px;}
+        .sidebar a { display:block; padding:15px; color:#ccc; text-decoration:none;}
+        .sidebar a:hover { background:#ff5a2c; color:white;}
+        .main { margin-left:220px; padding:20px;}
+        .form-container { background:white; padding:20px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:20px;}
+        .form-container input, .form-container textarea, .form-container select { width:100%; padding:10px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;}
+        .form-container button { padding:10px 20px; background:#ff5a2c; color:white; border:none; border-radius:5px; cursor:pointer;}
+        table { width:100%; background:white; border-radius:10px; overflow:hidden; }
+        table th, table td { padding:12px; text-align:left; }
+        table th { background:#111; color:white; }
+        .product-image { width:60px; height:60px; object-fit:cover; border-radius:5px;}
+        .category-filter { margin-bottom:20px; }
+        .category-filter select { padding:8px; border-radius:5px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h2>Gadget Soko Admin</h2>
+    <div><i class="fa fa-user"></i> Admin</div>
+</div>
+
+<div class="sidebar">
+    <a href="{% url 'dashboard' %}"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a href="{% url 'products' %}"><i class="fa fa-box"></i> Products</a>
+    <a href="#"><i class="fa fa-shopping-cart"></i> Orders</a>
+    <a href="#"><i class="fa fa-users"></i> Customers</a>
+</div>
+
+<div class="main">
+
+    <h2>Add New Product</h2>
+    <div class="form-container">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Upload Product</button>
+        </form>
+    </div>
+
+    <h2>All Products</h2>
+
+    <div class="category-filter">
+        <form method="get">
+            <label>Filter by category:</label>
+            <select name="category" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <table>
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Specifications</th>
+            <th>Category</th>
+        </tr>
+        {% for product in products %}
+        <tr>
+    <td>
+        {% if product.image %}
+            <img src="{{ product.image.url }}" class="product-image">
+        {% else %}
+            N/A
+        {% endif %}
+    </td>
+    <td>{{ product.name }}</td>
+    <td>KES {{ product.price }}</td>
+    <td>{{ product.specifications }}</td>
+    <td>
+        {% if product.category %}
+            {{ product.category.name }}
+        {% else %}
+            Uncategorized
+        {% endif %}
+    </td>
+</tr>
+        {% empty %}
+        <tr><td colspan="5" style="text-align:center;"><p style="text-align:center; padding:40px; color:#6b7280;">
+😕 Nothing here yet… try another category
+</p></td></tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+</body>
+</html>

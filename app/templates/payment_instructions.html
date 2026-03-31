@@ -1,0 +1,241 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | Gadget Soko Kenya</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+        :root { 
+            --soko-orange: #ff5a2c; 
+            --soko-dark: #1a1a1a;
+            --success: #00a650;
+            --bg: #fdfdfd; 
+            --paper: #ffffff;
+        }
+
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: var(--bg); 
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin: 0; 
+            padding: 20px; 
+            color: var(--soko-dark);
+        }
+
+        /* The Receipt Container */
+        .receipt { 
+            max-width: 480px; 
+            margin: 30px auto; 
+            background: var(--paper); 
+            border-radius: 24px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
+            position: relative;
+            border: 1px solid #f1f1f1;
+        }
+
+        /* Decorative "Punch Holes" on the side for that human feel */
+        .receipt::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 20%;
+            height: 60%;
+            width: 20px;
+            background-image: radial-gradient(#e5e7eb 5px, transparent 5px);
+            background-size: 20px 30px;
+        }
+
+        .header { 
+            text-align: center; 
+            padding: 40px 30px 20px; 
+        }
+
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: #f0fdf4;
+            color: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 20px;
+            border: 2px solid #dcfce7;
+        }
+
+        .header h2 { margin: 0; font-size: 24px; font-weight: 800; color: var(--soko-dark); }
+        .header p { color: #6b7280; font-size: 14px; margin-top: 5px; }
+
+        /* Order Details */
+        .info-grid { padding: 0 30px; }
+        .info-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 12px 0; 
+            border-bottom: 1px solid #f9fafb;
+            font-size: 15px; 
+        }
+        .info-row span:first-child { color: #9ca3af; font-weight: 500; }
+        .info-row span:last-child { font-weight: 600; color: var(--soko-dark); }
+
+        /* The "Price Tag" Area */
+        .price-section { 
+            background: #fff8f6; 
+            margin: 20px 30px; 
+            padding: 20px; 
+            border-radius: 16px; 
+            text-align: center;
+            border: 1px dashed var(--soko-orange);
+        }
+        .price-label { font-size: 13px; font-weight: 600; color: var(--soko-orange); text-transform: uppercase; letter-spacing: 1px; }
+        .price-amount { font-size: 32px; font-weight: 800; color: var(--soko-dark); display: block; margin-top: 5px; }
+
+        /* Payment Instructions Box */
+        .payment-instructions { 
+            margin: 20px 30px; 
+            padding: 20px; 
+            background: var(--soko-dark); 
+            color: white; 
+            border-radius: 16px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        .instr-title { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            margin-bottom: 12px;
+            color: #d1d5db;
+        }
+        .pay-details { 
+            background: rgba(255,255,255,0.05); 
+            padding: 15px; 
+            border-radius: 12px;
+            text-align: center;
+        }
+        .pay-value { font-size: 22px; font-weight: 800; color: var(--soko-orange); display: block; margin: 5px 0; letter-spacing: 1px; }
+        .pay-ref { font-size: 12px; color: #9ca3af; }
+
+        /* Actions */
+        .actions { 
+            padding: 20px 30px 40px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+        .btn { 
+            padding: 16px; 
+            border-radius: 14px; 
+            text-align: center; 
+            text-decoration: none; 
+            font-weight: 700; 
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+        .btn-main { background: var(--soko-orange); color: white; box-shadow: 0 8px 20px rgba(255,90,44,0.2); }
+        .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn-outline { color: #6b7280; font-weight: 600; font-size: 14px; }
+
+        /* Rubber Stamp Effect */
+        .stamp {
+            position: absolute;
+            top: 100px;
+            right: 40px;
+            border: 3px solid #f87171;
+            color: #f87171;
+            padding: 5px 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            transform: rotate(-15deg);
+            opacity: 0.3;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        @media print { .actions, .receipt::before { display: none; } body { background: white; } .receipt { box-shadow: none; border: 1px solid #eee; } }
+    </style>
+</head>
+<body>
+
+<div class="receipt">
+    <div class="stamp">Awaiting Pay</div>
+
+    <div class="header">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2>Order Confirmed!</h2>
+        <p>Order #GSK-{{ order.id }} has been registered.</p>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-row">
+            <span>Customer</span>
+            <span>{{ order.name }}</span>
+        </div>
+        <div class="info-row">
+            <span>Payment Method</span>
+            <span style="text-transform: capitalize;">{{ order.payment_method }}</span>
+        </div>
+        <div class="info-row">
+            <span>Placed On</span>
+            <span>{{ order.created_at|date:"M d, H:i" }}</span>
+        </div>
+    </div>
+
+    <div class="price-section">
+        <span class="price-label">Total Amount Due</span>
+        <span class="price-amount">KES {{ order.total }}</span>
+    </div>
+
+    <div class="payment-instructions">
+        {% if order.payment_method == 'equity' %}
+            <div class="instr-title"><i class="fas fa-university"></i> Equity Bank Instructions</div>
+            <div class="pay-details">
+                <span class="pay-value">Till: 7788990</span>
+                <span class="pay-ref">Ref: #GSK-{{ order.id }}</span>
+            </div>
+            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">Go to Equity Mobile -> Pay Merchant -> Till Number</p>
+
+        {% elif order.payment_method == 'pochi' %}
+            <div class="instr-title"><i class="fas fa-mobile-alt"></i> Pochi La Biashara</div>
+            <div class="pay-details">
+                <span class="pay-value">0722 000 000</span>
+                <span class="pay-ref">Name: GADGET SOKO KENYA</span>
+            </div>
+            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">M-Pesa -> Lipa na M-Pesa -> Pochi la Biashara</p>
+
+        {% elif order.payment_method == 'mpesa' %}
+            <div class="instr-title"><i class="fas fa-bolt"></i> M-Pesa Express (STK)</div>
+            <div class="pay-details">
+                <p style="font-size: 13px; margin: 0;">Check your phone for a PIN prompt.</p>
+            </div>
+            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">If no prompt appeared, use Paybill <b>400200</b> Acc: <b>{{ order.id }}</b></p>
+        {% else %}
+            <div class="instr-title"><i class="fas fa-truck"></i> Cash on Delivery</div>
+            <div class="pay-details">
+                <p style="font-size: 13px; margin: 0;">Payment will be collected upon delivery.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="actions">
+        <a href="{% url 'index' %}" class="btn btn-main">Continue Shopping</a>
+        <a href="javascript:window.print()" class="btn btn-outline"><i class="fas fa-print"></i> Save Receipt as PDF</a>
+    </div>
+</div>
+
+<script>
+    // Just a bit of extra "Human" touch - it's a shop, let's make it exciting
+    console.log("Gadget Soko: Order #GSK-{{ order.id }} successfully rendered.");
+</script>
+
+</body>
+</html>

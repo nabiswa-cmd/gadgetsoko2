@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Place Your Order</title>
+</head>
+<body>
+    <h1>Place Your Order</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label>Customer Name:</label>
+        <input type="text" name="customer_name" required><br><br>
+
+        <h3>Order Items</h3>
+        <div id="items">
+            <div>
+                <input type="text" name="item_name" placeholder="Item name" required>
+                <input type="number" name="item_quantity" placeholder="Quantity" required>
+            </div>
+        </div>
+        <button type="button" onclick="addItem()">Add Another Item</button><br><br>
+
+        <button type="submit">Submit Order</button>
+    </form>
+
+    <script>
+        function addItem() {
+            const container = document.getElementById('items');
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <input type="text" name="item_name" placeholder="Item name" required>
+                <input type="number" name="item_quantity" placeholder="Quantity" required>
+            `;
+            container.appendChild(div);
+        }
+    </script>
+</body>
+</html>

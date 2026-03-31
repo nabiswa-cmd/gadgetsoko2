@@ -1,0 +1,66 @@
+{% extends "baseadmin.html" %}
+
+{% block title %}Manage products | Gadget Soko{% endblock %}
+{% block header %}Manage products{% endblock %}
+
+{% block content %}
+{% load static %}
+    <meta charset="UTF-8">
+    <title>Manage Products</title>
+    <link rel="stylesheet" href="{% static 'css/manage_products.css' %}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Manage Products</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Category</th>
+                <th>Update Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>${{ product.price }}</td>
+
+                <td>
+                    {% if product.stock > 0 %}
+                        In Stock ({{ product.stock }})
+                    {% else %}
+                        <span class="out">Out of Stock</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ product.category.name }}</td>
+
+                <!-- Update Price Form -->
+                <td>
+                    <form method="POST" action="{% url 'update_price' product.id %}">
+                        {% csrf_token %}
+                        <input type="number" step="0.01" name="price" placeholder="New price" required>
+                        <button type="submit" class="btn">Update</button>
+                    </form>
+                </td>
+
+                <!-- Actions -->
+                <td>
+                    <form method="POST" action="{% url 'mark_out_of_stock' product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn danger">Mark Out of Stock</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{%endblock%}

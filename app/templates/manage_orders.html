@@ -1,0 +1,151 @@
+{% extends "baseadmin.html" %}
+
+{% block title %}Manage Orders| Gadget Soko{% endblock %}
+{% block header %}Manage Orders{% endblock %}
+{% block content %}
+{% load static %}
+    <title></title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        table th {
+            background: #0f4c81;
+            color: white;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .pending { background: orange; }
+        .processing { background: purple; }
+        .shipped { background: blue; }
+        .delivered { background: green; }
+
+        .btn {
+            padding: 6px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn-update {
+            background: #0f4c81;
+            color: white;
+        }
+
+        select {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Manage Orders</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Date</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.name }}</td>
+                <td>{{ order.phone }}</td>
+                <td>{{ order.destination }}</td>
+
+                <td>
+                    <ul>
+                        {% for item in order.items.all %}
+                            <li>{{ item.product.name }} x {{ item.quantity }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+
+                <td>KES {{ order.total }}</td>
+
+                <td>
+                    <span class="status 
+                        {% if order.status|lower == 'pending' %}pending{% endif %}
+                        {% if order.status|lower == 'processing' %}processing{% endif %}
+                        {% if order.status|lower == 'shipped' %}shipped{% endif %}
+                        {% if order.status|lower == 'delivered' %}delivered{% endif %}
+                    ">
+                        {{ order.status }}
+                    </span>
+                </td>
+
+                <td>{{ order.payment_status }}</td>
+
+                <td>{{ order.created_at|date:"M d, Y, h:i a" }}</td>
+
+                <td>
+                    <form method="POST" action="{% url 'update_order_status' order.id %}">
+                        {% csrf_token %}
+                        <select name="status">
+                            <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>Pending</option>
+                            <option value="Processing" {% if order.status == "Processing" %}selected{% endif %}>Processing</option>
+                            <option value="Shipped" {% if order.status == "Shipped" %}selected{% endif %}>Shipped</option>
+                            <option value="Delivered" {% if order.status == "Delivered" %}selected{% endif %}>Delivered</option>
+                            <option value="Cancelled" {% if order.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+                        </select>
+                        <button type="submit" class="btn btn-update">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10">No orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{%endblock%}

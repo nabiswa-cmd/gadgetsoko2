@@ -1,0 +1,116 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+
+    <style>
+        .search-dropdown {
+            width: 100%;
+        }
+
+        .product-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            background-color: #f5f5f5;
+        }
+
+        .product-card img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-info h3 {
+            font-size: 14px;
+            margin: 0;
+            color: #333;
+        }
+
+        .product-info p {
+            font-size: 12px;
+            color: #777;
+            margin: 2px 0;
+        }
+
+        .price {
+            font-size: 13px;
+            font-weight: bold;
+            color: green;
+        }
+
+        .old-price {
+            text-decoration: line-through;
+            color: red;
+            font-size: 12px;
+        }
+
+        .no-results {
+            padding: 10px;
+            text-align: center;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="search-dropdown">
+
+    {% if products %}
+        {% for product in products %}
+        <div class="product-card"
+             onclick="window.location.href='{% url 'product_detail' product.id %}'">
+
+            <!-- Product Image -->
+            {% if product.images.first %}
+                <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <img src="{% static 'images/default.png' %}" alt="No image">
+            {% endif %}
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <h3>{{ product.name }}</h3>
+
+                <!-- Specifications preview -->
+                <p>{{ product.specifications|truncatewords:8 }}</p>
+
+                <!-- Price -->
+                <div class="price">
+                    {% if product.discount > 0 %}
+                        <span class="old-price">KES {{ product.price }}</span>
+                        KES {{ product.discounted_price }}
+                    {% else %}
+                        KES {{ product.price }}
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+
+    {% else %}
+        <div class="no-results">
+            No products found matching your search.
+        </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

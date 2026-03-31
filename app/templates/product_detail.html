@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} | Gadget Soko Kenya</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --soko-orange: #ee4d2d;
+            --soko-black: #1a1a1a;
+            --soko-bg: #ffffff;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--soko-bg); color: #333; margin: 0; padding: 0; }
+        .wrapper { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+
+        /* NAVIGATION */
+        .top-nav { margin-bottom: 30px; }
+        .back-link { 
+            text-decoration: none; color: var(--soko-black); font-weight: 700; 
+            font-size: 13px; display: inline-flex; align-items: center; gap: 8px;
+            transition: 0.2s;
+        }
+        .back-link:hover { color: var(--soko-orange); }
+
+        .product-grid { display: flex; gap: 60px; flex-wrap: wrap; }
+
+        /* GALLERY (CLEAN) */
+        .gallery { flex: 1.2; min-width: 320px; position: relative; }
+        .display-area { height: 450px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .display-area img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .slide-ctrl {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: none; border: none; font-size: 20px; color: #ddd;
+            cursor: pointer; transition: 0.3s;
+        }
+        .slide-ctrl:hover { color: var(--soko-black); }
+        .prev-ctrl { left: -10px; }
+        .next-ctrl { right: -10px; }
+
+        .thumbs { display: flex; gap: 10px; margin-top: 20px; overflow-x: auto; scrollbar-width: none; }
+        .thumbs img { width: 65px; height: 65px; cursor: pointer; opacity: 0.4; transition: 0.3s; border-radius: 2px; }
+        .thumbs img.active { opacity: 1; transform: scale(1.1); }
+
+        /* INFO & TYPOGRAPHY */
+        .info { flex: 1; min-width: 320px; }
+        .brand-name { display: block; font-weight: 900; color: var(--soko-black); text-transform: uppercase; font-size: 14px; margin-bottom: 5px; }
+        .product-name { font-size: 38px; font-weight: 800; color: var(--soko-black); margin: 0 0 10px 0; line-height: 1.1; }
+        
+        .stock-indicator { color: var(--soko-black); font-weight: 800; font-size: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 5px; }
+
+        .rating-summary { margin-bottom: 20px; font-size: 14px; color: #1a1a1a; font-weight: 600; }
+        .stars { color: #f1c40f; margin-right: 5px; }
+
+        .price-tag { font-size: 44px; font-weight: 900; color: var(--soko-black); margin-bottom: 30px; letter-spacing: -1.5px; }
+
+        /* ACTION BUTTONS */
+        .actions { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 30px; }
+        .btn-soko {
+            padding: 22px; font-size: 16px; font-weight: 800; text-transform: uppercase;
+            cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px;
+            border-radius: 2px;
+        }
+        .btn-orange { background: var(--soko-orange); color: white; border: none; }
+        .btn-orange:hover { background: #d63d1f; transform: translateY(-2px); }
+
+        /* REVIEWS SECTION */
+        .reviews-box { margin-top: 50px; border-top: 1px solid #eee; padding-top: 30px; }
+        .review-card { background: #fafafa; padding: 20px; margin-bottom: 15px; border-radius: 4px; }
+        .review-card p { font-size: 14px; font-style: italic; margin: 0 0 10px 0; color: #444; }
+        .reviewer-info { font-size: 12px; font-weight: 800; color: var(--soko-black); text-transform: uppercase; }
+
+        /* TOAST (NO GREEN) */
+        #soko-toast {
+            position: fixed; bottom: 30px; left: -400px; width: 280px;
+            background: #fff; padding: 18px; box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            z-index: 999; display: flex; align-items: center; gap: 15px;
+            border: 1px solid #eee; transition: 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <nav class="top-nav">
+        <a href="{% url 'index' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> RETURN TO SHOP
+        </a>
+    </nav>
+
+    <div class="product-grid">
+        
+        <div class="gallery">
+            <div class="display-area">
+                <img id="main-frame" src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+                
+                {% if product.images.count > 1 %}
+                <button class="slide-ctrl prev-ctrl" onclick="move(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="slide-ctrl next-ctrl" onclick="move(1)"><i class="fas fa-chevron-right"></i></button>
+                {% endif %}
+            </div>
+
+            <div class="thumbs">
+                {% for pi in product.images.all %}
+                <img class="{% if forloop.first %}active{% endif %}" 
+                     src="{{ pi.image.url }}" 
+                     onclick="jump('{{ pi.image.url }}', {{ forloop.counter0 }})">
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="info">
+            <span class="brand-name">{{ product.brand.name }}</span>
+            <h1 class="product-name">{{ product.name }}</h1>
+
+            <div class="rating-summary">
+                <span class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></span>
+                (4.9) • 18 VERIFIED REVIEWS
+            </div>
+
+            <div class="stock-indicator">
+                <i class="fas fa-check-double"></i> IN STOCK • NAIROBI WAREHOUSE
+            </div>
+
+            <div class="price-tag">
+                KES {{ product.discounted_price }}
+            </div>
+
+            <div style="color: #666; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">
+                {{ product.specifications|linebreaks }}
+            </div>
+
+            <div class="actions">
+                <button class="btn-soko btn-orange" onclick="addToCart({{ product.id }})">
+                    <i class="fas fa-shopping-bag"></i> ADD TO CART
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="reviews-box">
+        <h3 style="font-weight: 800; text-transform: uppercase; font-size: 16px; margin-bottom: 25px;">Verified Customer Feedback</h3>
+        
+        <div class="review-card">
+            <p>"Delivery was super fast. Original item as described. Definitely shopping here again!"</p>
+            <div class="reviewer-info"><i class="fas fa-user-circle"></i> Kelvin M. • Verified Buyer</div>
+        </div>
+
+        <div class="review-card">
+            <p>"Authentic gadget. The battery life is exactly what I expected. Great price compared to other shops."</p>
+            <div class="reviewer-info"><i class="fas fa-user-circle"></i> Sarah J. • Verified Buyer</div>
+        </div>
+
+        <div class="review-card">
+            <p>"Gadget Soko never disappoints. The packaging was neat and the receipt was included."</p>
+            <div class="reviewer-info"><i class="fas fa-user-circle"></i> Brian O. • Verified Buyer</div>
+        </div>
+    </div>
+</div>
+
+<div id="soko-toast">
+    <div style="font-size: 22px; color: var(--soko-orange);">
+        <i class="fas fa-bolt"></i>
+    </div>
+    <div style="flex: 1;">
+        <p id="msg" style="margin: 0; font-size: 12px; color: #1a1a1a; line-height: 1.4;"></p>
+        <small style="color: #999; font-size: 10px;">JUST NOW</small>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const imgs = [{% for pi in product.images.all %} "{{ pi.image.url }}", {% endfor %}];
+    let curr = 0;
+
+    function move(d) {
+        if (imgs.length === 0) return;
+        curr += d;
+        if (curr >= imgs.length) curr = 0;
+        if (curr < 0) curr = imgs.length - 1;
+        syncUI();
+    }
+
+    function jump(u, i) {
+        curr = i;
+        syncUI();
+    }
+
+    function syncUI() {
+        $('#main-frame').fadeOut(100, function() {
+            $(this).attr('src', imgs[curr]).fadeIn(100);
+        });
+        $('.thumbs img').removeClass('active');
+        $('.thumbs img').eq(curr).addClass('active');
+    }
+
+    const bNames = ["Amina", "Kipkorir", "Mwangi", "Wanjiku", "Otieno"];
+    const bLocs = ["Westlands", "Mombasa Road", "Kisumu", "Thika Road"];
+
+    function triggerToast() {
+        const n = bNames[Math.floor(Math.random() * bNames.length)];
+        const l = bLocs[Math.floor(Math.random() * bLocs.length)];
+        $('#msg').html(`<strong>${n}</strong> in ${l} just bought this.`);
+        $('#soko-toast').css('left', '30px');
+        setTimeout(() => { $('#soko-toast').css('left', '-400px'); }, 6000);
+    }
+
+    $(document).ready(function() {
+        setTimeout(triggerToast, 6000);
+        setInterval(triggerToast, 28000);
+    });
+
+    function addToCart(id) {
+        $.get(`/add-to-cart/${id}/`, function() {
+            alert("Success! Added to your basket.");
+        });
+    }
+</script>
+
+</body>
+</html>

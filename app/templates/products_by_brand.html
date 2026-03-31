@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ brand }} Products - Gadget Soko Kenya</title>
+
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+</head>
+
+<body>
+
+<!-- HEADER (optional reuse) -->
+<header class="header">
+  <div class="navbar">
+
+    <div class="logo">
+      <a href="{% url 'index' %}">
+        <img src="{% static 'images/logo.png' %}" alt="Logo">
+      </a>
+    </div>
+
+    <nav class="menu">
+        <a href="{% url 'index' %}">Home</a>
+        <a href="#contact">Contact</a>
+        <a href="{% url 'products' %}">All Products</a>
+    </nav>
+
+  </div>
+</header>
+
+<!-- BRAND TITLE -->
+<section class="section">
+    <h2>{{ brand }} Products</h2>
+    <p>Browse all items from {{ brand }}</p>
+</section>
+
+<!-- PRODUCTS GRID -->
+<div class="product-grid">
+
+    {% for product in products %}
+    <div class="product-card">
+
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+            <img src="{% static 'images/default.png' %}" alt="No image">
+        {% endif %}
+
+        <h3>{{ product.name }}</h3>
+        <p>KES {{ product.price }}</p>
+
+        {% if product.id %}
+        <a href="{% url 'product_detail' product.id %}">
+            <button>View</button>
+        </a>
+
+        <a href="{% url 'add_to_cart' product.id %}">
+            <button>Add to Cart</button>
+        </a>
+        {% endif %}
+
+    </div>
+    {% empty %}
+        <p>No products found for this brand.</p>
+    {% endfor %}
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+{% extends 'base_site.html' %}
+{% load static %}
+
+{% block title %}Create Account | Gadget Soko Kenya{% endblock %}
+
+{% block content %}
+<style>
+    /* We keep the styles here so they only apply to the signup page */
+    .signup-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh; /* Changed from 100vh to avoid double scroll with nav */
+        background: #f4f6f8;
+    }
+
+    .signup-box {
+        width: 100%;
+        max-width: 400px;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+
+    h2 {
+        text-align: center;
+        color: #ee4d2d;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-top: 12px;
+        margin-bottom: 5px;
+    }
+
+    /* Target Django's auto-generated inputs */
+    input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        box-sizing: border-box; /* Ensures padding doesn't break width */
+    }
+
+    input:focus {
+        border-color: #ee4d2d;
+        outline: none;
+    }
+
+    button {
+        width: 100%;
+        background: #ee4d2d;
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-top: 18px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #d73d1f;
+    }
+
+    .errorlist {
+        color: red;
+        font-size: 13px;
+        list-style: none;
+        padding: 0;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    .login-link a {
+        color: #0b3a63;
+        font-weight: bold;
+        text-decoration: none;
+    }
+</style>
+
+<div class="signup-wrapper">
+    <div class="signup-box">
+        <h2>Create Account</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <label>Email</label>
+            {{ form.email }}
+            {{ form.email.errors }}
+
+            <label>Password</label>
+            {{ form.password1 }}
+            {{ form.password1.errors }}
+
+            <label>Confirm Password</label>
+            {{ form.password2 }}
+            {{ form.password2.errors }}
+
+            {% if form.non_field_errors %}
+                <div class="errorlist">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? 
+            <a href="{% url 'userlog' %}">Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

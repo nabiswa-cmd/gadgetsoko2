@@ -1,0 +1,782 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gadget Soko Kenya{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{% static 'images/logo-32x32.png' %}">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary:       #ee4d2d;
+            --primary-hover: #d73d1f;
+            --navy:          #0b3a63;
+            --success:       #00a650;
+            --bg-light:      #f4f6f8;
+            --white:         #ffffff;
+            --text-main:     #1e293b;
+            --text-muted:    #64748b;
+            --border:        #e2e8f0;
+            --shadow-sm:     0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md:     0 10px 25px rgba(0,0,0,0.1);
+            --radius-sm:     8px;
+            --radius-md:     14px;
+            --transition:    all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a { text-decoration: none; color: inherit; transition: var(--transition); }
+        button { cursor: pointer; transition: var(--transition); }
+
+        /* ============================================================
+           TOPBAR — hidden on mobile via Bootstrap d-none d-md-flex
+        ============================================================ */
+        .gs-topbar {
+            background: var(--navy);
+            color: rgba(255,255,255,0.8);
+            font-size: 12.5px;
+        }
+        .gs-topbar a { color: rgba(255,255,255,0.75); }
+        .gs-topbar a:hover { color: var(--white); }
+
+        /* ============================================================
+           NAVBAR
+        ============================================================ */
+        .gs-navbar {
+            background: var(--primary) !important;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(238,77,45,0.3);
+        }
+
+        .gs-logo img { height: 42px; display: block; }
+
+        /* Nav links */
+        .gs-nav-link {
+            position: relative;
+            color: rgba(255,255,255,0.92) !important;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 7px 11px !important;
+            border-radius: var(--radius-sm);
+            white-space: nowrap;
+        }
+
+        .gs-nav-link::after {
+            content: "";
+            position: absolute;
+            left: 0; bottom: 0;
+            width: 0; height: 2px;
+            background: linear-gradient(90deg, var(--white), gold, var(--white));
+            transition: width 0.35s ease;
+        }
+
+        .gs-nav-link:hover::after { width: 100%; }
+
+        /* Mobile collapsible menu styling */
+        .navbar-collapse .gs-nav-link {
+            padding: 9px 14px !important;
+        }
+
+        /* Search bar */
+        .gs-search {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50px;
+            overflow: hidden;
+            position: relative;
+            border: 1.5px solid rgba(255,255,255,0.45);
+            backdrop-filter: blur(4px);
+            transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            min-width: 0;
+        }
+
+        .gs-search:focus-within {
+            background: var(--white);
+            border-color: var(--white);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+        }
+
+        .gs-search input {
+            flex: 1;
+            padding: 8px 6px 8px 14px;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            font-family: inherit;
+            background: transparent;
+            color: var(--white);
+            min-width: 0;
+            width: 100%;
+        }
+
+        .gs-search input::placeholder { color: rgba(255,255,255,0.75); }
+        .gs-search:focus-within input { color: var(--text-main); }
+        .gs-search:focus-within input::placeholder { color: var(--text-muted); }
+
+        .gs-search-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.9);
+            padding: 0 13px;
+            font-size: 15px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            border-left: 1px solid rgba(255,255,255,0.25);
+            flex-shrink: 0;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .gs-search-btn:hover { background: rgba(255,255,255,0.15); }
+        .gs-search:focus-within .gs-search-btn { color: var(--primary); border-left-color: var(--border); }
+        .gs-search:focus-within .gs-search-btn:hover { background: var(--bg-light); }
+
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: var(--white);
+            z-index: 200;
+            box-shadow: var(--shadow-md);
+            border-radius: var(--radius-sm);
+            display: none;
+            overflow: hidden;
+        }
+
+        /* Cart icon */
+        .gs-cart-icon {
+            position: relative;
+            color: var(--white);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px 6px;
+            flex-shrink: 0;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -4px; right: -8px;
+            background: var(--white);
+            color: var(--primary);
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mobile: search inside collapse */
+        .mobile-search-wrap {
+            padding: 6px 0 4px;
+        }
+
+        /* ============================================================
+           MAIN
+        ============================================================ */
+        .gs-main {
+            flex: 1;
+            padding: 25px 8%;
+        }
+
+        /* Banner */
+        .banner, .slider {
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .banner img, .slider img {
+            width: 100%;
+            height: 320px;
+            object-fit: contain;
+            display: block;
+            background: #000;
+        }
+
+        /* ============================================================
+           PRODUCT GRID
+        ============================================================ */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card, .product {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .product-card:hover, .product:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .img-container {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .img-container img {
+            max-width: 100%; max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+            display: block;
+        }
+
+        .product-card:hover .img-container img,
+        .product:hover .img-container img { transform: scale(1.06); }
+
+        .product-card h3, .product h3 {
+            font-size: 14px; font-weight: 600;
+            padding: 10px 14px 4px;
+            line-height: 1.35; min-height: 46px;
+            color: var(--text-main);
+        }
+
+        .price { padding: 4px 14px 10px; }
+
+        .old-price {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            font-size: 12px; margin-right: 5px;
+        }
+
+        .new-price { color: var(--primary); font-weight: 700; font-size: 17px; }
+
+        .product-actions {
+            display: flex; gap: 8px;
+            padding: 0 12px 14px;
+            margin-top: auto;
+        }
+
+        .btn-view, .btn-add {
+            flex: 1; padding: 9px 6px;
+            font-size: 12px; font-weight: 700;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            display: flex; align-items: center;
+            justify-content: center; gap: 5px;
+        }
+
+        .btn-view {
+            background: var(--bg-light);
+            color: var(--navy);
+            border: 1px solid var(--border);
+        }
+
+        .btn-view:hover { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+        .btn-add { background: var(--primary); color: var(--white); border: none; }
+        .btn-add:hover { background: var(--primary-hover); }
+
+        /* ============================================================
+           CART SIDEBAR
+        ============================================================ */
+        .cart-sidebar {
+            position: fixed; top: 0; right: -400px;
+            width: 350px; height: 100%;
+            background: var(--white);
+            box-shadow: -5px 0 20px rgba(0,0,0,0.15);
+            z-index: 2000; transition: right 0.4s ease;
+            display: flex; flex-direction: column;
+        }
+
+        .cart-sidebar.active { right: 0; }
+
+        .cart-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: none; z-index: 1999;
+        }
+
+        .cart-overlay.active { display: block; }
+
+        .cart-header {
+            padding: 18px 20px;
+            background: var(--bg-light);
+            display: flex; justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-header h3 { font-size: 17px; color: var(--navy); font-family: 'Syne', sans-serif; }
+
+        .close-cart {
+            background: none; border: none;
+            font-size: 26px; color: var(--text-muted); cursor: pointer; line-height: 1;
+        }
+
+        .cart-items-container { flex: 1; overflow-y: auto; padding: 14px; }
+
+        .cart-item-row {
+            display: flex; align-items: center; gap: 10px;
+            padding-bottom: 12px; margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-item-row img {
+            width: 52px; height: 52px;
+            object-fit: cover; border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .cart-item-row .item-info { flex: 1; }
+        .cart-item-row .item-info b { font-size: 13px; display: block; }
+        .cart-item-row .item-info small { color: var(--text-muted); font-size: 12px; }
+
+        .cart-footer-panel {
+            padding: 18px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--white);
+        }
+
+        .cart-footer-panel .total-row {
+            display: flex; justify-content: space-between;
+            font-weight: 700; margin-bottom: 14px; font-size: 15px;
+        }
+
+        .cart-footer-panel .total-row span:last-child { color: var(--primary); }
+
+        .checkout-btn {
+            display: block; width: 100%;
+            background: var(--primary); color: var(--white) !important;
+            text-align: center; padding: 13px;
+            border-radius: var(--radius-sm);
+            font-weight: 700; font-size: 15px;
+        }
+
+        .checkout-btn:hover { background: var(--primary-hover); }
+
+        /* ============================================================
+           FOOTER
+        ============================================================ */
+        .gs-footer {
+            background: var(--navy); color: var(--white);
+            padding: 70px 8% 0;
+            margin-top: 50px;
+            border-top: 5px solid var(--primary);
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 50px; padding-bottom: 50px;
+        }
+
+        .footer-column h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem; color: var(--white);
+            margin-bottom: 22px; position: relative;
+            padding-bottom: 12px;
+        }
+
+        .footer-column h3::after {
+            content: ''; position: absolute;
+            left: 0; bottom: 0;
+            width: 40px; height: 3px;
+            background: var(--primary);
+        }
+
+        .footer-column p { color: rgba(255,255,255,0.7); font-size: 14px; line-height: 2; }
+
+        .footer-column a {
+            display: block; width: fit-content;
+            color: rgba(255,255,255,0.7);
+            font-size: 14px; line-height: 2.1;
+            position: relative;
+        }
+
+        .footer-column a::before {
+            content: '→'; position: absolute;
+            left: -12px; opacity: 0;
+            color: var(--primary); transition: var(--transition);
+        }
+
+        .footer-column a:hover { color: var(--white); padding-left: 14px; }
+        .footer-column a:hover::before { left: 0; opacity: 1; }
+
+        .social-icons { display: flex; gap: 12px; margin-top: 6px; }
+
+        .social-icons a {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.1);
+            display: flex; align-items: center;
+            justify-content: center; border-radius: 50%;
+            font-size: 17px; min-width: 40px;
+        }
+
+        .social-icons a::before { display: none; }
+
+        .social-icons a:hover {
+            background: var(--primary); color: var(--white);
+            transform: rotate(360deg);
+            padding-left: 0 !important;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 0; text-align: center;
+            font-size: 13px; color: rgba(255,255,255,0.5);
+        }
+
+        .footer-bottom strong { color: var(--primary); }
+
+        /* ============================================================
+           RESPONSIVE OVERRIDES
+        ============================================================ */
+        @media (max-width: 767.98px) {
+            .gs-logo img { height: 36px; }
+
+            .gs-main { padding: 15px 3%; }
+
+            .banner, .slider { border-radius: 0; }
+            .banner img, .slider img { height: 180px; }
+
+            .product-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .img-container { height: 145px; padding: 10px; }
+            .product-card h3, .product h3 { font-size: 12.5px; min-height: 36px; }
+
+            .cart-sidebar { width: 100%; right: -100%; }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+                gap: 28px; text-align: center;
+            }
+
+            .footer-column h3::after { left: 50%; transform: translateX(-50%); }
+            .footer-column a { margin: 0 auto; }
+            .social-icons { justify-content: center; }
+            .gs-footer { padding-top: 36px; }
+        }
+
+        /* Ensure Bootstrap navbar-collapse dark bg doesn't override */
+        .navbar-collapse.collapse.show,
+        .navbar-collapse.collapsing {
+            background: var(--primary);
+            padding: 0 10px 10px;
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+        }
+
+        /* Remove Bootstrap's default toggler border/outline */
+        .navbar-toggler { display: none !important; }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════════
+     TOPBAR — hidden on screens < md (768px)
+═══════════════════════════════════════════ -->
+<div class="gs-topbar d-none d-md-flex justify-content-between align-items-center px-0 py-2" style="padding-left:8%;padding-right:8%;">
+    <div>English | Swahili</div>
+    <div class="d-flex gap-3 align-items-center">
+        <a href="{% url 'login' %}">Admin Login</a>
+        <span>|</span>
+        <a href="#">Contact</a>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     NAVBAR — Bootstrap 5, no hamburger
+═══════════════════════════════════════════ -->
+<nav class="gs-navbar navbar navbar-expand-md">
+    <div class="container-fluid px-3 px-md-0" style="padding-left:8% !important; padding-right:8% !important;">
+
+        <!-- LOGO — always visible, left -->
+        <a class="gs-logo navbar-brand p-0 me-3" href="{% url 'index' %}">
+            <img src="{% static 'images/logo.png' %}" alt="Gadget Soko Logo">
+        </a>
+
+        <!-- MOBILE: cart icon shown next to logo (before collapse) -->
+        <div class="d-flex align-items-center gap-2 d-md-none ms-auto">
+            <!-- Mobile search toggle button -->
+            <button class="gs-search-toggle-btn border-0 bg-transparent text-white fs-5 p-1"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#mobileSearchCollapse"
+                    aria-expanded="false">
+                <i class="bi bi-search"></i>
+            </button>
+            <!-- Cart -->
+            <div class="gs-cart-icon" onclick="toggleCart()">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="cart-count">{% if request.user.is_authenticated %}{{ cart_count }}{% else %}0{% endif %}</span>
+            </div>
+        </div>
+
+        <!-- DESKTOP: nav links + search + cart — collapse on < md -->
+        <div class="collapse navbar-collapse" id="gsNavCollapse">
+
+            <!-- Nav links — centred -->
+            <ul class="navbar-nav mx-auto gap-1 flex-wrap">
+                <li class="nav-item">
+                    <a class="nav-link gs-nav-link" href="{% url 'index' %}#categories">Categories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link gs-nav-link" href="{% url 'products' %}">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link gs-nav-link" href="{% url 'index' %}#services">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link gs-nav-link" href="{% url 'index' %}#contacts">Contact</a>
+                </li>
+                <li class="nav-item">
+                    {% if not request.user.is_authenticated %}
+                        <a class="nav-link gs-nav-link" href="{% url 'userlog' %}">Login</a>
+                    {% else %}
+                        <a class="nav-link gs-nav-link" href="{% url 'logout' %}">Logout</a>
+                    {% endif %}
+                </li>
+            </ul>
+
+            <!-- Search — desktop only inside collapse -->
+            <form action="{% url 'search' %}" method="GET"
+                  class="gs-search search-form d-none d-md-flex me-3"
+                  style="width:340px; position:relative;">
+                <input type="text" name="q" id="searchInput"
+                       placeholder="Search gadgets..." autocomplete="off">
+                <button type="submit" class="gs-search-btn">
+                    <i class="bi bi-search"></i>
+                </button>
+                <div id="search-results" class="search-dropdown"></div>
+            </form>
+
+            <!-- Cart — desktop only -->
+            <div class="gs-cart-icon d-none d-md-flex" onclick="toggleCart()">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="cart-count">{% if request.user.is_authenticated %}{{ cart_count }}{% else %}0{% endif %}</span>
+            </div>
+
+        </div><!-- /navbar-collapse -->
+    </div><!-- /container-fluid -->
+
+    <!-- MOBILE: collapsible search bar (below main nav row) -->
+    <div class="collapse d-md-none w-100" id="mobileSearchCollapse">
+        <div class="px-3 pb-2 pt-1" style="background:var(--primary);">
+            <form action="{% url 'search' %}" method="GET"
+                  class="gs-search search-form w-100" style="position:relative;">
+                <input type="text" name="q"
+                       placeholder="Search gadgets or brands..." autocomplete="off">
+                <button type="submit" class="gs-search-btn">
+                    <i class="bi bi-search"></i>
+                </button>
+                <div class="search-dropdown"></div>
+            </form>
+        </div>
+    </div>
+
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════ -->
+<main class="gs-main">
+    {% block content %}
+    {% endblock %}
+</main>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer class="gs-footer">
+    <div class="footer-container">
+
+        <div class="footer-column">
+            <h3>Socials</h3>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+            </div>
+            <h3 style="margin-top:20px;">Contacts</h3>
+            <p><i class="bi bi-telephone-fill" style="color:var(--primary);margin-right:6px;"></i> 0759829235</p>
+            <p><i class="bi bi-envelope-fill" style="color:var(--primary);margin-right:6px;"></i> support@gadgetsoko.co.ke</p>
+        </div>
+
+        <div class="footer-column">
+            <h3>Quick Links</h3>
+            <a href="{% url 'index' %}">Home</a>
+            <a href="{% url 'products' %}">Products</a>
+            <a href="{% url 'index' %}#categories">Categories</a>
+            <a href="{% url 'index' %}#services">Services</a>
+        </div>
+
+        <div class="footer-column">
+            <h3>Customer Care</h3>
+            <a href="#">Order Tracking</a>
+            <a href="#">Returns Policy</a>
+            <a href="#">Delivery Info</a>
+            <a href="#">FAQs</a>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        Developed and Designed by <strong>Sammy Tings</strong> and <strong>Nabiswa James</strong> at TingsTech Technologies
+        &nbsp;|&nbsp; Contact 0727698319
+    </div>
+</footer>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+<div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+        <h3>Your Cart</h3>
+        <button class="close-cart" onclick="toggleCart()">&times;</button>
+    </div>
+
+    <div class="cart-items-container" id="cartSlides">
+        <p>Your cart is empty</p>
+    </div>
+
+    <div class="cart-footer-panel">
+        <div class="total-row">
+            <span>Total:</span>
+            <span id="sidebarTotal">KES {% if cart_total %}{{ cart_total }}{% else %}0{% endif %}</span>
+        </div>
+        <a href="{% url 'check' %}" class="checkout-btn">Checkout</a>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    /* ── CART ── */
+    function toggleCart() {
+        {% if not request.user.is_authenticated %}
+            window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
+            return;
+        {% endif %}
+
+        $('#cartSidebar').toggleClass('active');
+        $('#cartOverlay').toggleClass('active');
+
+        if ($('#cartSidebar').hasClass('active')) updateCartSidebar();
+    }
+
+    function updateCartSidebar() {
+        $.get("{% url 'view_cart' %}?ajax=1", function(data) {
+            let h = '';
+            if (!data.items || data.items.length === 0) {
+                h = '<p>Your cart is empty</p>';
+            } else {
+                data.items.forEach(i => {
+                    h += `
+                        <div class="cart-item-row">
+                            <img src="${i.image}" alt="">
+                            <div class="item-info">
+                                <b>${i.name}</b>
+                                <small>KES ${i.price} × ${i.quantity}</small>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            $('#cartSlides').html(h);
+            $('#sidebarTotal').text('KES ' + (data.total || 0));
+        });
+    }
+
+    function addToCart(pId) {
+        $.get(`/add-to-cart/${pId}/`, function(res) {
+            if (res.error === 'not_logged_in') {
+                window.location.href = "{% url 'userlog' %}";
+                return;
+            }
+            $('.cart-count').text(res.cart_count);
+            updateCartSidebar();
+            if (!$('#cartSidebar').hasClass('active')) {
+                $('#cartSidebar').addClass('active');
+                $('#cartOverlay').addClass('active');
+            }
+        });
+    }
+
+    /* ── LIVE SEARCH ── */
+    $(document).ready(function () {
+        function doSearch(val, $dropdown) {
+            if (val.length < 2) { $dropdown.hide(); return; }
+            $.ajax({
+                url: "{% url 'live_search' %}",
+                data: { 'q': val },
+                success: function (d) { $dropdown.html(d.html).show(); }
+            });
+        }
+
+        /* Desktop search */
+        $('#searchInput').on('keyup', function () {
+            doSearch($(this).val(), $('#search-results'));
+        });
+
+        /* Close dropdown on outside click */
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.gs-search').length) {
+                $('.search-dropdown').hide();
+            }
+        });
+    });
+</script>
+
+{% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

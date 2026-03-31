@@ -1,0 +1,168 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin | Gadget Soko{% endblock %}</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #ff5a2c;
+            --sidebar-bg: #111;
+            --body-bg: #f4f6f9;
+            --header-height: 60px;
+            --sidebar-width: 240px;
+        }
+        body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--body-bg); display:flex; }
+
+        /* NAVBAR */
+        .navbar {
+            background:white;
+            height: var(--header-height);
+            padding:0 30px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            position:fixed;
+            top:0;
+            right:0;
+            left: var(--sidebar-width);
+            z-index:1000;
+            box-shadow:0 2px 4px rgba(0,0,0,0.05);
+            transition:left 0.3s ease;
+        }
+        .navbar h2 { margin:0; font-size:1.2rem; color:var(--primary-color); }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            position: fixed;
+            top:0;
+            left:0;
+            color:white;
+            z-index:1001;
+            overflow-y:auto;
+            transition:width 0.3s ease;
+        }
+        .sidebar h3 { text-align:center; padding:25px 0; background: rgba(255,255,255,0.05); margin:0; font-size:1.1rem; }
+        .sidebar a { display:flex; align-items:center; padding:15px 25px; color:#b8c7ce; text-decoration:none; transition:0.3s; font-size:0.9rem; }
+        .sidebar a i { width:25px; margin-right:10px; }
+        .sidebar a span { transition:opacity 0.2s; }
+        .sidebar a:hover, .sidebar a.active { background:var(--primary-color); color:white; }
+
+        /* COLLAPSED SIDEBAR */
+        .sidebar.collapsed { width:70px; }
+        .sidebar.collapsed span { display:none; }
+        .sidebar.collapsed ~ .navbar { left:70px; }
+        .sidebar.collapsed ~ .main { margin-left:70px; }
+
+        /* MAIN */
+        .main { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding:30px; width:100%; transition:margin-left 0.3s ease; }
+
+        /* MOBILE */
+        @media (max-width:768px){
+            .sidebar { width:70px; }
+            .sidebar span { display:none; }
+            .navbar { left:70px; }
+            .main { margin-left:70px; }
+            .sidebar.active { width:240px; }
+            .sidebar.active span { display:inline; }
+            .sidebar.active ~ .navbar { left:240px; }
+            .sidebar.active ~ .main { margin-left:240px; }
+        }
+
+        .table-container { background:white; border-radius:12px; overflow:hidden; margin-top:20px; }
+        table { width:100%; border-collapse:collapse; }
+        table th, table td { padding:15px; border-bottom:1px solid #eee; }
+        .status-badge { padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:bold; }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+{% with request.resolver_match.url_name as url_name %}
+
+<div class="sidebar">
+    <h3>GADGET SOKO</h3>
+
+    <a href="{% url 'dashboard' %}" class="{% if url_name == 'dashboard' %}active{% endif %}">
+        <i class="fa fa-chart-line"></i><span>Overview</span>
+    </a>
+
+    <a href="{% url 'activity' %}" class="{% if url_name == 'activity' %}active{% endif %}">
+        <i class="fa fa-eye"></i><span>Customer Activity</span>
+    </a>
+
+    <a href="{% url 'add_product' %}" class="{% if url_name == 'add_product' %}active{% endif %}">
+        <i class="fa fa-add"></i><span>Add products</span>
+    </a>
+
+    <a href="{% url 'manage_orders' %}" class="{% if url_name == 'manage_orders' %}active{% endif %}">
+        <i class="fa fa-shopping-cart"></i><span>Orders</span>
+    </a>
+
+    <a href="{% url 'manage_products' %}" class="{% if url_name == 'manage_products' %}active{% endif %}">
+        <i class="fa fa-box"></i><span>Products</span>
+    </a>
+
+    <a href="{% url 'customers' %}" class="{% if url_name == 'customers' %}active{% endif %}">
+        <i class="fa fa-users"></i><span>Customers</span>
+    </a>
+
+    <a href="{% url 'analytics' %}" class="{% if url_name == 'analytics' %}active{% endif %}">
+        <i class="fa fa-chart-bar"></i><span>Analytics</span>
+    </a>
+
+    <a href="{% url 'settings' %}" class="{% if url_name == 'settings' %}active{% endif %}">
+        <i class="fa fa-cog"></i><span>Settings</span>
+    </a>
+
+    <hr style="border-top:1px solid #333; margin:20px 0;">
+
+    <a href="{% url 'logout' %}">
+        <i class="fa fa-sign-out"></i><span>Logout</span>
+    </a>
+</div>
+
+{% endwith %}
+
+<div class="navbar">
+    <div style="display:flex; align-items:center; gap:15px;">
+        <i class="fa fa-bars" id="menuToggle" style="cursor:pointer;"></i>
+        <h2>{% block header %}Dashboard{% endblock %}</h2>
+    </div>
+
+    <div>
+        <i class="fa fa-user-circle"></i> {{ request.user.username|default:"Admin User" }}
+    </div>
+</div>
+
+<div class="main">
+    {% block content %}{% endblock %}
+</div>
+
+<script>
+const toggleBtn = document.getElementById("menuToggle");
+const sidebar = document.querySelector(".sidebar");
+
+toggleBtn.addEventListener("click", () => {
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle("active");
+    } else {
+        sidebar.classList.toggle("collapsed");
+    }
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

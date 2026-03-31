@@ -1,0 +1,155 @@
+
+/* ================= GLOBAL ================= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    color: #333;
+}
+
+/* ================= HEADER ================= */
+#header, .header {
+    background: #0f4c81;
+    color: white;
+}
+
+#branding, .topbar {
+    background: #0b3a63;
+    color: white;
+    padding: 8px 30px;
+}
+
+#header h1, #header h1 a {
+    color: white !important;
+    text-decoration: none;
+}
+
+/* Navbar style */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 30px;
+}
+
+/* ================= LINKS ================= */
+a {
+    color: #0f4c81;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #08345a;
+}
+
+/* ================= BUTTONS ================= */
+button,
+input[type=submit] {
+    background: #0f4c81;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button:hover,
+input[type=submit]:hover {
+    background: #08345a;
+}
+
+/* ================= TABLES ================= */
+.module {
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #0f4c81;
+    color: white;
+    padding: 8px;
+}
+
+td {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background: #f1f8ff;
+}
+
+/* ================= FORMS ================= */
+input[type=text],
+input[type=password],
+select,
+textarea {
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 4px;
+    width: 100%;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #0f4c81;
+    outline: none;
+}
+
+/* ================= SEARCH BOX ================= */
+.search-box input {
+    padding: 8px;
+    width: 250px;
+}
+
+.search-box button {
+    padding: 8px;
+}
+
+/* ================= SECTIONS ================= */
+.section {
+    padding: 60px 10%;
+    margin-top: 40px;
+    background: white;
+}
+
+/* ================= GRID ================= */
+.product-grid,
+.services {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+/* ================= CARD ================= */
+.product,
+.service {
+    background: #f1f1f1;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+/* ================= FOOTER ================= */
+#footer {
+    background: #0f4c81;
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+
+/* ================= MESSAGES ================= */
+.messages {
+    border-left: 4px solid #0f4c81;
+    background: #eaf0fb;
+    padding: 10px;
+    margin: 10px 0;
+}

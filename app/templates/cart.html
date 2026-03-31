@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Cart | Gadget Soko Kenya{% endblock %}
+
+{% block extra_head %}
+<style>
+    .cart-page {
+        max-width: 960px;
+        margin: 36px auto;
+        padding: 0 4%;
+    }
+
+    /* Page heading */
+    .cart-heading {
+        font-family: 'Syne', sans-serif;
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--brand-navy);
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .cart-heading i { color: var(--brand-orange); }
+    .cart-count-pill {
+        font-size: 13px;
+        font-weight: 600;
+        background: var(--brand-light);
+        color: var(--text-muted);
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+
+    /* Layout: items left, summary right */
+    .cart-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* Card wrapper */
+    .cart-card {
+        background: var(--white);
+        border-radius: 14px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .cart-card-header {
+        padding: 16px 22px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    /* Single cart row */
+    .cart-row {
+        display: grid;
+        grid-template-columns: 80px 1fr auto auto;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 22px;
+        border-bottom: 1px solid #f7f7f7;
+        transition: background var(--transition);
+    }
+    .cart-row:last-child { border-bottom: none; }
+    .cart-row:hover { background: #fafafa; }
+
+    .cart-row img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #f0f0f0;
+    }
+
+    .cart-product-name {
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--text-main);
+        margin-bottom: 4px;
+        line-height: 1.3;
+    }
+    .cart-product-sub {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .cart-price {
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--brand-navy);
+        white-space: nowrap;
+        text-align: right;
+    }
+    .cart-price small {
+        display: block;
+        font-weight: 400;
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    .remove-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #fff0ee;
+        color: var(--brand-orange);
+        text-decoration: none;
+        font-size: 14px;
+        transition: all var(--transition);
+        flex-shrink: 0;
+    }
+    .remove-btn:hover { background: var(--brand-orange); color: var(--white); }
+
+    /* Empty state */
+    .cart-empty {
+        padding: 60px 20px;
+        text-align: center;
+    }
+    .cart-empty i {
+        font-size: 56px;
+        color: #dde;
+        margin-bottom: 18px;
+    }
+    .cart-empty h3 {
+        font-family: 'Syne', sans-serif;
+        font-size: 20px;
+        color: var(--brand-navy);
+        margin-bottom: 8px;
+    }
+    .cart-empty p { color: var(--text-muted); font-size: 14px; margin-bottom: 22px; }
+    .cart-empty a {
+        display: inline-block;
+        background: var(--brand-green);
+        color: var(--white);
+        padding: 12px 28px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 14px;
+        transition: background var(--transition);
+    }
+    .cart-empty a:hover { background: #008c43; }
+
+    /* Summary card */
+    .summary-card {
+        background: var(--white);
+        border-radius: 14px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+        padding: 24px;
+        position: sticky;
+        top: 90px;
+    }
+    .summary-card h3 {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--brand-navy);
+        margin-bottom: 20px;
+    }
+    .summary-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        font-size: 14px;
+        color: var(--text-muted);
+        border-bottom: 1px solid #f5f5f5;
+    }
+    .summary-line:last-of-type { border-bottom: none; }
+    .summary-line span:last-child { color: var(--text-main); font-weight: 600; }
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0 0;
+        margin-top: 6px;
+        border-top: 2px solid var(--brand-light);
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--brand-navy);
+    }
+    .summary-total span:last-child { color: var(--brand-orange); }
+
+    .checkout-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        margin-top: 20px;
+        background: var(--brand-orange);
+        color: var(--white);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 15px;
+        padding: 15px;
+        border-radius: 10px;
+        transition: background var(--transition), transform var(--transition);
+    }
+    .checkout-link:hover { background: #d63d1f; transform: translateY(-1px); }
+
+    .continue-link {
+        display: block;
+        text-align: center;
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color var(--transition);
+    }
+    .continue-link:hover { color: var(--brand-green); }
+
+    .trust-badges {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 20px;
+        padding-top: 18px;
+        border-top: 1px solid #f0f0f0;
+    }
+    .trust-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        color: var(--text-muted);
+        text-align: center;
+    }
+    .trust-badge i { font-size: 18px; color: var(--brand-green); }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 780px) {
+        .cart-layout { grid-template-columns: 1fr; }
+        .summary-card { position: static; }
+    }
+    @media (max-width: 520px) {
+        .cart-row {
+            grid-template-columns: 64px 1fr;
+            grid-template-rows: auto auto;
+        }
+        .cart-row img { width: 64px; height: 64px; }
+        .cart-price { grid-column: 2; text-align: left; }
+        .remove-btn { grid-column: 1; grid-row: 2; justify-self: center; }
+        .cart-heading { font-size: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+
+    <h1 class="cart-heading">
+        <i class="fas fa-shopping-bag"></i>
+        Your Cart
+        {% if cart_items %}
+            <span class="cart-count-pill">{{ cart_items|length }} item{{ cart_items|length|pluralize }}</span>
+        {% endif %}
+    </h1>
+
+    {% if cart_items %}
+    <div class="cart-layout">
+
+        <!-- Items Column -->
+        <div>
+            <div class="cart-card">
+                <div class="cart-card-header">Items in your basket</div>
+                {% for item in cart_items %}
+                <div class="cart-row">
+                    {% if item.product.images.first %}
+                        <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}">
+                    {% else %}
+                        <img src="{% static 'images/default.png' %}" alt="No image">
+                    {% endif %}
+
+                    <div>
+                        <div class="cart-product-name">{{ item.product.name }}</div>
+                        <div class="cart-product-sub">Qty: {{ item.quantity }} &nbsp;&bull;&nbsp; KES {{ item.price }} each</div>
+                    </div>
+
+                    <div class="cart-price">
+                        KES {{ item.get_total }}
+                        <small>{{ item.quantity }} &times; {{ item.price }}</small>
+                    </div>
+
+                    <a href="{% url 'remove_from_cart' item.id %}" class="remove-btn" title="Remove item">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Summary Column -->
+        <div class="summary-card">
+            <h3>Order Summary</h3>
+
+            {% for item in cart_items %}
+            <div class="summary-line">
+                <span>{{ item.product.name|truncatewords:3 }} &times;{{ item.quantity }}</span>
+                <span>KES {{ item.get_total }}</span>
+            </div>
+            {% endfor %}
+
+            <div class="summary-line">
+                <span>Shipping</span>
+                <span style="color:var(--brand-green); font-weight:700;">FREE (Nairobi)</span>
+            </div>
+
+            <div class="summary-total">
+                <span>Total</span>
+                <span>KES {{ total }}</span>
+            </div>
+
+            <a href="{% url 'check' %}" class="checkout-link">
+                <i class="fas fa-lock"></i> Secure Checkout
+            </a>
+            <a href="{% url 'products' %}" class="continue-link">← Continue Shopping</a>
+
+            <div class="trust-badges">
+                <div class="trust-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-truck"></i>
+                    <span>Fast Delivery</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-undo"></i>
+                    <span>Easy Returns</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="cart-card">
+        <div class="cart-empty">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Your cart is empty</h3>
+            <p>Looks like you haven't added anything yet. Start shopping!</p>
+            <a href="{% url 'products' %}">Browse Products</a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

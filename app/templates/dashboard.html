@@ -1,0 +1,198 @@
+{% extends "baseadmin.html" %}
+
+{% block title %}Dashboard | Gadget Soko{% endblock %}
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+/* Dashboard Cards */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h3 {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.card p {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #ff5a2c;
+}
+
+/* Tables */
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 2rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+thead {
+    background: #111;
+    color: #fff;
+}
+
+thead th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+tbody td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+tbody tr:hover {
+    background: #f9f9f9;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #ff5a2c;
+    color: #fff;
+}
+
+/* Section Headings */
+h2 {
+    margin: 2rem 0 1rem;
+    font-size: 1.3rem;
+    color: #222;
+    border-left: 4px solid #ff5a2c;
+    padding-left: 0.5rem;
+}
+</style>
+<div class="cards">
+    <div class="card">
+        <h3>Total Products</h3>
+        <p>{{ products_count|default:"0" }}</p>
+    </div>
+    <div class="card">
+        <h3>Total Orders</h3>
+        <p>{{ orders_count|default:"0" }}</p>
+    </div>
+    <div class="card">
+        <h3>Active Users</h3>
+        <p>{{ users_count|default:"0" }}</p>
+    </div>
+    <div class="card">
+        <h3>Total Revenue</h3>
+        <p>KES {{ revenue|default:"0" }}</p>
+    </div>
+</div>
+
+<h2>Recent Orders</h2>
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Name</th><th>Phone</th><th>Total</th><th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in recent_orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.name|default:"N/A" }}</td>
+                <td>{{ order.phone|default:"N/A" }}</td>
+                <td>KES {{ order.total|default:"0" }}</td>
+                <td><span class="status-badge">{{ order.status|default:"Pending" }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;">No recent orders</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2>Customer Activity Logs</h2>
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>User</th><th>Action</th><th>Product</th><th>Time</th><th>Last Order Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in customer_activity %}
+            <tr>
+                <td>{{ log.user.username }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.product.name|default:"-" }}</td>
+                <td>{{ log.timestamp|timesince }} ago</td>
+                <td>{{ log.last_order_status }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;">No activity logs</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2>Revenue Chart</h2>
+<canvas id="revenueChart"></canvas>
+<h2>Top Products</h2>
+<canvas id="topProductsChart"></canvas>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+        labels: {{ revenue_labels|safe|default:"[]" }},
+        datasets: [{
+            label:'Revenue (KES)',
+            data: {{ revenue_values|safe|default:"[]" }},
+            borderColor:'#ff5a2c',
+            backgroundColor:'rgba(255,90,44,0.1)',
+            fill:true
+        }]
+    }
+});
+
+new Chart(document.getElementById('topProductsChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ top_products_labels|safe|default:"[]" }},
+        datasets: [{
+            label:'Units Sold',
+            data: {{ top_products_values|safe|default:"[]" }},
+            backgroundColor:'#111'
+        }]
+    },
+    options: { indexAxis:'y' }
+});
+</script>
+{% endblock %}
