@@ -226,10 +226,9 @@
             <button onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
-
-    <section class="banner">
-        <img id="bannerImage" src="{% static 'images/photo.png' %}" alt="Banner" style="width:100%; height:auto; display:block;">
-    </section>
+<section class="banner">
+    <img id="bannerImage" src="{% static 'images/photo1.png' %}" alt="Banner" style="width:100%; height:auto; display:block; transition: opacity 0.4s ease-in-out;">
+</section>
 
     <section id="categories" class="section">
         <h2>SHOP BY BRAND</h2>
@@ -391,18 +390,26 @@
         }
 
         /* --- DOCUMENT READY FUNCTIONS --- */
-        $(document).ready(function() {
-            
-            /* --- BANNER ROTATION --- */
-            // IMPORTANT: Ensure these files are in static/images/ and have correct extensions
-            const photos = [
-                "{% static 'images/photo1.png' %}", 
-                "{% static 'images/photo2.png' %}",
-                "{% static 'images/photo3.png' %}"
+      /* --- FIXED BANNER ROTATION --- */
+const photos = [
+    "{% static 'images/photo1.png' %}", 
+    "{% static 'images/photo2.png' %}",
+    "{% static 'images/photo3.png' %}"
+];
 
-            ];
-            
-            let idx = 0;
+let idx = 0;
+if(photos.length > 1) {
+    setInterval(() => {
+        // Increment index
+        idx = (idx + 1) % photos.length;
+        
+        // Smooth transition: Fade out, change source, fade back in
+        $('#bannerImage').animate({ opacity: 0 }, 400, function() {
+            $(this).attr('src', photos[idx]);
+            $(this).animate({ opacity: 1 }, 400);
+        });
+    }, 4000); // Rotates every 4 seconds
+}
             if(photos.length > 1) {
                 setInterval(() => {
                     idx = (idx + 1) % photos.length;
