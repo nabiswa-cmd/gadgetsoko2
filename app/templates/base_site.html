@@ -747,6 +747,32 @@
         </div>
     </div>
 
+    <!-- CART OVERLAY -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+        <h3>Your Cart</h3>
+        <button class="close-cart" onclick="toggleCart()">&times;</button>
+    </div>
+
+    <div class="cart-items-container" id="cartSlides">
+        <p class="text-muted">Loading cart...</p>
+    </div>
+
+    <div class="cart-footer-panel">
+        <div class="total-row">
+            <span>Total:</span>
+            <span id="sidebarTotal">KES 0</span>
+        </div>
+
+        <a href="{% url 'check' %}" class="checkout-btn">
+            Proceed to Checkout
+        </a>
+    </div>
+</div>
+
     <main class="gs-main">
         {% block content %}{% endblock %}
     </main>
