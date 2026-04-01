@@ -103,14 +103,28 @@ SITE_ID = 1
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+#DATABASES = {
+   # 'default': {
+     #     'ENGINE': 'django.db.backends.sqlite3',
+  #      'NAME': BASE_DIR / 'db.sqlite3',
+  #  }
+import dj_database_url
+
+import os
+
+import os
+from dotenv import load_dotenv
+import dj_database_url
+
+load_dotenv() # This loads the variables from .env
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -173,6 +187,11 @@ MPESA_PASSKEY =os.getenv("MPESA_PASSKEY")
 MPESA_ENV = os.getenv("MPESA_ENV")  # 'sandbox' or 'production'
 MPESA_CALLBACK_URL = os.getenv("MPESA_CALLBACK_URL")  # We'll generate this later
 SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'https://your-app-name.onrender.com')
+
+
+#Google auth
+CLIENT_ID=os.getenv("CLIENT_ID")
+CLIENT_SECRET=os.getenv("SECRET_SECRET")
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

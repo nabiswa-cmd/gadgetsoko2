@@ -5,42 +5,55 @@
 
 {% block content %}
 <style>
-    /* Settings Page */
-h2 {
-    margin: 1.5rem 0 1rem;
-    font-size: 1.3rem;
-    color: #222;
-    border-left: 4px solid #ff5a2c;
-    padding-left: 0.5rem;
-}
+    /* Settings Page Titles */
+    h2 {
+        margin: 1.5rem 0 1rem;
+        font-size: 1.3rem;
+        color: #222;
+        border-left: 4px solid #ee4d2d; /* Matching your Gadget Soko primary theme */
+        padding-left: 0.5rem;
+    }
 
-/* Buttons */
-button {
-    background: #ff5a2c;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0.75rem 1.5rem;
-    margin-right: 1rem;
-    margin-bottom: 1rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease;
-}
+    /* Common Button Styling for both <button> and <a> tags */
+    .admin-btn, .admin-link-btn {
+        display: inline-block;
+        background: #ee4d2d;
+        color: #fff !important;
+        border: none;
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        margin-right: 1rem;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none; /* Removes underline from <a> */
+        transition: background 0.2s ease, transform 0.2s ease;
+        text-align: center;
+        vertical-align: middle;
+    }
 
-button:hover {
-    background: #e14d22;
-    transform: translateY(-2px);
-}
+    .admin-btn:hover, .admin-link-btn:hover {
+        background: #d73d1f;
+        transform: translateY(-2px);
+        color: #fff;
+    }
 
-button:active {
-    transform: translateY(0);
-    background: #c43f1b;
-}
-
+    .admin-btn:active, .admin-link-btn:active {
+        transform: translateY(0);
+        background: #c43f1b;
+    }
 </style>
-<h2>Admin Settings</h2>
-<button href="{url ""}">Change Password</button>
-<button>Add Admin</button>
+
+<div class="container-fluid">
+    <h2>Admin Account Actions</h2>
+    
+    <a href="{% url 'change_password' %}" class="admin-link-btn">
+        <i class="bi bi-key me-1"></i> Change Password
+    </a>
+
+    <a href="{% url 'add_admin_view' %}" class="admin-link-btn">
+        <i class="bi bi-person-plus me-1"></i>Add Admin</a>
+
+</div>
 {% endblock %}

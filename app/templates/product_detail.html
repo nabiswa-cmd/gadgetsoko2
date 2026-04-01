@@ -13,6 +13,7 @@
             --soko-orange: #ee4d2d;
             --soko-black: #1a1a1a;
             --soko-bg: #ffffff;
+            --soko-green: #25D366;
         }
 
         body { font-family: 'Inter', sans-serif; background-color: var(--soko-bg); color: #333; margin: 0; padding: 0; }
@@ -64,10 +65,14 @@
         .btn-soko {
             padding: 22px; font-size: 16px; font-weight: 800; text-transform: uppercase;
             cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px;
-            border-radius: 2px;
+            border-radius: 2px; text-decoration: none;
         }
         .btn-orange { background: var(--soko-orange); color: white; border: none; }
         .btn-orange:hover { background: #d63d1f; transform: translateY(-2px); }
+        
+        /* WhatsApp Hover */
+        .btn-whatsapp { background: #25D366; color: white; }
+        .btn-whatsapp:hover { background: #20bd5a; transform: translateY(-2px); }
 
         /* REVIEWS SECTION */
         .reviews-box { margin-top: 50px; border-top: 1px solid #eee; padding-top: 30px; }
@@ -75,7 +80,7 @@
         .review-card p { font-size: 14px; font-style: italic; margin: 0 0 10px 0; color: #444; }
         .reviewer-info { font-size: 12px; font-weight: 800; color: var(--soko-black); text-transform: uppercase; }
 
-        /* TOAST (NO GREEN) */
+        /* DYNAMIC TOAST NOTIFICATION */
         #soko-toast {
             position: fixed; bottom: 30px; left: -400px; width: 280px;
             background: #fff; padding: 18px; box-shadow: 0 15px 40px rgba(0,0,0,0.1);
@@ -139,6 +144,12 @@
                 <button class="btn-soko btn-orange" onclick="addToCart({{ product.id }})">
                     <i class="fas fa-shopping-bag"></i> ADD TO CART
                 </button>
+                
+                <a href="https://wa.me/254700000000?text=Hi%20Gadget%20Soko%2C%20I'm%20interested%20in%20the%20{{ product.name|urlencode }}" 
+                   class="btn-soko btn-whatsapp" 
+                   target="_blank">
+                    <i class="fab fa-whatsapp"></i> CHAT ON WHATSAPP
+                </a>
             </div>
         </div>
     </div>
@@ -164,12 +175,12 @@
 </div>
 
 <div id="soko-toast">
-    <div style="font-size: 22px; color: var(--soko-orange);">
+    <div id="toast-icon" style="font-size: 22px; color: var(--soko-orange);">
         <i class="fas fa-bolt"></i>
     </div>
     <div style="flex: 1;">
         <p id="msg" style="margin: 0; font-size: 12px; color: #1a1a1a; line-height: 1.4;"></p>
-        <small style="color: #999; font-size: 10px;">JUST NOW</small>
+        <small id="toast-time" style="color: #999; font-size: 10px;">JUST NOW</small>
     </div>
 </div>
 
@@ -177,7 +188,9 @@
 <script>
     const imgs = [{% for pi in product.images.all %} "{{ pi.image.url }}", {% endfor %}];
     let curr = 0;
+    let toastTimeout;
 
+    /* GALLERY LOGIC */
     function move(d) {
         if (imgs.length === 0) return;
         curr += d;
@@ -199,15 +212,46 @@
         $('.thumbs img').eq(curr).addClass('active');
     }
 
+    /* REUSABLE TOAST POPUP CONTROLLER */
+    function showToast(message, type = 'live') {
+        // Clear any active hide timeouts
+        clearTimeout(toastTimeout);
+        
+        // Retract current toast instantly to reload clean state
+        $('#soko-toast').css('left', '-400px');
+        
+        // Style based on notification type
+        setTimeout(() => {
+            $('#msg').html(message);
+            
+            if (type === 'cart') {
+                // Bright Green Success Theme for Adds
+                $('#toast-icon').html('<i class="fas fa-shopping-basket"></i>').css('color', 'var(--soko-green)');
+                $('#toast-time').text('SUCCESS');
+            } else {
+                // Standard Orange bolt for active viewer alerts
+                $('#toast-icon').html('<i class="fas fa-bolt"></i>').css('color', 'var(--soko-orange)');
+                $('#toast-time').text('JUST NOW');
+            }
+            
+            // Slide it in
+            $('#soko-toast').css('left', '30px');
+            
+            // Disappear after set window
+            toastTimeout = setTimeout(() => { 
+                $('#soko-toast').css('left', '-400px'); 
+            }, type === 'cart' ? 4500 : 4000); 
+        }, 300);
+    }
+
+    /* FAKE BUYER NOTIFICATION SCRIPT */
     const bNames = ["Amina", "Kipkorir", "Mwangi", "Wanjiku", "Otieno"];
     const bLocs = ["Westlands", "Mombasa Road", "Kisumu", "Thika Road"];
 
     function triggerToast() {
         const n = bNames[Math.floor(Math.random() * bNames.length)];
         const l = bLocs[Math.floor(Math.random() * bLocs.length)];
-        $('#msg').html(`<strong>${n}</strong> in ${l} just bought this.`);
-        $('#soko-toast').css('left', '30px');
-        setTimeout(() => { $('#soko-toast').css('left', '-400px'); }, 6000);
+        showToast(`<strong>${n}</strong> in ${l} just bought this.`, 'live');
     }
 
     $(document).ready(function() {
@@ -215,9 +259,23 @@
         setInterval(triggerToast, 28000);
     });
 
+    /* FUNCTIONAL ADD TO CART LOGIC */
     function addToCart(id) {
-        $.get(`/add-to-cart/${id}/`, function() {
-            alert("Success! Added to your basket.");
+        $.get(`/add-to-cart/${id}/`, function(res) {
+            if (res.error === 'login_required') { 
+                window.location.href = "{% url 'userlog' %}"; 
+                return; 
+            }
+            
+            // Success Notification - Passing 'cart' triggers the green basket theme
+            showToast(`<strong>{{ product.name }}</strong> successfully added to your cart!`, 'cart');
+            
+            // Updates navbar counter if element class exists
+            if(res.cart_count) {
+                $('.cart-count').text(res.cart_count);
+            }
+        }).fail(function() {
+            showToast(`<span style="color: #ee4d2d;">Oops! Failed to add item to cart.</span>`, 'live');
         });
     }
 </script>

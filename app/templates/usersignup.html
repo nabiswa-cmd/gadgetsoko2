@@ -3,17 +3,14 @@
 {% load static %}
 
 {% block content %}
-{%load static%}
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
         .login-page {
             font-family: Arial, sans-serif;
-
             background: url("{% static 'images/userlog.png' %}") no-repeat center center;
             background-size: cover;
-
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -21,7 +18,6 @@
             position: relative;
         }
 
-        /* Overlay */
         .login-page::before {
             content: "";
             position: absolute;
@@ -32,16 +28,12 @@
         .login-card {
             position: relative;
             z-index: 1;
-
             width: 320px;
             padding: 30px;
-
             border-radius: 15px;
             backdrop-filter: blur(12px);
             background: rgba(255,255,255,0.95);
-
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-
             text-align: center;
             animation: fadeIn 0.6s ease-in-out;
         }
@@ -51,19 +43,44 @@
             to {opacity: 1; transform: translateY(0);}
         }
 
-        .login-card h2 {
-            margin-bottom: 15px;
+        /* --- ERROR MESSAGE STYLES --- */
+        .error-container {
+            height: 20px; /* Prevents layout jumping when error appears/disappears */
+            margin-bottom: 10px;
         }
+
+        .error-msg {
+            color: #ee4d2d;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+            
+            /* The Wipe Effect Logic */
+            mask-image: linear-gradient(to right, transparent 0%, black 0%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 0%);
+            mask-size: 200% 100%;
+            mask-position: 100% 0;
+            -webkit-mask-size: 200% 100%;
+            -webkit-mask-position: 100% 0;
+            
+            animation: wipeLeftToRight 3s forwards ease-in-out;
+        }
+
+        @keyframes wipeLeftToRight {
+            0% { -webkit-mask-position: 100% 0; opacity: 1; }
+            80% { -webkit-mask-position: 100% 0; opacity: 1; } /* Stay visible for 80% of the time */
+            100% { -webkit-mask-position: 0% 0; opacity: 0; }  /* Rapid vanish from left to right */
+        }
+
+        .login-card h2 { margin-bottom: 15px; }
 
         .login-card input {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
-
             border: 1px solid #ddd;
             border-radius: 6px;
             outline: none;
-
             transition: 0.3s;
         }
 
@@ -76,22 +93,17 @@
             width: 100%;
             padding: 11px;
             margin-top: 10px;
-
             border: none;
             border-radius: 8px;
             background: #ee4d2d;
             color: white;
             font-weight: bold;
             cursor: pointer;
-
             transition: 0.3s;
         }
 
-        .login-btn:hover {
-            background: #d84324;
-        }
+        .login-btn:hover { background: #d84324; }
 
-        /* Divider */
         .divider {
             margin: 15px 0;
             font-size: 13px;
@@ -99,12 +111,11 @@
             position: relative;
         }
 
-        .divider::before,
-        .divider::after {
+        .divider::before, .divider::after {
             content: "";
             position: absolute;
             top: 50%;
-            width: 40%;
+            width: 35%;
             height: 1px;
             background: #ddd;
         }
@@ -112,79 +123,76 @@
         .divider::before { left: 0; }
         .divider::after { right: 0; }
 
-        /* Google button */
         .google-btn {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-
             width: 100%;
             padding: 10px;
-
             border-radius: 8px;
             border: 1px solid #ddd;
             background: #fff;
             cursor: pointer;
-
+            text-decoration: none;
+            color: #333;
             font-weight: 500;
             transition: 0.3s;
         }
 
-        .google-btn i {
-            color: #db4437;
-            font-size: 16px;
-        }
+        .google-btn i { color: #db4437; }
+        .google-btn:hover { background: #f5f5f5; }
 
-        .google-btn:hover {
-            background: #f5f5f5;
-        }
-
-        .signup-link {
-            display: block;
-            margin-top: 12px;
-            font-size: 13px;
-            color: #333;
-            text-decoration: none;
-        }
-
-        .signup-link:hover {
-            text-decoration: underline;
-        }
+        .signup-p { margin-top: 15px; font-size: 13px; }
+        .signup-p a { color: #ee4d2d; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 
 <body>
 
 <div class="login-page">
-
     <div class="login-card">
-        <h2>Welcome </h2>
+        <h2>Welcome</h2>
+
+        <div class="error-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <span class="error-msg" id="errorMessage">
+                        <i class="fas fa-exclamation-circle"></i> {{ message }}
+                    </span>
+                {% endfor %}
+            {% endif %}
+        </div>
 
         <form method="POST">
             {% csrf_token %}
-
+            <label for ="email" name
             <input type="text" name="username" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
-
             <button type="submit" class="login-btn">Login</button>
         </form>
 
         <div class="divider">OR</div>
 
-        <!-- Google Login -->
         <a href="/accounts/google/login/" class="google-btn">
-            <i class="fab fa-google"></i>
-            Continue with Google
+            <i class="fab fa-google"></i> Continue with Google
         </a>
-        <p style="text-align:center; margin-top:10px;">
-    Don't have an account?
-    <a href="{% url 'signup' %}">Create one</a>
-</p>
 
+        <p class="signup-p">
+            Don't have an account? <a href="{% url 'signup' %}">Create one</a>
+        </p>
     </div>
-
 </div>
 
-</body>s
-{%endblock%}
+<script>
+    // Optional: Completely remove the element from DOM after animation finishes
+    const errorEl = document.getElementById('errorMessage');
+    if (errorEl) {
+        errorEl.addEventListener('animationend', () => {
+            errorEl.style.display = 'none';
+        });
+    }
+</script>
+
+</body>
+{% endblock %}

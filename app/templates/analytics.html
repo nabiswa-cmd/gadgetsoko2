@@ -1,51 +1,207 @@
 {% extends "baseadmin.html" %}
 
-{% block title %}Analytics | Gadget Soko{% endblock %}
-{% block header %}Analytics{% endblock %}
-
 {% block content %}
-<h2>Business Insights</h2>
+<div class="soko-admin-wrapper">
+    <header class="soko-header">
+        <div class="title-area">
+            <h2 class="formal-title">Gadget Soko: Performance Analytics</h2>
+            <p class="subtitle">Real-time data visualization of store health</p>
+        </div>
+        <div class="status-badge">
+            <span class="dot"></span> System Live
+        </div>
+    </header>
 
-<div class="cards">
-  <!-- You can optionally put summary cards here -->
+    <div class="metrics-grid">
+        <div class="chart-card">
+            <div class="card-header">
+                <h3>Revenue Flow</h3>
+                <span class="tag">KES / Monthly</span>
+            </div>
+            <div class="canvas-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="card-header">
+                <h3>Most Wanted Gadgets</h3>
+                <span class="tag">By Sales Volume</span>
+            </div>
+            <div class="canvas-container">
+                <canvas id="topProductsChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div style="margin-top: 20px; margin-bottom: 40px;">
-  <canvas id="revenueChart"></canvas>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div>
-  <canvas id="topProductsChart"></canvas>
-</div>
-{% endblock %}
-
-{% block extra_js %}
 <script>
-new Chart(document.getElementById('revenueChart'), {
-    type: 'line',
-    data: {
-        labels: {{ revenue_labels|safe|default:"[]" }},
-        datasets: [{
-            label: 'Revenue (KES)',
-            data: {{ revenue_values|safe|default:"[]" }},
-            borderColor: '#ff5a2c',
-            backgroundColor: 'rgba(255,90,44,0.1)',
-            fill: true
-        }]
-    }
-});
+    // 1. Revenue Flow Chart (Line)
+    const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctxRevenue, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Revenue',
+                data: [120000, 190000, 150000, 250000, 220000, 300000],
+                borderColor: '#0046be',
+                backgroundColor: 'rgba(0, 70, 190, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
 
-new Chart(document.getElementById('topProductsChart'), {
-    type: 'bar',
-    data: {
-        labels: {{ top_products_labels|safe|default:"[]" }},
-        datasets: [{
-            label: 'Units Sold',
-            data: {{ top_products_values|safe|default:"[]" }},
-            backgroundColor: '#111'
-        }]
-    },
-    options: { indexAxis: 'y' }
-});
+    // 2. Top Products Chart (Bar)
+    const ctxProducts = document.getElementById('topProductsChart').getContext('2d');
+    new Chart(ctxProducts, {
+        type: 'bar',
+        data: {
+            labels: ['iPhone 15', 'Galaxy S24', 'MacBook Air', 'Sony WH-1000', 'iPad Pro'],
+            datasets: [{
+                label: 'Units Sold',
+                data: [45, 38, 25, 52, 18],
+                backgroundColor: '#1a1f2c',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
 </script>
+
+<style>
+/* Modern Professional Theme for Gadget Soko */
+:root {
+    --primary-blue: #0046be; 
+    --dark-slate: #1a1f2c;
+    --surface-white: #ffffff;
+    --bg-gray: #f8fafc;
+    --border-color: #e2e8f0;
+    --text-main: #334155;
+}
+
+.soko-admin-wrapper { 
+    padding: 2rem; 
+    background-color: var(--bg-gray); 
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-main);
+}
+
+.soko-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2.5rem;
+}
+
+.formal-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--dark-slate);
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    color: #64748b;
+    margin: 5px 0 0 0;
+    font-size: 0.95rem;
+}
+
+.status-badge {
+    background: #dcfce7;
+    color: #166534;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-badge .dot {
+    height: 8px;
+    width: 8px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.chart-card {
+    background: var(--surface-white);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.card-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--dark-slate);
+}
+
+.tag {
+    font-size: 0.7rem;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--primary-blue);
+}
+
+.canvas-container {
+    height: 300px;
+    width: 100%;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    .soko-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+</style>
 {% endblock %}

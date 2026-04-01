@@ -22,15 +22,23 @@ from .models import Brand
 from django.db.models import Sum
 from .models import CartItem, Brand, Product
 
+from .models import Product, Brand, CartItem
+from django.db.models import Sum
+
 def index_view(request):
     products = Product.objects.all()
     brands = Brand.objects.all()
 
     recommended_products = get_recommended_products(request.user)
+    
     quick_sales = Product.objects.filter(
         discount__gt=0,
         stock__gt=0
     ).order_by('-discount')[:8]
+
+    # 🔥 ADDED: Fetch the last 20 products added to the database
+    # This orders by the highest ID first (which are the newest inserts)
+    featured_products = Product.objects.all().order_by('-id')[:20]
 
     # ✅ SAFE cart count
     cart_count = 0
@@ -41,14 +49,15 @@ def index_view(request):
         )
         cart_count = result['total'] or 0
 
+    # Added 'featured_products' to the context dictionary below
     return render(request, 'index.html', {
         'products': products,
         'brands': brands,
         'recommended_products': recommended_products,
         'quick_sales': quick_sales,
+        'featured_products': featured_products,  # 👈 Pass it to index.html here
         'cart_count': cart_count
     })
-
 # Make sure category_id is included here!
 def products_view(request, brand_id=None, category_id=None):
     products = Product.objects.all()
@@ -194,18 +203,28 @@ import random
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404
 from .models import Product, ProductView, UserActivity # Ensure these are imported
+import random
+from datetime import datetime
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.db.models import Sum
 
+# Remember to align these with your actual model names!
+from .models import Product, CartItem, ProductView, UserActivity
+
+
+# ==========================================
+# 1. PRODUCT DETAIL VIEW (Displays page & logs activity)
+# ==========================================
 def product_detail(request, pk):
     product = get_object_or_404(Product, id=pk)
     
     # --- DYNAMIC REVIEWS & RATINGS LOGIC ---
-    # Create a seed based on product ID and the 12-hour block (AM/PM)
     now = datetime.now()
     time_chunk = 0 if now.hour < 12 else 1
     seed_value = int(f"{pk}{now.year}{now.month}{now.day}{time_chunk}")
     random.seed(seed_value)
 
-    # Generate consistent "fake" data for this 12-hour window
     fake_rating = round(random.uniform(4.4, 5.0), 1)
     fake_count = random.randint(28, 145)
     
@@ -220,7 +239,6 @@ def product_detail(request, pk):
         "Fast shipping to Mombasa, received in 24 hours!"
     ]
     
-    # Pick 3 random reviews for variety
     selected_reviews = random.sample(potential_comments, 3)
     
     social_proof = {
@@ -252,7 +270,39 @@ def product_detail(request, pk):
 
     return render(request, 'product_detail.html', {
         'product': product,
-        'social_proof': social_proof  # Pass the new data to the template
+        'social_proof': social_proof
+    })
+
+
+# ==========================================
+# 2. ADD TO CART VIEW (Called by AJAX)
+# ==========================================
+def add_to_cart(request, product_id):
+    # Guard rail: Make sure the user is logged in
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'login_required'}, status=200)
+
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Get the cart item if it exists or create a new one with qty 1
+    cart_item, created = CartItem.objects.get_or_create(
+        user=request.user,
+        product=product,
+        defaults={'quantity': 1}
+    )
+    
+    # If the item was already in the cart, increment the amount
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    # Sum up all quantities in the cart for the user to reflect in your top navbar
+    result = CartItem.objects.filter(user=request.user).aggregate(total=Sum('quantity'))
+    cart_count = result['total'] or 0
+
+    return JsonResponse({
+        'success': True,
+        'cart_count': cart_count
     })
 def products_by_brand(request, brand_id):
     products = Product.objects.filter(brand__id=brand_id)
@@ -488,44 +538,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Sum
 from .models import Product, CartItem, UserActivity
 
-def add_to_cart(request, product_id):
-    # 🔐 HANDLE NOT LOGGED IN (AJAX SAFE)
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'error': 'login_required',
-            'message': 'Please login to add items to cart'
-        }, status=403)
 
-    product = get_object_or_404(Product, id=product_id)
-
-    cart_item, created = CartItem.objects.get_or_create(
-        user=request.user,
-        product=product
-    )
-
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
-        action_text = "Increased quantity"
-    else:
-        action_text = "Added to cart"
-
-    # 🔥 TRACK ACTIVITY
-    UserActivity.objects.create(
-        user=request.user,
-        action='CART',
-        product=product,
-        extra_info=f"{action_text}: {product.name} (Qty: {cart_item.quantity})"
-    )
-
-    total = CartItem.objects.filter(user=request.user).aggregate(
-        total=Sum('quantity')
-    )['total'] or 0
-
-    return JsonResponse({
-        'cart_count': total,
-        'product_name': product.name
-    })
 from django import forms
 from django.contrib.auth.models import User
 
@@ -645,33 +658,34 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.contrib import messages
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+
 def userlog_view(request):
     if request.method == "POST":
-        # Using .get() prevents the MultiValueDictKeyError crash
+        # Get data from the login form
         username = request.POST.get('username')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
+        password1 = request.POST.get('password') # Matching your HTML input name
 
-        # Basic validation to ensure fields aren't empty
-        if not all([username, email, password1, password2]):
-            messages.error(request, "All fields are required.")
-            return render(request, 'usersignup.html')
+        # 1. Basic validation
+        if not username or not password1:
+            messages.error(request, "Please enter both username and password")
+            return render(request, 'userlog.html') # Replace with your actual login template name
 
-        if password1 != password2:
-            messages.error(request, "Passwords do not match")
-        elif User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists")
-        else:
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password1,
-                is_staff=False
-            )
+        # 2. Authenticate the user
+        user = authenticate(request, username=username, password=password1)
+
+        if user is not None:
+            # 3. If credentials are correct, log them in
             login(request, user)
             return redirect('index')
+        else:
+            # 4. If incorrect, send the error message that triggers the animation
+            messages.error(request, "Incorrect details")
+            return render(request, 'usersignup.html')
 
+    # GET request: just show the login page
     return render(request, 'usersignup.html')
 def logout_view(request):
     logout(request)
@@ -786,36 +800,39 @@ from django.shortcuts import render
 from .models import Product, Order
 from django.db.models import Sum
 
-@staff_member_required
+import json
+from django.db.models import Sum, Count
+from .models import Order, OrderItem # Adjust to your actual models
+
+import json
+from django.db.models import Sum
+from .models import Order, OrderItem 
+
 def analytics_view(request):
-    # Revenue per month (last 6 months)
-    today = datetime.today()
-    revenue_data = defaultdict(int)
-    for i in range(6, 0, -1):
-        month = (today.month - i) % 12 or 12
-        orders_in_month = Order.objects.filter(created_at__month=month)
-        month_name = datetime(1900, month, 1).strftime('%b')
-        revenue_data[month_name] = sum(o.total for o in orders_in_month if o.total)
+    # 1. Revenue by Date (Changed 'total_price' to 'total')
+    revenue_data = Order.objects.values('created_at__date').annotate(
+        total_daily=Sum('total')
+    ).order_by('created_at__date')
+    
+    revenue_labels = [str(item['created_at__date']) for item in revenue_data]
+    revenue_values = [float(item['total_daily'] or 0) for item in revenue_data]
 
-    revenue_labels = list(revenue_data.keys())
-    revenue_values = list(revenue_data.values())
-
-    # Top products by units sold
-    top_products = Product.objects.annotate(total_sold=Sum('orderitem__quantity')).order_by('-total_sold')[:5]
-    top_products_labels = [p.name for p in top_products]
-    top_products_values = [p.total_sold or 0 for p in top_products]
+    # 2. Top Products (Assuming OrderItem has 'quantity' and 'product')
+    # Note: If 'product' is a ForeignKey, use 'product__name'
+    product_data = OrderItem.objects.values('product__name').annotate(
+        total_sold=Sum('quantity')
+    ).order_by('-total_sold')[:5]
+    
+    top_products_labels = [item['product__name'] for item in product_data]
+    top_products_values = [int(item['total_sold'] or 0) for item in product_data]
 
     context = {
-        "revenue_labels": revenue_labels,
-        "revenue_values": revenue_values,
-        "top_products_labels": top_products_labels,
-        "top_products_values": top_products_values,
+        'revenue_labels': json.dumps(revenue_labels),
+        'revenue_values': json.dumps(revenue_values),
+        'top_products_labels': json.dumps(top_products_labels),
+        'top_products_values': json.dumps(top_products_values),
     }
-
-    return render(request, "analytics.html", context)
-from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render
-
+    return render(request, 'analytics.html', context)
 @staff_member_required
 def settings_view(request):
     # You can pass forms here if needed
@@ -1078,56 +1095,72 @@ class CustomPasswordChangeForm(forms.Form):
         
         return cleaned_data
 
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.decorators import login_required
+
 @login_required
 def change_password_view(request):
     if request.method == 'POST':
-        form = CustomPasswordChangeForm(request.POST)
+        # PasswordChangeForm handles the old password verification and hashing
+        form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
-            current_password = form.cleaned_data['current_password']
-            new_password = form.cleaned_data['new_password']
-
-            # Authenticate user with current password
-            user = authenticate(username=username, password=current_password)
-            if user is None or user != request.user:
-                messages.error(request, "Incorrect username or current password.")
-            else:
-                user.set_password(new_password)
-                user.save()
-                update_session_auth_hash(request, user)  # Keep user logged in
-                messages.success(request, "Password changed successfully.")
-                return redirect('dashboard')
+            user = form.save()  # This saves the hashed password to the database
+            
+            # This is CRITICAL: it updates the session so the user stays logged in
+            update_session_auth_hash(request, user)
+            
+            messages.success(request, 'Your admin key has been updated successfully!')
+            return redirect('change_password') # Or redirect to your admin dashboard
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
-        form = CustomPasswordChangeForm()
-
-    return render(request, 'change_password.html', {'form': form})
-
-    from django.contrib.auth.models import User
+        form = PasswordChangeForm(request.user)
+    
+    return render(request, 'change_password.html', {
+        'form': form
+    })
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 
-@staff_member_required
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import user_passes_test
+
+# Optional: Only allow existing superusers to add new admins
+@user_passes_test(lambda u: u.is_superuser)
 def add_admin_view(request):
-    if request.method == "POST":
-        username = request.POST.get("username").strip()
-        email = request.POST.get("email").strip()
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
 
-        # Prevent adding forbidden usernames
-        if username.lower() in ["admin", "administrator"]:
-            messages.error(request, "Username not allowed.")
-            return redirect('add_admin')
-
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists.")
-        elif User.objects.filter(email=email).exists():
-            messages.error(request, "Email already exists.")
+        # Simple Validation
+        if not username or not password:
+            messages.error(request, "All fields are required!")
+        elif password != confirm_password:
+            messages.error(request, "Passwords do not match!")
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists!")
         else:
-            # Default password
-            default_password = "bugbugGADGET"
+            # Create the user and set permissions
+            new_admin = User.objects.create_user(username=username, password=password)
+            new_admin.is_staff = True  # Allows access to admin site
+            new_admin.is_superuser = True # Full permissions
+            new_admin.save()
+            
+            messages.success(request, f"Admin {username} created successfully!")
+            return redirect('add_admin_view') # Return 1: After successful POST
 
-            # Create admin user
-
+    # Return 2: The GET request (This fixes your 'returned None' error)
+    return render(request, 'add_admin.html')
 from django.contrib import messages
 
 def google_login_callback(request):
