@@ -643,6 +643,252 @@
         padding: 5px 3% 15px;
     }
 }
+/* =====================================
+   CLEAN TRUSTWORTHY SECTION HEADINGS
+===================================== */
+.section h2,
+.products h2 {
+    font-family: 'Syne', sans-serif !important;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+    position: relative;
+    padding-left: 12px;
+}
+
+/* Left border accent */
+.section h2::before,
+.products h2::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 5px;
+    height: 70%;
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+/* Featured + Quick Sales spacing */
+.products {
+    margin-top: 28px;
+    margin-bottom: 35px;
+}
+
+/* =====================================
+   SHOP BY BRAND (COMPACT + CLEAN)
+===================================== */
+#categories {
+    margin-top: 25px;
+    margin-bottom: 35px;
+}
+
+/* Brand container */
+.category-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 12px;
+    background: white;
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* Brand name pills (VERY HUMAN STYLE) */
+.category-grid a {
+    padding: 7px 14px;
+    border-radius: 30px;
+    background: #f8fafc;
+    border: 1px solid rgba(0,0,0,0.08);
+    font-size: 13px;
+    font-weight: 700;
+    color: #0b3a63;
+    font-family: 'DM Sans', sans-serif;
+    transition: 0.2s ease;
+    white-space: nowrap;
+}
+
+/* Hover effect (simple, realistic) */
+.category-grid a:hover {
+    background: #fff;
+    border-color: rgba(238, 77, 45, 0.4);
+    color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* =====================================
+   MOBILE FIXES (FONT + SPACING)
+===================================== */
+@media (max-width: 768px) {
+
+    .section h2,
+    .products h2 {
+        font-family: 'Syne', sans-serif !important;
+        font-size: 19px !important;
+        font-weight: 800;
+        margin-bottom: 12px;
+        padding-left: 10px;
+        letter-spacing: -0.3px;
+    }
+
+    .section h2::before,
+    .products h2::before {
+        width: 4px;
+        top: 3px;
+    }
+
+    /* Brand grid becomes super compact */
+    .category-grid {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .category-grid a {
+        font-size: 12px;
+        padding: 6px 12px;
+        font-weight: 700;
+    }
+}
+/* ================================
+   FOOTER
+================================ */
+.gs-footer {
+    background: var(--navy);
+    color: rgba(255,255,255,0.85);
+    padding: 60px 8% 20px;
+    margin-top: 60px;
+    border-top: 5px solid var(--primary);
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 35px;
+}
+
+.footer-column h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 18px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.footer-column h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 45px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+.footer-column p {
+    font-size: 13px;
+    margin-bottom: 10px;
+    line-height: 1.8;
+}
+
+.footer-column i {
+    color: var(--primary);
+    margin-right: 8px;
+}
+
+/* Quick links */
+.footer-column a {
+    display: block;
+    color: rgba(255,255,255,0.75);
+    font-size: 13px;
+    margin-bottom: 9px;
+    transition: 0.25s ease;
+}
+
+.footer-column a:hover {
+    color: white;
+    transform: translateX(6px);
+}
+
+/* Social icons */
+.footer-social {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.footer-social a {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 15px;
+    transition: 0.35s ease;
+}
+
+/* Rotate effect */
+.footer-social a:hover {
+    background: var(--primary);
+    transform: rotate(360deg) scale(1.1);
+}
+
+/* Footer bottom */
+.footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 18px;
+    text-align: center;
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.8;
+}
+
+.footer-bottom strong {
+    color: var(--primary);
+}
+
+.dev-contact {
+    color: rgba(255,255,255,0.8);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.dev-contact:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .gs-footer {
+        padding: 45px 5% 20px;
+        text-align: center;
+    }
+
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    .footer-column h3::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .footer-social {
+        justify-content: center;
+    }
+}
+
 
     </style>
     {% block extra_head %}{% endblock %}
@@ -1036,6 +1282,76 @@ function addToCart(pId) {
         </div>
     </div>
 </div>
+<footer class="gs-footer" id="footer">
+    <div class="footer-container">
+
+        <!-- LOCATION -->
+        <div class="footer-column">
+            <h3>Our Location</h3>
+            <p>
+                <i class="fa-solid fa-location-dot"></i>
+                Nairobi, Kenya <br>
+                Along Mombasa Road / CBD Delivery Available
+            </p>
+
+            <p style="margin-top:12px;">
+                <i class="fa-solid fa-clock"></i>
+                Open: Mon - Sat (8:00AM - 7:00PM)
+            </p>
+        </div>
+
+        <!-- QUICK LINKS -->
+        <div class="footer-column">
+            <h3>Quick Links</h3>
+            <a href="{% url 'index' %}">Home</a>
+            <a href="{% url 'products' %}">Products</a>
+            <a href="{% url 'index' %}#categories">Brands</a>
+            <a href="{% url 'index' %}#services">Services</a>
+            <a href="{% url 'index' %}#contacts">Contact</a>
+        </div>
+
+        <!-- CONTACTS + SOCIALS -->
+        <div class="footer-column">
+            <h3>Contacts</h3>
+
+            <p>
+                <i class="fa-solid fa-phone"></i>
+                +254 7XX XXX XXX
+            </p>
+
+            <p>
+                <i class="fa-solid fa-envelope"></i>
+                support@gadgetsokokenya.com
+            </p>
+
+            <p>
+                <i class="fa-brands fa-whatsapp"></i>
+                WhatsApp: +254 7XX XXX XXX
+            </p>
+
+            <div class="footer-social">
+                <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER BOTTOM -->
+    <div class="footer-bottom">
+        <p>
+            © {{ year|default:"2026" }} Gadget Soko Kenya. All Rights Reserved.
+        </p>
+
+        <p>
+            Developed by <strong>Sammy Tings</strong> |
+            Contact: <a href="tel:+2547XXXXXXXX" class="dev-contact">+254 7XX XXX XXX</a> |
+            Email: <a href="mailto:sammytings@email.com" class="dev-contact">sammytings@email.com</a>
+        </p>
+    </div>
+</footer>
 
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
