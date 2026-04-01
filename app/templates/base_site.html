@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -7,15 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Gadget Soko Kenya{% endblock %}</title>
 
-    <link rel="icon" type="image/png" href="{% static 'images/logo-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/logo-32x32.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/logo.png' %}">
+    <link rel="shortcut icon" href="{% static 'images/logo-32x32.png' %}">
 
-    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -212,6 +209,7 @@
 
         /* Banner */
         .banner, .slider {
+            margin-top: 0;
             width: 100%;
             background: #000;
             border-radius: 12px;
@@ -511,186 +509,505 @@
 
         /* Remove Bootstrap's default toggler border/outline */
         .navbar-toggler { display: none !important; }
-    </style>
 
+
+        /* Hamburger Toggle Button */
+.hamburger-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    padding: 0;
+    margin-right: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+/* Sidebar Styling */
+.mobile-sidebar {
+    background-color: #fff;
+    position: fixed;
+    top: 0;
+    left: -300px; /* Hidden state */
+    width: 280px;
+    height: 100vh;
+    background: var(--navy);
+    z-index: 3000;
+    transition: var(--transition);
+    padding: 25px 20px;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+}
+
+.mobile-sidebar.active {
+    left: 0; /* Visible state */
+}
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    z-index: 2999;
+    backdrop-filter: blur(3px);
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* Sidebar Links */
+.mobile-links {
+    list-style: none;
+    padding: 0;
+}
+
+.mobile-links li a {
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    display: block;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: 0.2s;
+}
+
+.mobile-links li a:hover {
+    color: var(--primary);
+    padding-left: 10px;
+}
+
+
+    /* ==========================================
+       CHATBOT AT THE RIGHT
+    ========================================== */
+    .chatbot-trigger {
+        position: fixed;
+        bottom: 30px;
+        right: 30px; /* Positioned on the right */
+        background: var(--navy);
+        color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        cursor: pointer;
+        z-index: 4000;
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.2);
+        /* Human-sketched aesthetic */
+        border: 3px solid var(--primary);
+        transition: var(--transition);
+    }
+
+    .chatbot-trigger:hover {
+        transform: scale(1.1) rotate(5deg); /* Tilted slightly inward on the right */
+        background: var(--primary);
+        border-color: var(--navy);
+    }
+
+    /* Responsive for mobile */
+    @media (max-width: 768px) {
+        .chatbot-trigger { 
+            bottom: 20px; 
+            right: 20px; 
+            width: 50px; 
+            height: 50px; 
+            font-size: 24px; 
+        }
+    }
+    /* Remove the bottom shadow and margin from the Navbar */
+.gs-navbar {
+    margin-bottom: 0 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional: Soften the shadow */
+}
+
+/* Adjust the main container padding */
+.gs-main {
+    flex: 1;
+    /* Reduced top padding from 25px to 10px (or 0) */
+    padding: 10px 8% 25px; 
+}
+
+/* Remove any top margin from the banner/slider itself */
+.banner, .slider {
+    margin-top: 0 !important;
+    margin-bottom: 20px;
+}
+
+/* Mobile specific: further tighten the gap on small screens */
+@media (max-width: 767.98px) {
+    .gs-main {
+        padding: 5px 3% 15px;
+    }
+}
+
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
-
 <body>
 
-<!-- ═══════════════════════════════════════════
-     TOPBAR — hidden on screens < md (768px)
-═══════════════════════════════════════════ -->
-<div class="gs-topbar d-none d-md-flex justify-content-between align-items-center px-0 py-2" style="padding-left:8%;padding-right:8%;">
-    <div>English | Swahili</div>
-    <div class="d-flex gap-3 align-items-center">
-        <a href="{% url 'login' %}">Admin Login</a>
-        <span>|</span>
-        <a href="#">Contact</a>
-    </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     NAVBAR — Bootstrap 5, no hamburger
-═══════════════════════════════════════════ -->
-<nav class="gs-navbar navbar navbar-expand-md">
-    <div class="container-fluid px-3 px-md-0" style="padding-left:8% !important; padding-right:8% !important;">
-
-        <!-- LOGO — always visible, left -->
-        <a class="gs-logo navbar-brand p-0 me-3" href="{% url 'index' %}">
-            <img src="{% static 'images/logo.png' %}" alt="Gadget Soko Logo">
-        </a>
-
-        <!-- MOBILE: cart icon shown next to logo (before collapse) -->
-        <div class="d-flex align-items-center gap-2 d-md-none ms-auto">
-            <!-- Mobile search toggle button -->
-            <button class="gs-search-toggle-btn border-0 bg-transparent text-white fs-5 p-1"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#mobileSearchCollapse"
-                    aria-expanded="false">
-                <i class="bi bi-search"></i>
-            </button>
-            <!-- Cart -->
-            <div class="gs-cart-icon" onclick="toggleCart()">
-                <i class="fa fa-shopping-cart"></i>
-                <span class="cart-count">{% if request.user.is_authenticated %}{{ cart_count }}{% else %}0{% endif %}</span>
-            </div>
+    <div class="gs-topbar d-none d-md-flex justify-content-between align-items-center px-0 py-2" style="padding-left:8%; padding-right:8%;">
+        <div>English | Swahili</div>
+        <div class="d-flex gap-3 align-items-center">
+            <a href="{% url 'login' %}">Admin Login</a>
+            <span>|</span>
+            <a href="#">Contact</a>
         </div>
+    </div>
 
-        <!-- DESKTOP: nav links + search + cart — collapse on < md -->
-        <div class="collapse navbar-collapse" id="gsNavCollapse">
+    <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
 
-            <!-- Nav links — centred -->
-            <ul class="navbar-nav mx-auto gap-1 flex-wrap">
-                <li class="nav-item">
-                    <a class="nav-link gs-nav-link" href="{% url 'index' %}#categories">Categories</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link gs-nav-link" href="{% url 'products' %}">Products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link gs-nav-link" href="{% url 'index' %}#services">Services</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link gs-nav-link" href="{% url 'index' %}#contacts">Contact</a>
-                </li>
-                <li class="nav-item">
-                    {% if not request.user.is_authenticated %}
-                        <a class="nav-link gs-nav-link" href="{% url 'userlog' %}">Login</a>
-                    {% else %}
-                        <a class="nav-link gs-nav-link" href="{% url 'logout' %}">Logout</a>
-                    {% endif %}
-                </li>
-            </ul>
+    <div class="mobile-sidebar" id="sidebar">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <img src="{% static 'images/logo.png' %}" style="height: 35px;">
+            <button class="text-white bg-transparent border-0 fs-2" onclick="toggleMenu()">&times;</button>
+        </div>
+        <ul class="mobile-links" style="list-style:none; padding:0;">
+            <li class="mb-3"><a href="{% url 'index' %}" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-house-door me-2"></i> Home</a></li>
+<li class="mb-3"><a href="{% url 'products' %}" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-laptop me-2"></i> Products</a></li>
+<li class="mb-3"><a href="{% url 'index' %}#categories" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-grid me-2"></i> Categories</a></li>
+<li class="mb-3"><a href="{% url 'index' %}#services" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-tools me-2"></i> Services</a></li>
+<li class="mb-3"><a href="{% url 'index' %}#contacts" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-envelope me-2"></i> Contact</a></li>
 
-            <!-- Search — desktop only inside collapse -->
-            <form action="{% url 'search' %}" method="GET"
-                  class="gs-search search-form d-none d-md-flex me-3"
-                  style="width:340px; position:relative;">
-                <input type="text" name="q" id="searchInput"
-                       placeholder="Search gadgets..." autocomplete="off">
-                <button type="submit" class="gs-search-btn">
-                    <i class="bi bi-search"></i>
+<hr class="text-white-50 my-3"> {% if user.is_authenticated %}
+    <li class="mb-3">
+        <a href="{% url 'account_logout' %}" class="text-white text-decoration-none" onclick="toggleMenu()">
+            <i class="bi bi-box-arrow-right me-2"></i> Logout ({{ user.username }})
+        </a>
+    </li>
+{% else %}
+    <li class="mb-3">
+        <a href="{% url 'account_login' %}" class="text-white text-decoration-none" onclick="toggleMenu()">
+            <i class="bi bi-person-check me-2"></i> Login
+        </a>
+    </li>
+{% endif %}
+        </ul>
+    </div>
+
+    <nav class="gs-navbar navbar navbar-expand-md">
+        <div class="container-fluid px-3" style="padding-left:8% !important; padding-right:8% !important;">
+            
+            <div class="d-flex align-items-center d-md-none">
+                <button class="bg-transparent border-0 text-white fs-2 me-2" onclick="toggleMenu()">
+                    <i class="bi bi-list"></i>
                 </button>
+                <a class="gs-logo navbar-brand p-0" href="{% url 'index' %}">
+                    <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 30px;">
+                </a>
+            </div>
+
+            <div class="d-none d-md-flex align-items-center gap-3">
+                <a class="gs-logo navbar-brand p-0" href="{% url 'index' %}">
+                    <img src="{% static 'images/logo.png' %}" alt="Gadget Soko Logo">
+                </a>
+                <div class="d-flex align-items-center gap-1">
+                    <a href="{% url 'index' %}" class="gs-nav-link">Home</a>
+                    <a href="{% url 'products' %}" class="gs-nav-link">Products</a>
+                    <a href="{% url 'index' %}#categories" class="gs-nav-link">Categories</a>
+                    <a href="{% url 'index' %}#services" class="gs-nav-link">Services</a>
+                    <a href="{% url 'index' %}#contacts" class="gs-nav-link">Contacts</a>
+                </div>
+            </div>
+
+            <form action="{% url 'search' %}" method="GET" class="gs-search d-none d-md-flex mx-auto" style="width: 35%; max-width: 450px;">
+                <input type="text" name="q" id="searchInput" placeholder="Search gadgets..." autocomplete="off">
+                <button type="submit" class="gs-search-btn"><i class="bi bi-search"></i></button>
                 <div id="search-results" class="search-dropdown"></div>
             </form>
 
-            <!-- Cart — desktop only -->
-            <div class="gs-cart-icon d-none d-md-flex" onclick="toggleCart()">
-                <i class="fa fa-shopping-cart"></i>
-                <span class="cart-count">{% if request.user.is_authenticated %}{{ cart_count }}{% else %}0{% endif %}</span>
-            </div>
-
-        </div><!-- /navbar-collapse -->
-    </div><!-- /container-fluid -->
-
-    <!-- MOBILE: collapsible search bar (below main nav row) -->
-    <div class="collapse d-md-none w-100" id="mobileSearchCollapse">
-        <div class="px-3 pb-2 pt-1" style="background:var(--primary);">
-            <form action="{% url 'search' %}" method="GET"
-                  class="gs-search search-form w-100" style="position:relative;">
-                <input type="text" name="q"
-                       placeholder="Search gadgets or brands..." autocomplete="off">
-                <button type="submit" class="gs-search-btn">
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-none d-md-block">
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="text-white fw-bold small"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    {% else %}
+                        <a href="{% url 'userlog' %}" class="text-white fw-bold small"><i class="bi bi-person-circle"></i> Login</a>
+                    {% endif %}
+                </div>
+                <button class="d-md-none border-0 bg-transparent text-white fs-4" data-bs-toggle="collapse" data-bs-target="#mobileSearchCollapse">
                     <i class="bi bi-search"></i>
                 </button>
-                <div class="search-dropdown"></div>
+                <div class="gs-cart-icon" onclick="toggleCart()">
+                    <i class="fa fa-shopping-cart"></i>
+                    <span class="cart-count">{{ cart_count|default:0 }}</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="collapse d-md-none w-100" id="mobileSearchCollapse">
+        <div class="px-3 pb-3 pt-1" style="background:var(--primary);">
+            <form action="{% url 'search' %}" method="GET" class="gs-search w-100">
+                <input type="text" name="q" placeholder="Search gadgets...">
+                <button type="submit" class="gs-search-btn"><i class="bi bi-search"></i></button>
             </form>
         </div>
     </div>
 
-</nav>
+    <main class="gs-main">
+        {% block content %}{% endblock %}
+    </main>
+    <!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- ═══════════════════════════════════════════
-     MAIN CONTENT
-═══════════════════════════════════════════ -->
-<main class="gs-main">
-    {% block content %}
-    {% endblock %}
-</main>
+<script>
+    /* ── CART ── */
+    function toggleCart() {
+        {% if not request.user.is_authenticated %}
+            window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
+            return;
+        {% endif %}
 
-<!-- ═══════════════════════════════════════════
-     FOOTER
-═══════════════════════════════════════════ -->
-<footer class="gs-footer">
-    <div class="footer-container">
+        $('#cartSidebar').toggleClass('active');
+        $('#cartOverlay').toggleClass('active');
 
-        <div class="footer-column">
-            <h3>Socials</h3>
-            <div class="social-icons">
-                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-            </div>
-            <h3 style="margin-top:20px;">Contacts</h3>
-            <p><i class="bi bi-telephone-fill" style="color:var(--primary);margin-right:6px;"></i> 0759829235</p>
-            <p><i class="bi bi-envelope-fill" style="color:var(--primary);margin-right:6px;"></i> support@gadgetsoko.co.ke</p>
-        </div>
+        if ($('#cartSidebar').hasClass('active')) updateCartSidebar();
+    }
 
-        <div class="footer-column">
-            <h3>Quick Links</h3>
-            <a href="{% url 'index' %}">Home</a>
-            <a href="{% url 'products' %}">Products</a>
-            <a href="{% url 'index' %}#categories">Categories</a>
-            <a href="{% url 'index' %}#services">Services</a>
-        </div>
+    function updateCartSidebar() {
+        $.get("{% url 'view_cart' %}?ajax=1", function(data) {
+            let h = '';
+            if (!data.items || data.items.length === 0) {
+                h = '<p>Your cart is empty</p>';
+            } else {
+                data.items.forEach(i => {
+                    h += `
+                        <div class="cart-item-row">
+                            <img src="${i.image}" alt="">
+                            <div class="item-info">
+                                <b>${i.name}</b>
+                                <small>KES ${i.price} × ${i.quantity}</small>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            $('#cartSlides').html(h);
+            $('#sidebarTotal').text('KES ' + (data.total || 0));
+        });
+    }
 
-        <div class="footer-column">
-            <h3>Customer Care</h3>
-            <a href="#">Order Tracking</a>
-            <a href="#">Returns Policy</a>
-            <a href="#">Delivery Info</a>
-            <a href="#">FAQs</a>
-        </div>
+    
+    /* ── MOBILE MENU (HAMBURGER) ── */
+function toggleMenu() {
+    // Select by class to match your CSS styling
+    const sidebar = document.querySelector('.mobile-sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
 
+    // Prevent body scrolling when menu is open
+    if (sidebar.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = 'auto';
+    }
+}
+
+/* ── ADD TO CART (WITH LOADER) ── */
+function addToCart(pId) {
+    const isUserAuthenticated = "{{ request.user.is_authenticated }}" === "True";
+
+    if (!isUserAuthenticated) {
+        // Show the loader immediately
+        const loader = document.getElementById('auth-loader');
+        loader.style.display = 'flex';
+        
+        // Brief delay to show off the "Techie" animation
+        setTimeout(function() {
+            window.location.href = "{% url 'userlog' %}?next=" + window.location.pathname;
+        }, 1000); 
+        return;
+    }
+
+    // Ajax for Logged-in users
+    $.get(`/add-to-cart/${pId}/`, function(res) {
+        if (res.error === 'not_logged_in') {
+            document.getElementById('auth-loader').style.display = 'flex';
+            window.location.href = "{% url 'userlog' %}";
+            return;
+        }
+        $('.cart-count').text(res.cart_count);
+        updateCartSidebar();
+        
+        // Automatically slide out the cart sidebar
+        $('#cartSidebar, #cartOverlay').addClass('active');
+    });
+}
+    
+
+    /* ── LIVE SEARCH ── */
+    $(document).ready(function () {
+        function doSearch(val, $dropdown) {
+            if (val.length < 2) { $dropdown.hide(); return; }
+            $.ajax({
+                url: "{% url 'live_search' %}",
+                data: { 'q': val },
+                success: function (d) { $dropdown.html(d.html).show(); }
+            });
+        }
+
+        /* Desktop search */
+        $('#searchInput').on('keyup', function () {
+            doSearch($(this).val(), $('#search-results'));
+        });
+
+        /* Close dropdown on outside click */
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.gs-search').length) {
+                $('.search-dropdown').hide();
+            }
+        });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Check if user is logged out (Django context check)
+        const isUserAuthenticated = "{{ user.is_authenticated }}" === "True";
+        
+        // Check if they already dismissed the cookie prompt
+        const cookieAccepted = localStorage.getItem("gsk_cookies");
+
+        if (!isUserAuthenticated && !cookieAccepted) {
+            // Show the popup with a slight delay for effect
+            setTimeout(() => {
+                document.getElementById('cookie-popup').classList.remove('hidden');
+            }, 2000);
+        }
+    });
+
+    function acceptCookies() {
+        localStorage.setItem("gsk_cookies", "accepted");
+        closeCookiePopup();
+        console.log("Cookies enabled for Gadget Soko session.");
+    }
+
+    function closeCookiePopup() {
+        document.getElementById('cookie-popup').classList.add('hidden');
+    }
+</script>
+
+{% block extra_scripts %}{% endblock %}
+
+<div id="auth-loader" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; backdrop-filter:blur(8px);">
+    <div class="cart-flipper" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;">
+        <i class="fa fa-shopping-cart"></i>
     </div>
+    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; color: var(--navy);">Logging you into Gadget Soko...</h3>
+    <p style="color: var(--text-muted);">Almost there! After logging in, you can fill your cart.</p>
+</div>
 
-    <div class="footer-bottom">
-        Developed and Designed by <strong>Sammy Tings</strong> and <strong>Nabiswa James</strong> at TingsTech Technologies
-        &nbsp;|&nbsp; Contact 0727698319
-    </div>
-</footer>
+<style>
+    /* Cart Flipping Animation */
+    .cart-flipper {
+        animation: flipCart 0.6s infinite linear;
+        display: inline-block;
+    }
+    @keyframes flipCart {
+        0% { transform: rotateY(0deg); }
+        100% { transform: rotateY(360deg); }
+    }
+    .cookie-card {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        max-width: 400px;
+        background: #111; /* Dark techie theme */
+        color: white;
+        padding: 20px;
+        z-index: 9999;
+        /* Sketched-look border */
+        border: 2px solid var(--primary);
+        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+        box-shadow: 8px 8px 0px rgba(255, 90, 44, 0.2);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.4s ease-in-out;
+    }
 
-<!-- CART SIDEBAR -->
-<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+    .cookie-card.hidden {
+        transform: translateY(150%);
+    }
 
-<div class="cart-sidebar" id="cartSidebar">
-    <div class="cart-header">
-        <h3>Your Cart</h3>
-        <button class="close-cart" onclick="toggleCart()">&times;</button>
-    </div>
+    .cookie-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-    <div class="cart-items-container" id="cartSlides">
-        <p>Your cart is empty</p>
-    </div>
+    .cookie-icon i {
+        font-size: 30px;
+        color: var(--primary);
+        filter: drop-shadow(0 0 5px var(--primary));
+    }
 
-    <div class="cart-footer-panel">
-        <div class="total-row">
-            <span>Total:</span>
-            <span id="sidebarTotal">KES {% if cart_total %}{{ cart_total }}{% else %}0{% endif %}</span>
+    .cookie-text h4 {
+        margin: 0;
+        font-family: 'Courier New', monospace; /* Techie font */
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .cookie-text p {
+        margin: 5px 0 0;
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    .cookie-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .btn-accept {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .btn-close {
+        background: transparent;
+        color: #888;
+        border: 1px solid #444;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-accept:hover { background: #e44d22; }
+
+    /* Mobile tweak */
+    @media (max-width: 480px) {
+        .cookie-card { left: 10px; right: 10px; bottom: 10px; }
+    }
+</style>
+<div id="cookie-popup" class="cookie-card hidden">
+    <div class="cookie-content">
+        <div class="cookie-icon">
+            <i class="fa-solid fa-cookie-bite"></i>
         </div>
-        <a href="{% url 'check' %}" class="checkout-btn">Checkout</a>
+        <div class="cookie-text">
+            <h4>Syncing Your Tech...</h4>
+            <p>We use cookies to remember your cart and optimize your gadget hunt. Is that cool?</p>
+        </div>
+        <div class="cookie-actions">
+            <button onclick="acceptCookies()" class="btn-accept">Enable</button>
+            <button onclick="closeCookiePopup()" class="btn-close">Later</button>
+        </div>
     </div>
 </div>
 
@@ -736,20 +1053,54 @@
         });
     }
 
-    function addToCart(pId) {
-        $.get(`/add-to-cart/${pId}/`, function(res) {
-            if (res.error === 'not_logged_in') {
-                window.location.href = "{% url 'userlog' %}";
-                return;
-            }
-            $('.cart-count').text(res.cart_count);
-            updateCartSidebar();
-            if (!$('#cartSidebar').hasClass('active')) {
-                $('#cartSidebar').addClass('active');
-                $('#cartOverlay').addClass('active');
-            }
-        });
+    function toggleMenu() {
+        // Toggle the 'active' class on both sidebar and overlay
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+
+        // Prevent body scrolling when menu is open
+        if (sidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
     }
+
+    function addToCart(pId) {
+    // 1. Immediate check (0.02s speed)
+    {% if not request.user.is_authenticated %}
+        const loader = document.getElementById('auth-loader');
+        loader.style.display = 'flex';
+        
+        // Redirect after a very brief delay to let them see the message/animation
+        setTimeout(function() {
+            window.location.href = "{% url 'userlog' %}?next=" + window.location.pathname;
+        }, 800); // 800ms gives the user time to read the message, change to 200 for faster
+        return;
+    {% endif %}
+
+    // 2. Logic for Logged-in users
+    $.get(`/add-to-cart/${pId}/`, function(res) {
+        if (res.error === 'not_logged_in') {
+            document.getElementById('auth-loader').style.display = 'flex';
+            window.location.href = "{% url 'userlog' %}";
+            return;
+        }
+        $('.cart-count').text(res.cart_count);
+        updateCartSidebar();
+        
+        if (!$('#cartSidebar').hasClass('active')) {
+            $('#cartSidebar').addClass('active');
+            $('#cartOverlay').addClass('active');
+        }
+    });
+}
+
+
+    
 
     /* ── LIVE SEARCH ── */
     $(document).ready(function () {
@@ -774,9 +1125,153 @@
             }
         });
     });
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Check if user is logged out (Django context check)
+        const isUserAuthenticated = "{{ user.is_authenticated }}" === "True";
+        
+        // Check if they already dismissed the cookie prompt
+        const cookieAccepted = localStorage.getItem("gsk_cookies");
+
+        if (!isUserAuthenticated && !cookieAccepted) {
+            // Show the popup with a slight delay for effect
+            setTimeout(() => {
+                document.getElementById('cookie-popup').classList.remove('hidden');
+            }, 2000);
+        }
+    });
+
+    function acceptCookies() {
+        localStorage.setItem("gsk_cookies", "accepted");
+        closeCookiePopup();
+        console.log("Cookies enabled for Gadget Soko session.");
+    }
+
+    function closeCookiePopup() {
+        document.getElementById('cookie-popup').classList.add('hidden');
+    }
 </script>
 
-{% block extra_scripts %}{% endblock %}
+
+
+<div id="auth-loader" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; backdrop-filter:blur(8px);">
+    <div class="cart-flipper" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;">
+        <i class="fa fa-shopping-cart"></i>
+    </div>
+    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; color: var(--navy);">Logging you into Gadget Soko...</h3>
+    <p style="color: var(--text-muted);">Almost there! After logging in, you can fill your cart.</p>
+</div>
+
+<style>
+    /* Cart Flipping Animation */
+    .cart-flipper {
+        animation: flipCart 0.6s infinite linear;
+        display: inline-block;
+    }
+    @keyframes flipCart {
+        0% { transform: rotateY(0deg); }
+        100% { transform: rotateY(360deg); }
+    }
+    .cookie-card {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        max-width: 400px;
+        background: #111; /* Dark techie theme */
+        color: white;
+        padding: 20px;
+        z-index: 9999;
+        /* Sketched-look border */
+        border: 2px solid var(--primary);
+        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+        box-shadow: 8px 8px 0px rgba(255, 90, 44, 0.2);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.4s ease-in-out;
+    }
+
+    .cookie-card.hidden {
+        transform: translateY(150%);
+    }
+
+    .cookie-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .cookie-icon i {
+        font-size: 30px;
+        color: var(--primary);
+        filter: drop-shadow(0 0 5px var(--primary));
+    }
+
+    .cookie-text h4 {
+        margin: 0;
+        font-family: 'Courier New', monospace; /* Techie font */
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .cookie-text p {
+        margin: 5px 0 0;
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    .cookie-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .btn-accept {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .btn-close {
+        background: transparent;
+        color: #888;
+        border: 1px solid #444;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-accept:hover { background: #e44d22; }
+
+    /* Mobile tweak */
+    @media (max-width: 480px) {
+        .cookie-card { left: 10px; right: 10px; bottom: 10px; }
+    }
+</style>
+<div id="cookie-popup" class="cookie-card hidden">
+    <div class="cookie-content">
+        <div class="cookie-icon">
+            <i class="fa-solid fa-cookie-bite"></i>
+        </div>
+        <div class="cookie-text">
+            <h4>Syncing Your Tech...</h4>
+            <p>We use cookies to remember your cart and optimize your gadget hunt. Is that cool?</p>
+        </div>
+        <div class="cookie-actions">
+            <button onclick="acceptCookies()" class="btn-accept">Enable</button>
+            <button onclick="closeCookiePopup()" class="btn-close">Later</button>
+        </div>
+    </div>
+</div>
 
 </body>
+
+    </body>
 </html>
