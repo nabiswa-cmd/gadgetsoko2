@@ -512,11 +512,6 @@
             padding: 0 10px 10px;
             border-radius: 0 0 var(--radius-sm) var(--radius-sm);
         }
-
-        /* Remove Bootstrap's default toggler border/outline */
-        .navbar-toggler { display: none !important; }
-
-
         /* Hamburger Toggle Button */
 .hamburger-btn {
     background: none;
@@ -894,6 +889,236 @@
         justify-content: center;
     }
 }
+/* Quantity Controls */
+.qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+.qty-btn {
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--border);
+    background: var(--bg-light);
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.qty-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.qty-num {
+    min-width: 20px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* Remove button */
+.remove-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #aaa;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: 0.2s;
+}
+
+.remove-btn:hover {
+    color: red;
+}
+
+
+<style>
+    /* Cart Flipping Animation */
+    .cart-flipper {
+        animation: flipCart 0.6s infinite linear;
+        display: inline-block;
+    }
+    @keyframes flipCart {
+        0% { transform: rotateY(0deg); }
+        100% { transform: rotateY(360deg); }
+    }
+    .cookie-card {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        max-width: 400px;
+        background: #111; /* Dark techie theme */
+        color: white;
+        padding: 20px;
+        z-index: 9999;
+        /* Sketched-look border */
+        border: 2px solid var(--primary);
+        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+        box-shadow: 8px 8px 0px rgba(255, 90, 44, 0.2);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.4s ease-in-out;
+    }
+
+    .cookie-card.hidden {
+        transform: translateY(150%);
+    }
+
+    .cookie-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .cookie-icon i {
+        font-size: 30px;
+        color: var(--primary);
+        filter: drop-shadow(0 0 5px var(--primary));
+    }
+
+    .cookie-text h4 {
+        margin: 0;
+        font-family: 'Courier New', monospace; /* Techie font */
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .cookie-text p {
+        margin: 5px 0 0;
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    .cookie-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .btn-accept {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .btn-close {
+        background: transparent;
+        color: #888;
+        border: 1px solid #444;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-accept:hover { background: #e44d22; }
+
+    /* Mobile tweak */
+    @media (max-width: 480px) {
+        .cookie-card { left: 10px; right: 10px; bottom: 10px; }
+    }
+        /* Cart Flipping Animation */
+    .cart-flipper {
+        animation: flipCart 0.6s infinite linear;
+        display: inline-block;
+    }
+    @keyframes flipCart {
+        0% { transform: rotateY(0deg); }
+        100% { transform: rotateY(360deg); }
+    }
+    .cookie-card {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        max-width: 400px;
+        background: #111; /* Dark techie theme */
+        color: white;
+        padding: 20px;
+        z-index: 9999;
+        /* Sketched-look border */
+        border: 2px solid var(--primary);
+        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+        box-shadow: 8px 8px 0px rgba(255, 90, 44, 0.2);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.4s ease-in-out;
+    }
+
+    .cookie-card.hidden {
+        transform: translateY(150%);
+    }
+
+    .cookie-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .cookie-icon i {
+        font-size: 30px;
+        color: var(--primary);
+        filter: drop-shadow(0 0 5px var(--primary));
+    }
+
+    .cookie-text h4 {
+        margin: 0;
+        font-family: 'Courier New', monospace; /* Techie font */
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .cookie-text p {
+        margin: 5px 0 0;
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    .cookie-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .btn-accept {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .btn-close {
+        background: transparent;
+        color: #888;
+        border: 1px solid #444;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-accept:hover { background: #e44d22; }
+
+    /* Mobile tweak */
+    @media (max-width: 480px) {
+        .cookie-card { left: 10px; right: 10px; bottom: 10px; }
+    }
+
 
 
     </style>
@@ -1001,8 +1226,6 @@
 
     <!-- CART OVERLAY -->
 <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-
-<!-- CART SIDEBAR -->
 <div class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
         <h3>Your Cart</h3>
@@ -1025,9 +1248,109 @@
     </div>
 </div>
 
+
     <main class="gs-main">
         {% block content %}{% endblock %}
     </main>
+<footer class="gs-footer" id="footer">
+    <div class="footer-container">
+
+        <!-- LOCATION -->
+        <div class="footer-column">
+            <h3>Our Location</h3>
+            <p>
+                <i class="fa-solid fa-location-dot"></i>
+                Nairobi, Kenya <br>
+                Along Mombasa Road / CBD Delivery Available
+            </p>
+
+            <p style="margin-top:12px;">
+                <i class="fa-solid fa-clock"></i>
+                Open: Mon - Sat (8:00AM - 7:00PM)
+            </p>
+        </div>
+
+        <!-- QUICK LINKS -->
+        <div class="footer-column">
+            <h3>Quick Links</h3>
+            <a href="{% url 'index' %}">Home</a>
+            <a href="{% url 'products' %}">Products</a>
+            <a href="{% url 'index' %}#categories">Brands</a>
+            <a href="{% url 'index' %}#services">Services</a>
+            <a href="{% url 'index' %}#contacts">Contact</a>
+        </div>
+
+        <!-- CONTACTS + SOCIALS -->
+        <div class="footer-column">
+            <h3>Contacts</h3>
+
+            <p>
+                <i class="fa-solid fa-phone"></i>
+                +254 7XX XXX XXX
+            </p>
+
+            <p>
+                <i class="fa-solid fa-envelope"></i>
+                support@gadgetsokokenya.com
+            </p>
+
+            <p>
+                <i class="fa-brands fa-whatsapp"></i>
+                WhatsApp: +254 7XX XXX XXX
+            </p>
+
+            <div class="footer-social">
+                <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+        </div>
+
+    </div>
+    <div id="auth-loader" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; backdrop-filter:blur(8px);">
+    <div class="cart-flipper" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;">
+        <i class="fa fa-shopping-cart"></i>
+    </div>
+    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; color: var(--navy);">Logging you into Gadget Soko...</h3>
+    <p style="color: var(--text-muted);">Almost there! After logging in, you can fill your cart.</p>
+</div>
+<div id="cookie-popup" class="cookie-card hidden">
+    <div class="cookie-content">
+        <div class="cookie-icon">
+            <i class="fa-solid fa-cookie-bite"></i>
+        </div>
+        <div class="cookie-text">
+            <h4>Syncing Your Tech...</h4>
+            <p>We use cookies to remember your cart and optimize your gadget hunt. Is that cool?</p>
+        </div>
+        <div class="cookie-actions">
+            <button onclick="acceptCookies()" class="btn-accept">Enable</button>
+            <button onclick="closeCookiePopup()" class="btn-close">Later</button>
+        </div>
+    </div>
+</div>
+
+
+    <!-- FOOTER BOTTOM -->
+    <div class="footer-bottom">
+        <p>
+            © {{ year|default:"2026" }} Gadget Soko Kenya. All Rights Reserved.
+        </p>
+
+        <p>
+            Developed by <strong>Sammy Tings</strong> |
+            Contact: <a href="tel:+2547XXXXXXXX" class="dev-contact">+254 7XX XXX XXX</a> |
+            Email: <a href="mailto:sammytings@email.com" class="dev-contact">sammytings@email.com</a>
+        </p>
+    </div>
+    
+</footer>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- jQuery -->
@@ -1048,27 +1371,62 @@
     }
 
     function updateCartSidebar() {
-        $.get("{% url 'view_cart' %}?ajax=1", function(data) {
-            let h = '';
-            if (!data.items || data.items.length === 0) {
-                h = '<p>Your cart is empty</p>';
-            } else {
-                data.items.forEach(i => {
-                    h += `
-                        <div class="cart-item-row">
-                            <img src="${i.image}" alt="">
-                            <div class="item-info">
-                                <b>${i.name}</b>
-                                <small>KES ${i.price} × ${i.quantity}</small>
+    $.get("{% url 'view_cart' %}?ajax=1", function(data) {
+        let h = '';
+
+        if (!data.items || data.items.length === 0) {
+            h = '<p>Your cart is empty</p>';
+        } else {
+            data.items.forEach(i => {
+                h += `
+                    <div class="cart-item-row">
+                        <img src="${i.image}" alt="">
+                        
+                        <div class="item-info">
+                            <b>${i.name}</b>
+                            <small>KES ${i.price}</small>
+
+                            <div class="qty-controls">
+                                <button onclick="updateQty(${i.id}, 'decrease')" class="qty-btn">−</button>
+                                <span class="qty-num">${i.quantity}</span>
+                                <button onclick="updateQty(${i.id}, 'increase')" class="qty-btn">+</button>
                             </div>
                         </div>
-                    `;
-                });
-            }
-            $('#cartSlides').html(h);
-            $('#sidebarTotal').text('KES ' + (data.total || 0));
-        });
-    }
+
+                        <button onclick="removeItem(${i.id})" class="remove-btn">&times;</button>
+                    </div>
+                `;
+            });
+        }
+
+        $('#cartSlides').html(h);
+        $('#sidebarTotal').text('KES ' + (data.total || 0));
+    });
+}
+/* Increase / Decrease Quantity */
+function updateQty(productId, action) {
+    $.ajax({
+        url: `/update-cart/${productId}/`,
+        method: "GET",
+        data: { action: action },
+        success: function(res) {
+            $('.cart-count').text(res.cart_count);
+            updateCartSidebar();
+        }
+    });
+}
+
+/* Remove Item Completely */
+function removeItem(productId) {
+    $.ajax({
+        url: `/remove-from-cart/${productId}/`,
+        method: "GET",
+        success: function(res) {
+            $('.cart-count').text(res.cart_count);
+            updateCartSidebar();
+        }
+    });
+}
 
     
     /* ── MOBILE MENU (HAMBURGER) ── */
@@ -1169,457 +1527,11 @@ function addToCart(pId) {
     function closeCookiePopup() {
         document.getElementById('cookie-popup').classList.add('hidden');
     }
-</script>
-
-{% block extra_scripts %}{% endblock %}
-
-<div id="auth-loader" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; backdrop-filter:blur(8px);">
-    <div class="cart-flipper" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;">
-        <i class="fa fa-shopping-cart"></i>
-    </div>
-    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; color: var(--navy);">Logging you into Gadget Soko...</h3>
-    <p style="color: var(--text-muted);">Almost there! After logging in, you can fill your cart.</p>
-</div>
-
-<style>
-    /* Cart Flipping Animation */
-    .cart-flipper {
-        animation: flipCart 0.6s infinite linear;
-        display: inline-block;
-    }
-    @keyframes flipCart {
-        0% { transform: rotateY(0deg); }
-        100% { transform: rotateY(360deg); }
-    }
-    .cookie-card {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        right: 20px;
-        max-width: 400px;
-        background: #111; /* Dark techie theme */
-        color: white;
-        padding: 20px;
-        z-index: 9999;
-        /* Sketched-look border */
-        border: 2px solid var(--primary);
-        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
-        box-shadow: 8px 8px 0px rgba(255, 90, 44, 0.2);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.4s ease-in-out;
-    }
-
-    .cookie-card.hidden {
-        transform: translateY(150%);
-    }
-
-    .cookie-content {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .cookie-icon i {
-        font-size: 30px;
-        color: var(--primary);
-        filter: drop-shadow(0 0 5px var(--primary));
-    }
-
-    .cookie-text h4 {
-        margin: 0;
-        font-family: 'Courier New', monospace; /* Techie font */
-        color: var(--primary);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .cookie-text p {
-        margin: 5px 0 0;
-        font-size: 13px;
-        opacity: 0.9;
-    }
-
-    .cookie-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-    }
-
-    .btn-accept {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 5px;
-        font-weight: bold;
-        cursor: pointer;
-        flex: 1;
-    }
-
-    .btn-close {
-        background: transparent;
-        color: #888;
-        border: 1px solid #444;
-        padding: 8px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .btn-accept:hover { background: #e44d22; }
-
-    /* Mobile tweak */
-    @media (max-width: 480px) {
-        .cookie-card { left: 10px; right: 10px; bottom: 10px; }
-    }
-</style>
-<div id="cookie-popup" class="cookie-card hidden">
-    <div class="cookie-content">
-        <div class="cookie-icon">
-            <i class="fa-solid fa-cookie-bite"></i>
-        </div>
-        <div class="cookie-text">
-            <h4>Syncing Your Tech...</h4>
-            <p>We use cookies to remember your cart and optimize your gadget hunt. Is that cool?</p>
-        </div>
-        <div class="cookie-actions">
-            <button onclick="acceptCookies()" class="btn-accept">Enable</button>
-            <button onclick="closeCookiePopup()" class="btn-close">Later</button>
-        </div>
-    </div>
-</div>
-<footer class="gs-footer" id="footer">
-    <div class="footer-container">
-
-        <!-- LOCATION -->
-        <div class="footer-column">
-            <h3>Our Location</h3>
-            <p>
-                <i class="fa-solid fa-location-dot"></i>
-                Nairobi, Kenya <br>
-                Along Mombasa Road / CBD Delivery Available
-            </p>
-
-            <p style="margin-top:12px;">
-                <i class="fa-solid fa-clock"></i>
-                Open: Mon - Sat (8:00AM - 7:00PM)
-            </p>
-        </div>
-
-        <!-- QUICK LINKS -->
-        <div class="footer-column">
-            <h3>Quick Links</h3>
-            <a href="{% url 'index' %}">Home</a>
-            <a href="{% url 'products' %}">Products</a>
-            <a href="{% url 'index' %}#categories">Brands</a>
-            <a href="{% url 'index' %}#services">Services</a>
-            <a href="{% url 'index' %}#contacts">Contact</a>
-        </div>
-
-        <!-- CONTACTS + SOCIALS -->
-        <div class="footer-column">
-            <h3>Contacts</h3>
-
-            <p>
-                <i class="fa-solid fa-phone"></i>
-                +254 7XX XXX XXX
-            </p>
-
-            <p>
-                <i class="fa-solid fa-envelope"></i>
-                support@gadgetsokokenya.com
-            </p>
-
-            <p>
-                <i class="fa-brands fa-whatsapp"></i>
-                WhatsApp: +254 7XX XXX XXX
-            </p>
-
-            <div class="footer-social">
-                <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- FOOTER BOTTOM -->
-    <div class="footer-bottom">
-        <p>
-            © {{ year|default:"2026" }} Gadget Soko Kenya. All Rights Reserved.
-        </p>
-
-        <p>
-            Developed by <strong>Sammy Tings</strong> |
-            Contact: <a href="tel:+2547XXXXXXXX" class="dev-contact">+254 7XX XXX XXX</a> |
-            Email: <a href="mailto:sammytings@email.com" class="dev-contact">sammytings@email.com</a>
-        </p>
-    </div>
-</footer>
-
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-    /* ── CART ── */
-    function toggleCart() {
-        {% if not request.user.is_authenticated %}
-            window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
-            return;
-        {% endif %}
-
-        $('#cartSidebar').toggleClass('active');
-        $('#cartOverlay').toggleClass('active');
-
-        if ($('#cartSidebar').hasClass('active')) updateCartSidebar();
-    }
-
-    function updateCartSidebar() {
-        $.get("{% url 'view_cart' %}?ajax=1", function(data) {
-            let h = '';
-            if (!data.items || data.items.length === 0) {
-                h = '<p>Your cart is empty</p>';
-            } else {
-                data.items.forEach(i => {
-                    h += `
-                        <div class="cart-item-row">
-                            <img src="${i.image}" alt="">
-                            <div class="item-info">
-                                <b>${i.name}</b>
-                                <small>KES ${i.price} × ${i.quantity}</small>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-            $('#cartSlides').html(h);
-            $('#sidebarTotal').text('KES ' + (data.total || 0));
-        });
-    }
-
-    function toggleMenu() {
-        // Toggle the 'active' class on both sidebar and overlay
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-
-        // Prevent body scrolling when menu is open
-        if (sidebar.classList.contains('active')) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
-    }
-
-    function addToCart(pId) {
-    // 1. Immediate check (0.02s speed)
-    {% if not request.user.is_authenticated %}
-        const loader = document.getElementById('auth-loader');
-        loader.style.display = 'flex';
-        
-        // Redirect after a very brief delay to let them see the message/animation
-        setTimeout(function() {
-            window.location.href = "{% url 'userlog' %}?next=" + window.location.pathname;
-        }, 800); // 800ms gives the user time to read the message, change to 200 for faster
-        return;
-    {% endif %}
-
-    // 2. Logic for Logged-in users
-    $.get(`/add-to-cart/${pId}/`, function(res) {
-        if (res.error === 'not_logged_in') {
-            document.getElementById('auth-loader').style.display = 'flex';
-            window.location.href = "{% url 'userlog' %}";
-            return;
-        }
-        $('.cart-count').text(res.cart_count);
-        updateCartSidebar();
-        
-        if (!$('#cartSidebar').hasClass('active')) {
-            $('#cartSidebar').addClass('active');
-            $('#cartOverlay').addClass('active');
-        }
-    });
-}
 
 
-    
-
-    /* ── LIVE SEARCH ── */
-    $(document).ready(function () {
-        function doSearch(val, $dropdown) {
-            if (val.length < 2) { $dropdown.hide(); return; }
-            $.ajax({
-                url: "{% url 'live_search' %}",
-                data: { 'q': val },
-                success: function (d) { $dropdown.html(d.html).show(); }
-            });
-        }
-
-        /* Desktop search */
-        $('#searchInput').on('keyup', function () {
-            doSearch($(this).val(), $('#search-results'));
-        });
-
-        /* Close dropdown on outside click */
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('.gs-search').length) {
-                $('.search-dropdown').hide();
-            }
-        });
-    });
-
-
-    document.addEventListener("DOMContentLoaded", function() {
-        // Check if user is logged out (Django context check)
-        const isUserAuthenticated = "{{ user.is_authenticated }}" === "True";
-        
-        // Check if they already dismissed the cookie prompt
-        const cookieAccepted = localStorage.getItem("gsk_cookies");
-
-        if (!isUserAuthenticated && !cookieAccepted) {
-            // Show the popup with a slight delay for effect
-            setTimeout(() => {
-                document.getElementById('cookie-popup').classList.remove('hidden');
-            }, 2000);
-        }
-    });
-
-    function acceptCookies() {
-        localStorage.setItem("gsk_cookies", "accepted");
-        closeCookiePopup();
-        console.log("Cookies enabled for Gadget Soko session.");
-    }
-
-    function closeCookiePopup() {
-        document.getElementById('cookie-popup').classList.add('hidden');
-    }
 </script>
 
 
-
-<div id="auth-loader" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; backdrop-filter:blur(8px);">
-    <div class="cart-flipper" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;">
-        <i class="fa fa-shopping-cart"></i>
-    </div>
-    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; color: var(--navy);">Logging you into Gadget Soko...</h3>
-    <p style="color: var(--text-muted);">Almost there! After logging in, you can fill your cart.</p>
-</div>
-
-<style>
-    /* Cart Flipping Animation */
-    .cart-flipper {
-        animation: flipCart 0.6s infinite linear;
-        display: inline-block;
-    }
-    @keyframes flipCart {
-        0% { transform: rotateY(0deg); }
-        100% { transform: rotateY(360deg); }
-    }
-    .cookie-card {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        right: 20px;
-        max-width: 400px;
-        background: #111; /* Dark techie theme */
-        color: white;
-        padding: 20px;
-        z-index: 9999;
-        /* Sketched-look border */
-        border: 2px solid var(--primary);
-        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
-        box-shadow: 8px 8px 0px rgba(255, 90, 44, 0.2);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.4s ease-in-out;
-    }
-
-    .cookie-card.hidden {
-        transform: translateY(150%);
-    }
-
-    .cookie-content {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .cookie-icon i {
-        font-size: 30px;
-        color: var(--primary);
-        filter: drop-shadow(0 0 5px var(--primary));
-    }
-
-    .cookie-text h4 {
-        margin: 0;
-        font-family: 'Courier New', monospace; /* Techie font */
-        color: var(--primary);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .cookie-text p {
-        margin: 5px 0 0;
-        font-size: 13px;
-        opacity: 0.9;
-    }
-
-    .cookie-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-    }
-
-    .btn-accept {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 5px;
-        font-weight: bold;
-        cursor: pointer;
-        flex: 1;
-    }
-
-    .btn-close {
-        background: transparent;
-        color: #888;
-        border: 1px solid #444;
-        padding: 8px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .btn-accept:hover { background: #e44d22; }
-
-    /* Mobile tweak */
-    @media (max-width: 480px) {
-        .cookie-card { left: 10px; right: 10px; bottom: 10px; }
-    }
-</style>
-<div id="cookie-popup" class="cookie-card hidden">
-    <div class="cookie-content">
-        <div class="cookie-icon">
-            <i class="fa-solid fa-cookie-bite"></i>
-        </div>
-        <div class="cookie-text">
-            <h4>Syncing Your Tech...</h4>
-            <p>We use cookies to remember your cart and optimize your gadget hunt. Is that cool?</p>
-        </div>
-        <div class="cookie-actions">
-            <button onclick="acceptCookies()" class="btn-accept">Enable</button>
-            <button onclick="closeCookiePopup()" class="btn-close">Later</button>
-        </div>
-    </div>
-</div>
-
-</body>
 
     </body>
 </html>

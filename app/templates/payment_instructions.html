@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Confirmed | Gadget Soko Kenya</title>
+    <title>Order Receipt | Gadget Soko Kenya</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
@@ -27,7 +27,6 @@
             color: var(--soko-dark);
         }
 
-        /* The Receipt Container */
         .receipt { 
             max-width: 480px; 
             margin: 30px auto; 
@@ -38,7 +37,6 @@
             border: 1px solid #f1f1f1;
         }
 
-        /* Decorative "Punch Holes" on the side for that human feel */
         .receipt::before {
             content: '';
             position: absolute;
@@ -52,7 +50,12 @@
 
         .header { 
             text-align: center; 
-            padding: 40px 30px 20px; 
+            padding: 30px 20px 20px; 
+        }
+
+        .header img.logo {
+            width: 150px;
+            margin-bottom: 15px;
         }
 
         .success-icon {
@@ -72,8 +75,7 @@
         .header h2 { margin: 0; font-size: 24px; font-weight: 800; color: var(--soko-dark); }
         .header p { color: #6b7280; font-size: 14px; margin-top: 5px; }
 
-        /* Order Details */
-        .info-grid { padding: 0 30px; }
+        .info-grid { padding: 0 30px; margin-top: 10px; }
         .info-row { 
             display: flex; 
             justify-content: space-between; 
@@ -84,7 +86,6 @@
         .info-row span:first-child { color: #9ca3af; font-weight: 500; }
         .info-row span:last-child { font-weight: 600; color: var(--soko-dark); }
 
-        /* The "Price Tag" Area */
         .price-section { 
             background: #fff8f6; 
             margin: 20px 30px; 
@@ -96,7 +97,6 @@
         .price-label { font-size: 13px; font-weight: 600; color: var(--soko-orange); text-transform: uppercase; letter-spacing: 1px; }
         .price-amount { font-size: 32px; font-weight: 800; color: var(--soko-dark); display: block; margin-top: 5px; }
 
-        /* Payment Instructions Box */
         .payment-instructions { 
             margin: 20px 30px; 
             padding: 20px; 
@@ -123,7 +123,6 @@
         .pay-value { font-size: 22px; font-weight: 800; color: var(--soko-orange); display: block; margin: 5px 0; letter-spacing: 1px; }
         .pay-ref { font-size: 12px; color: #9ca3af; }
 
-        /* Actions */
         .actions { 
             padding: 20px 30px 40px; 
             display: flex; 
@@ -143,7 +142,6 @@
         .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
         .btn-outline { color: #6b7280; font-weight: 600; font-size: 14px; }
 
-        /* Rubber Stamp Effect */
         .stamp {
             position: absolute;
             top: 100px;
@@ -159,15 +157,29 @@
             pointer-events: none;
         }
 
-        @media print { .actions, .receipt::before { display: none; } body { background: white; } .receipt { box-shadow: none; border: 1px solid #eee; } }
+        @media print { 
+            .actions, .receipt::before { display: none; } 
+            body { background: white; } 
+            .receipt { box-shadow: none; border: 1px solid #eee; } 
+        }
     </style>
 </head>
 <body>
 
 <div class="receipt">
-    <div class="stamp">Awaiting Pay</div>
+    <div class="stamp">
+        {% if order.payment_status == "Paid" %}
+            Paid
+        {% elif order.payment_method == "pod" %}
+            COD
+        {% else %}
+            Awaiting Pay
+        {% endif %}
+    </div>
 
     <div class="header">
+        <!-- Gadget Soko Logo -->
+        <img src="{% static 'images/logo.png' %}" alt="Gadget Soko" class="logo">
         <div class="success-icon">
             <i class="fas fa-check"></i>
         </div>
@@ -175,26 +187,36 @@
         <p>Order #GSK-{{ order.id }} has been registered.</p>
     </div>
 
+    <!-- Customer Info -->
     <div class="info-grid">
+        <div class="info-row"><span>Customer</span><span>{{ order.name }}</span></div>
+        <div class="info-row"><span>Email</span><span>{{ order.email }}</span></div>
+        <div class="info-row"><span>Phone</span><span>{{ order.phone }}</span></div>
+        <div class="info-row"><span>Destination</span><span>{{ order.destination }}</span></div>
+        <div class="info-row"><span>Placed On</span><span>{{ order.created_at|date:"M d, H:i" }}</span></div>
+    </div>
+
+    <!-- Items -->
+    <div class="info-grid">
+        {% for item in order.items.all %}
+            <div class="info-row">
+                <span>{{ item.product.name }} x {{ item.quantity }}</span>
+                <span>KES {{ item.subtotal }}</span>
+            </div>
+        {% endfor %}
         <div class="info-row">
-            <span>Customer</span>
-            <span>{{ order.name }}</span>
-        </div>
-        <div class="info-row">
-            <span>Payment Method</span>
-            <span style="text-transform: capitalize;">{{ order.payment_method }}</span>
-        </div>
-        <div class="info-row">
-            <span>Placed On</span>
-            <span>{{ order.created_at|date:"M d, H:i" }}</span>
+            <span>Shipping Fee</span>
+            <span>KES {{ order.shipping_fee }}</span>
         </div>
     </div>
 
+    <!-- Total -->
     <div class="price-section">
         <span class="price-label">Total Amount Due</span>
         <span class="price-amount">KES {{ order.total }}</span>
     </div>
 
+    <!-- Payment Instructions -->
     <div class="payment-instructions">
         {% if order.payment_method == 'equity' %}
             <div class="instr-title"><i class="fas fa-university"></i> Equity Bank Instructions</div>
@@ -202,22 +224,26 @@
                 <span class="pay-value">Till: 7788990</span>
                 <span class="pay-ref">Ref: #GSK-{{ order.id }}</span>
             </div>
-            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">Go to Equity Mobile -> Pay Merchant -> Till Number</p>
-
+            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">
+                Go to Equity Mobile -> Pay Merchant -> Till Number
+            </p>
         {% elif order.payment_method == 'pochi' %}
             <div class="instr-title"><i class="fas fa-mobile-alt"></i> Pochi La Biashara</div>
             <div class="pay-details">
                 <span class="pay-value">0722 000 000</span>
                 <span class="pay-ref">Name: GADGET SOKO KENYA</span>
             </div>
-            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">M-Pesa -> Lipa na M-Pesa -> Pochi la Biashara</p>
-
+            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">
+                M-Pesa -> Lipa na M-Pesa -> Pochi la Biashara
+            </p>
         {% elif order.payment_method == 'mpesa' %}
             <div class="instr-title"><i class="fas fa-bolt"></i> M-Pesa Express (STK)</div>
             <div class="pay-details">
                 <p style="font-size: 13px; margin: 0;">Check your phone for a PIN prompt.</p>
             </div>
-            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">If no prompt appeared, use Paybill <b>400200</b> Acc: <b>{{ order.id }}</b></p>
+            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">
+                If no prompt appeared, use Paybill <b>400200</b> Acc: <b>{{ order.id }}</b>
+            </p>
         {% else %}
             <div class="instr-title"><i class="fas fa-truck"></i> Cash on Delivery</div>
             <div class="pay-details">
@@ -233,7 +259,6 @@
 </div>
 
 <script>
-    // Just a bit of extra "Human" touch - it's a shop, let's make it exciting
     console.log("Gadget Soko: Order #GSK-{{ order.id }} successfully rendered.");
 </script>
 

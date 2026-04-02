@@ -457,7 +457,8 @@ def check(request):
             total=final_total,
             shipping_fee=shipping_fee, # Recommended to add this field to your Model
             status="Pending",
-            payment_status="Awaiting Payment"
+            payment_status="Awaiting Payment",
+            payment_method=payment_method
         )
 
         # --- 4. CREATE ORDER ITEMS ---
@@ -1201,3 +1202,38 @@ def get_dynamic_reviews(product_id):
         'reviews': selected_reviews,
         'stars_html': '★' * int(rating) + '☆' * (5 - int(rating))
     }
+
+def remove_from_cart(request, product_id):
+    cart = request.session.get('cart', {})
+    product_id = str(product_id)
+
+    if product_id in cart:
+        del cart[product_id]
+
+    request.session['cart'] = cart
+
+    return JsonResponse({
+        'cart_count': sum(item['quantity'] for item in cart.values())
+    })
+def update_cart(request, product_id):
+    action = request.GET.get('action')
+    cart = request.session.get('cart', {})
+
+    product_id = str(product_id)
+
+    if product_id not in cart:
+        return JsonResponse({"error": "Item not in cart"})
+
+    if action == 'increase':
+        cart[product_id]['quantity'] += 1
+
+    elif action == 'decrease':
+        cart[product_id]['quantity'] -= 1
+        if cart[product_id]['quantity'] <= 0:
+            del cart[product_id]
+
+    request.session['cart'] = cart
+
+    return JsonResponse({
+        'cart_count': sum(item['quantity'] for item in cart.values())
+    })
