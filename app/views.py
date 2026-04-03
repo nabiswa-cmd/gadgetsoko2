@@ -84,36 +84,43 @@ def products_view(request, brand_id=None, category_id=None):
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import JsonResponse
+
+from django.http import JsonResponse
+@login_required
+
 @login_required
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user)
+    
+    # Calculate totals for both AJAX and Normal renders
+    # Use the property 'discounted_price' as defined in your Product model
+    total = sum(item.quantity * item.product.discounted_price for item in cart_items)
+    cart_count = sum(item.quantity for item in cart_items)
 
-    # AJAX REQUEST
     if request.GET.get('ajax'):
         items = []
-        total = 0
-
         for item in cart_items:
             product = item.product
-            price = product.discounted_price if product.discount > 0 else product.price
-            item_total = price * item.quantity
-            total += item_total
-
+            price = product.discounted_price
             items.append({
                 'id': item.id,
+                'price': f"{price:,.2f}",
                 'name': product.name,
-                'brand': product.brand.name,
-                'price': price,
+               
                 'quantity': item.quantity,
-                'item_total': item_total,
                 'image': product.images.first().image.url if product.images.first() else '/static/images/default.png'
             })
+        return JsonResponse({'items': items, 'total': float(total), 'cart_count': cart_count})
 
-        return JsonResponse({
-            'items': items,
-            'total': total,
-            'cart_count': sum(item.quantity for item in cart_items)
-        })
+    # This handles the actual page visit
+    return render(request, 'cart.html', {
+        'cart_items': cart_items,
+        'total': total,
+        'cart_count': cart_count
+    })
+    
+    # Regular (non-AJAX) return
+    return render(request, 'app/cart.html', {'cart_items': cart_items})
 
     # ✅ NORMAL PAGE (THIS WAS MISSING)
     total = sum(item.quantity * item.product.discounted_price for item in cart_items)
@@ -268,9 +275,16 @@ def product_detail(request, pk):
             extra_info=f"Viewed {product.name}"
         )
 
+    # --- RECOMMENDED PRODUCTS (THE ROPE) ---
+    # Fetch up to 10 products from the same category, excluding the current one
+    recommended_products = Product.objects.filter(
+        category=product.category
+    ).exclude(id=product.id)[:10]
+
     return render(request, 'product_detail.html', {
         'product': product,
-        'social_proof': social_proof
+        'social_proof': social_proof,
+        'recommended_products': recommended_products, # New context variable
     })
 
 
@@ -611,7 +625,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 
-def login_view(request):
+def secretkey_view(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
@@ -1215,25 +1229,70 @@ def remove_from_cart(request, product_id):
     return JsonResponse({
         'cart_count': sum(item['quantity'] for item in cart.values())
     })
-def update_cart(request, product_id):
-    action = request.GET.get('action')
-    cart = request.session.get('cart', {})
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import CartItem, Product
+import json
 
-    product_id = str(product_id)
+def update_cart(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        product_id = data.get('id')
+        action = data.get('action') # 'add', 'remove', or 'delete'
+        
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Get or create cart item for the logged-in user
+        cart_item, created = CartItem.objects.get_or_create(
+            user=request.user, 
+            product=product
+        )
 
-    if product_id not in cart:
-        return JsonResponse({"error": "Item not in cart"})
+        if action == 'add':
+            cart_item.quantity += 1
+        elif action == 'remove':
+            cart_item.quantity -= 1
+        
+        if action == 'delete' or cart_item.quantity <= 0:
+            cart_item.delete()
+            return JsonResponse({'status': 'deleted'})
+        
+        cart_item.save()
+        return JsonResponse({'status': 'updated', 'quantity': cart_item.quantity})
 
-    if action == 'increase':
-        cart[product_id]['quantity'] += 1
+def get_cart(request):
+    items = CartItem.objects.filter(user=request.user)
+    cart_data = [{
+        'id': item.product.id,
+        'name': item.product.name,
+        'price': item.product.price,
+        'image': item.product.image.url,
+        'quantity': item.quantity
+    } for item in items]
+    return JsonResponse({'cart': cart_data})
+import os
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.utils.text import slugify
+from django.conf import settings
+from .models import Brand
 
-    elif action == 'decrease':
-        cart[product_id]['quantity'] -= 1
-        if cart[product_id]['quantity'] <= 0:
-            del cart[product_id]
+@receiver(pre_save, sender=Brand)
+def auto_assign_brand_logo(sender, instance, **kwargs):
+    if not instance.logo and instance.name:
+        # 1. Create the slug (e.g., "Samsung" -> "samsung")
+        brand_slug = slugify(instance.name)
+        
+        # 2. Define the relative path Django needs
+        relative_path = f'brand_master_assets/{brand_slug}.png'
+        
+        # 3. Define the absolute path to check if the file exists on your PC
+        absolute_path = os.path.join(settings.MEDIA_ROOT, 'brand_master_assets', f'{brand_slug}.png')
+        
+        print(f"DEBUG: Looking for logo at {absolute_path}") # Check your terminal!
 
-    request.session['cart'] = cart
-
-    return JsonResponse({
-        'cart_count': sum(item['quantity'] for item in cart.values())
-    })
+        if os.path.exists(absolute_path):
+            instance.logo = relative_path
+            print(f"DEBUG: Found it! Assigned {relative_path} to {instance.name}")
+        else:
+            print(f"DEBUG: File not found for {instance.name}")

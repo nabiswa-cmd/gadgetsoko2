@@ -4,281 +4,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} | Gadget Soko Kenya</title>
+    <title>{{ product.name }} | GADGET SOKO</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <style>
         :root {
             --soko-orange: #ee4d2d;
-            --soko-black: #1a1a1a;
-            --soko-bg: #ffffff;
             --soko-green: #25D366;
+            --soko-blue: #007bff;
+            --soko-black: #111;
+            --soko-gray: #f8f8f8;
+            --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--soko-bg); color: #333; margin: 0; padding: 0; }
-        .wrapper { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        body { font-family: 'Inter', sans-serif; background: #fff; color: var(--soko-black); margin: 0; overflow-x: hidden; }
+        .wrapper { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
-        /* NAVIGATION */
-        .top-nav { margin-bottom: 30px; }
-        .back-link { 
-            text-decoration: none; color: var(--soko-black); font-weight: 700; 
-            font-size: 13px; display: inline-flex; align-items: center; gap: 8px;
-            transition: 0.2s;
-        }
-        .back-link:hover { color: var(--soko-orange); }
+        /* TOP NAV */
+        .top-nav { padding: 10px 0 30px 0; }
+        .back-link { text-decoration: none; color: #999; font-weight: 800; font-size: 12px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .back-link:hover { color: var(--soko-orange); transform: translateX(-5px); }
 
-        .product-grid { display: flex; gap: 60px; flex-wrap: wrap; }
+        /* GRID */
+        .product-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; }
+        .stage { background: var(--soko-gray); height: 500px; border-radius: 25px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid #eee; }
+        .stage img { max-width: 80%; max-height: 80%; object-fit: contain; transition: 0.1s linear; }
 
-        /* GALLERY (CLEAN) */
-        .gallery { flex: 1.2; min-width: 320px; position: relative; }
-        .display-area { height: 450px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .display-area img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        /* BADGES */
+        .badge-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .soko-badge { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 900; text-transform: uppercase; border: 1px solid #eee; }
+        .b-stock { background: #e6fff0; color: #2ecc71; }
+        .b-rating { background: #fffbe6; color: #f1c40f; }
 
-        .slide-ctrl {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            background: none; border: none; font-size: 20px; color: #ddd;
-            cursor: pointer; transition: 0.3s;
-        }
-        .slide-ctrl:hover { color: var(--soko-black); }
-        .prev-ctrl { left: -10px; }
-        .next-ctrl { right: -10px; }
+        /* TYPOGRAPHY */
+        .p-title { font-size: 52px; font-weight: 900; margin: 0; line-height: 0.9; letter-spacing: -2px; }
+        .p-price { font-size: 60px; font-weight: 900; margin: 25px 0; letter-spacing: -3px; }
+        .p-price span { font-size: 22px; color: var(--soko-orange); vertical-align: top; }
 
-        .thumbs { display: flex; gap: 10px; margin-top: 20px; overflow-x: auto; scrollbar-width: none; }
-        .thumbs img { width: 65px; height: 65px; cursor: pointer; opacity: 0.4; transition: 0.3s; border-radius: 2px; }
-        .thumbs img.active { opacity: 1; transform: scale(1.1); }
+        /* CART BUTTON */
+        .btn-cart { width: 100%; padding: 25px; border-radius: 18px; background: var(--soko-orange); color: #fff; border: none; font-weight: 900; font-size: 20px; cursor: pointer; transition: 0.3s var(--spring); display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .btn-cart:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(238, 77, 45, 0.3); }
 
-        /* INFO & TYPOGRAPHY */
-        .info { flex: 1; min-width: 320px; }
-        .brand-name { display: block; font-weight: 900; color: var(--soko-black); text-transform: uppercase; font-size: 14px; margin-bottom: 5px; }
-        .product-name { font-size: 38px; font-weight: 800; color: var(--soko-black); margin: 0 0 10px 0; line-height: 1.1; }
+        /* REVIEWS */
+        .rev-section { margin-top: 80px; }
+        .rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
+        .rev-item p { font-size: 16px; color: #333; font-style: italic; margin: 0 0 10px 0; line-height: 1.5; }
+        .rev-user { font-weight: 900; font-size: 11px; color: var(--soko-orange); text-transform: uppercase; }
+
+        /* THE ROPE & DOTS */
+        .rope-wrap { margin-top: 100px; padding-bottom: 120px; position: relative; }
+        .rope-item { background: #fff; padding: 20px; border-radius: 20px; border: 1px solid #eee; transition: 0.4s var(--spring); }
+        .rope-item:hover { transform: translateY(-10px); border-color: var(--soko-orange); }
         
-        .stock-indicator { color: var(--soko-black); font-weight: 800; font-size: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 5px; }
+        .dot-bar { display: flex; justify-content: center; gap: 10px; margin-top: 30px; }
+        .dot { width: 10px; height: 10px; background: #ddd; border-radius: 50%; transition: 0.4s var(--spring); }
+        .dot.active { width: 35px; background: var(--soko-orange); border-radius: 10px; }
 
-        .rating-summary { margin-bottom: 20px; font-size: 14px; color: #1a1a1a; font-weight: 600; }
-        .stars { color: #f1c40f; margin-right: 5px; }
+        /* FLOATING ACTION HUB */
+        .floating-hub { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 99999; }
+        .f-btn { width: 65px; height: 65px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); transition: 0.3s var(--spring); text-decoration: none; border: none; cursor: pointer; }
+        .f-btn:hover { transform: scale(1.1) rotate(10deg); }
+        .bg-wa { background: var(--soko-green); }
+        .bg-call { background: var(--soko-blue); }
 
-        .price-tag { font-size: 44px; font-weight: 900; color: var(--soko-black); margin-bottom: 30px; letter-spacing: -1.5px; }
+        /* LIVE ACTIVITY TOAST */
+        #soko-pill { position: fixed; bottom: -120px; left: 20px; background: #fff; padding: 15px 25px; border-radius: 100px; display: flex; align-items: center; gap: 15px; box-shadow: 0 25px 60px rgba(0,0,0,0.15); border: 1px solid #eee; z-index: 99999; transition: 0.6s var(--spring); min-width: 300px; }
+        #soko-pill.active { bottom: 30px; }
 
-        /* ACTION BUTTONS */
-        .actions { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 30px; }
-        .btn-soko {
-            padding: 22px; font-size: 16px; font-weight: 800; text-transform: uppercase;
-            cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px;
-            border-radius: 2px; text-decoration: none;
-        }
-        .btn-orange { background: var(--soko-orange); color: white; border: none; }
-        .btn-orange:hover { background: #d63d1f; transform: translateY(-2px); }
-        
-        /* WhatsApp Hover */
-        .btn-whatsapp { background: #25D366; color: white; }
-        .btn-whatsapp:hover { background: #20bd5a; transform: translateY(-2px); }
-
-        /* REVIEWS SECTION */
-        .reviews-box { margin-top: 50px; border-top: 1px solid #eee; padding-top: 30px; }
-        .review-card { background: #fafafa; padding: 20px; margin-bottom: 15px; border-radius: 4px; }
-        .review-card p { font-size: 14px; font-style: italic; margin: 0 0 10px 0; color: #444; }
-        .reviewer-info { font-size: 12px; font-weight: 800; color: var(--soko-black); text-transform: uppercase; }
-
-        /* DYNAMIC TOAST NOTIFICATION */
-        #soko-toast {
-            position: fixed; bottom: 30px; left: -400px; width: 280px;
-            background: #fff; padding: 18px; box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            z-index: 999; display: flex; align-items: center; gap: 15px;
-            border: 1px solid #eee; transition: 0.5s ease-in-out;
-        }
+        @media (max-width: 900px) { .product-grid { grid-template-columns: 1fr; } .p-title { font-size: 38px; } }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <nav class="top-nav">
-        <a href="{% url 'index' %}" class="back-link">
-            <i class="fas fa-arrow-left"></i> RETURN TO SHOP
-        </a>
-    </nav>
+    <div class="top-nav">
+        <a href="{% url 'index' %}" class="back-link"><i class="fas fa-arrow-left"></i> Return to Shopping</a>
+    </div>
 
     <div class="product-grid">
-        
         <div class="gallery">
-            <div class="display-area">
-                <img id="main-frame" src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
-                
-                {% if product.images.count > 1 %}
-                <button class="slide-ctrl prev-ctrl" onclick="move(-1)"><i class="fas fa-chevron-left"></i></button>
-                <button class="slide-ctrl next-ctrl" onclick="move(1)"><i class="fas fa-chevron-right"></i></button>
-                {% endif %}
+            <div class="stage" id="stage"><img id="v-img" src="{{ product.images.first.image.url }}"></div>
+        </div>
+        <div class="details">
+            <div class="badge-row">
+                <span class="soko-badge b-stock"><i class="fas fa-check"></i> 14 Units In Stock</span>
+                <span class="soko-badge b-rating"><i class="fas fa-star"></i> 4.9 Real Rating</span>
             </div>
+            <h1 class="p-title">{{ product.name }}</h1>
+            <div class="p-price"><span>KES</span>{{ product.discounted_price }}</div>
+            <div style="line-height: 1.7; color: #444; margin-bottom: 40px;">{{ product.specifications|linebreaks }}</div>
+            <button class="btn-cart" onclick="add({{ product.id }})">ADD TO CART <i class="fas fa-shopping-basket"></i></button>
+        </div>
+    </div>
 
-            <div class="thumbs">
-                {% for pi in product.images.all %}
-                <img class="{% if forloop.first %}active{% endif %}" 
-                     src="{{ pi.image.url }}" 
-                     onclick="jump('{{ pi.image.url }}', {{ forloop.counter0 }})">
+    <div class="rev-section">
+        <h3 style="font-weight: 900; font-size: 22px; margin-bottom: 35px; text-transform: uppercase;">Real Human Vibe</h3>
+        <div class="rev-grid" id="rev-engine"></div>
+    </div>
+
+    <div class="rope-wrap">
+        <h3 style="font-weight: 900; font-size: 22px; margin-bottom: 30px; text-transform: uppercase;">Flash Gear</h3>
+        <div class="swiper productSwiper">
+            <div class="swiper-wrapper">
+                {% for item in recommended_products %}
+                <div class="swiper-slide">
+                    <div class="rope-item">
+                        <a href="{% url 'product_detail' item.id %}" style="text-decoration:none; color:inherit;">
+                            <div style="height:140px; display:flex; align-items:center; justify-content:center;">
+                                <img src="{{ item.images.first.image.url }}" style="max-height:100%; max-width:100%;">
+                            </div>
+                            <span style="font-weight: 800; font-size: 15px; display: block; margin-top: 15px;">{{ item.name|truncatechars:18 }}</span>
+                            <div style="color: var(--soko-orange); font-weight: 900; margin-top: 5px;">KES {{ item.discounted_price }}</div>
+                        </a>
+                    </div>
+                </div>
                 {% endfor %}
             </div>
         </div>
-
-        <div class="info">
-            <span class="brand-name">{{ product.brand.name }}</span>
-            <h1 class="product-name">{{ product.name }}</h1>
-
-            <div class="rating-summary">
-                <span class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></span>
-                (4.9) • 18 VERIFIED REVIEWS
-            </div>
-
-            <div class="stock-indicator">
-                <i class="fas fa-check-double"></i> IN STOCK • NAIROBI WAREHOUSE
-            </div>
-
-            <div class="price-tag">
-                KES {{ product.discounted_price }}
-            </div>
-
-            <div style="color: #666; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">
-                {{ product.specifications|linebreaks }}
-            </div>
-
-            <div class="actions">
-                <button class="btn-soko btn-orange" onclick="addToCart({{ product.id }})">
-                    <i class="fas fa-shopping-bag"></i> ADD TO CART
-                </button>
-                
-                <a href="https://wa.me/254700000000?text=Hi%20Gadget%20Soko%2C%20I'm%20interested%20in%20the%20{{ product.name|urlencode }}" 
-                   class="btn-soko btn-whatsapp" 
-                   target="_blank">
-                    <i class="fab fa-whatsapp"></i> CHAT ON WHATSAPP
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="reviews-box">
-        <h3 style="font-weight: 800; text-transform: uppercase; font-size: 16px; margin-bottom: 25px;">Verified Customer Feedback</h3>
-        
-        <div class="review-card">
-            <p>"Delivery was super fast. Original item as described. Definitely shopping here again!"</p>
-            <div class="reviewer-info"><i class="fas fa-user-circle"></i> Kelvin M. • Verified Buyer</div>
-        </div>
-
-        <div class="review-card">
-            <p>"Authentic gadget. The battery life is exactly what I expected. Great price compared to other shops."</p>
-            <div class="reviewer-info"><i class="fas fa-user-circle"></i> Sarah J. • Verified Buyer</div>
-        </div>
-
-        <div class="review-card">
-            <p>"Gadget Soko never disappoints. The packaging was neat and the receipt was included."</p>
-            <div class="reviewer-info"><i class="fas fa-user-circle"></i> Brian O. • Verified Buyer</div>
-        </div>
+        <div class="dot-bar" id="dot-bar"></div>
     </div>
 </div>
 
-<div id="soko-toast">
-    <div id="toast-icon" style="font-size: 22px; color: var(--soko-orange);">
-        <i class="fas fa-bolt"></i>
-    </div>
-    <div style="flex: 1;">
-        <p id="msg" style="margin: 0; font-size: 12px; color: #1a1a1a; line-height: 1.4;"></p>
-        <small id="toast-time" style="color: #999; font-size: 10px;">JUST NOW</small>
+<div class="floating-hub">
+    <a href="tel:+254700000000" class="f-btn bg-call"><i class="fas fa-phone"></i></a>
+    <a href="https://wa.me/254700000000?text=hallo%20gadget%20soko,,i%20need%20this%20{{ product.name|urlencode }}" class="f-btn bg-wa" target="_blank"><i class="fab fa-whatsapp"></i></a>
+</div>
+
+<div id="soko-pill">
+    <img src="" id="t-avatar" style="width:55px; height:55px; border-radius:50%; border: 3px solid var(--soko-orange);">
+    <div>
+        <div id="t-user" style="font-weight: 900; font-size: 15px;">User</div>
+        <div id="t-msg" style="font-size: 12px; color: #555;">just secured an item</div>
+        <div id="t-meta" style="font-size: 10px; font-weight: 900; color: var(--soko-orange); text-transform: uppercase; margin-top: 3px;">Kilimani • 4m ago</div>
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    const imgs = [{% for pi in product.images.all %} "{{ pi.image.url }}", {% endfor %}];
-    let curr = 0;
-    let toastTimeout;
+    /* THE 100+ REVIEW DATA ENGINE */
+    const reviews = [
+        "Hii gadget imeweza sana maze. Delivery hapa CBD ilikua fast.",
+        "Original stuff only. Gadget Soko are serious people, no long stories.",
+        "Wueh! Speed ya delivery ilikua scary. Sealed and clean factory packaging.",
+        "Best tech deals in KE. Compared everywhere else and hapa ndio home.",
+        "M-Pesa checkout ilikua seamless. Trusted and verified shop.",
+        "Item arrived in Eldoret next morning. Very reliable team.",
+        "Mwangi was very helpful on WhatsApp kusetup kila kitu. 10/10 service.",
+        "Genuine product, factory sealed. I'll definitely order again.",
+        "Prices are unmatchable for the quality you get here.",
+        "My go-to for all electronics. Fast, genuine, and reliable.",
+        "Soko legit! I've bought three items now and zero issues.",
+        "Hapa ndio kwa ukweli. Item iko sealed kabisa.",
+        "Finally a shop that actually stocks what they show on the site.",
+        "Top-tier customer support. They respond so fast on WhatsApp.",
+        "Hii shop haina mchezo. Legit deals always.",
+        "Just received my laptop, condition is 100% clean. Safi sana.",
+        "Highly recommended for anyone looking for authentic tech hapa KE."
+    ];
+    const buyers = ["Kamau", "Shiko", "Otieno", "Achieng", "Brayo", "Fatuma", "Moraa", "Kip", "Njeri", "Juma", "Zawadi", "Mutua", "Wanjiku", "Ondiek", "Stacy"];
 
-    /* GALLERY LOGIC */
-    function move(d) {
-        if (imgs.length === 0) return;
-        curr += d;
-        if (curr >= imgs.length) curr = 0;
-        if (curr < 0) curr = imgs.length - 1;
-        syncUI();
+    function loadDynamicReviews() {
+        let pool = [...reviews];
+        let picked = [];
+        for(let i=0; i<4; i++) {
+            let idx = Math.floor(Math.random() * pool.length);
+            picked.push({
+                u: buyers[Math.floor(Math.random() * buyers.length)] + (Math.random() > 0.5 ? " M." : " W."),
+                m: pool.splice(idx, 1)[0]
+            });
+        }
+        let html = '';
+        picked.forEach(r => html += `<div class="rev-item"><p>"${r.m}"</p><div class="rev-user">${r.u} • Verified Client</div></div>`);
+        $('#rev-engine').html(html);
     }
 
-    function jump(u, i) {
-        curr = i;
-        syncUI();
-    }
-
-    function syncUI() {
-        $('#main-frame').fadeOut(100, function() {
-            $(this).attr('src', imgs[curr]).fadeIn(100);
-        });
-        $('.thumbs img').removeClass('active');
-        $('.thumbs img').eq(curr).addClass('active');
-    }
-
-    /* REUSABLE TOAST POPUP CONTROLLER */
-    function showToast(message, type = 'live') {
-        // Clear any active hide timeouts
-        clearTimeout(toastTimeout);
-        
-        // Retract current toast instantly to reload clean state
-        $('#soko-toast').css('left', '-400px');
-        
-        // Style based on notification type
-        setTimeout(() => {
-            $('#msg').html(message);
-            
-            if (type === 'cart') {
-                // Bright Green Success Theme for Adds
-                $('#toast-icon').html('<i class="fas fa-shopping-basket"></i>').css('color', 'var(--soko-green)');
-                $('#toast-time').text('SUCCESS');
-            } else {
-                // Standard Orange bolt for active viewer alerts
-                $('#toast-icon').html('<i class="fas fa-bolt"></i>').css('color', 'var(--soko-orange)');
-                $('#toast-time').text('JUST NOW');
-            }
-            
-            // Slide it in
-            $('#soko-toast').css('left', '30px');
-            
-            // Disappear after set window
-            toastTimeout = setTimeout(() => { 
-                $('#soko-toast').css('left', '-400px'); 
-            }, type === 'cart' ? 4500 : 4000); 
-        }, 300);
-    }
-
-    /* FAKE BUYER NOTIFICATION SCRIPT */
-    const bNames = ["Amina", "Kipkorir", "Mwangi", "Wanjiku", "Otieno"];
-    const bLocs = ["Westlands", "Mombasa Road", "Kisumu", "Thika Road"];
+    /* THE 1000+ COMBINATION ACTIVITY ENGINE */
+    const locations = ["Kilimani", "CBD", "Eldoret", "Mombasa Road", "Kisumu", "Thika", "Nakuru", "Kitengela", "Rongai", "Westlands", "Kasarani", "Syokimau", "Lavington", "Lodwar", "Embu", "Garrisa", "Nanyuki"];
+    const products = ["iPhone 15 Pro", "Samsung S24", "JBL Flip 6", "MacBook Air M3", "Sony XM5", "HP Victus", "Logitech Mouse", "PS5", "Apple Watch", "Gaming Monitor"];
 
     function triggerToast() {
-        const n = bNames[Math.floor(Math.random() * bNames.length)];
-        const l = bLocs[Math.floor(Math.random() * bLocs.length)];
-        showToast(`<strong>${n}</strong> in ${l} just bought this.`, 'live');
+        const u = buyers[Math.floor(Math.random()*buyers.length)];
+        const loc = locations[Math.floor(Math.random()*locations.length)];
+        const item = products[Math.floor(Math.random()*products.length)];
+        const time = Math.floor(Math.random()*59) + 1;
+
+        $('#t-user').text(u);
+        $('#t-msg').text(`just secured ${item}`);
+        $('#t-meta').text(`${loc} • ${time}m ago`);
+        $('#t-avatar').attr('src', `https://ui-avatars.com/api/?name=${u}&background=ee4d2d&color=fff`);
+        
+        $('#soko-pill').addClass('active');
+        setTimeout(() => $('#soko-pill').removeClass('active'), 5000);
     }
 
+    /* THE NITRO ENGINE (ROPE + CYCLES) */
     $(document).ready(function() {
-        setTimeout(triggerToast, 6000);
+        loadDynamicReviews();
+
+        const swiper = new Swiper(".productSwiper", {
+            slidesPerView: 2.2, spaceBetween: 20, speed: 600,
+            breakpoints: { 1024: { slidesPerView: 5 } },
+            on: {
+                init: function() {
+                    let dotCount = Math.ceil(this.slides.length / this.params.slidesPerView);
+                    let dots = '';
+                    for(let i=0; i<dotCount; i++) dots += `<div class="dot ${i===0?'active':''}"></div>`;
+                    $('#dot-bar').html(dots);
+                },
+                slideChange: function() {
+                    let cur = Math.floor(this.activeIndex / this.params.slidesPerView);
+                    $('.dot').removeClass('active').eq(cur).addClass('active');
+                    if(this.isEnd) setTimeout(() => this.slideTo(0, 450), 1200);
+                }
+            }
+        });
+
+        // FORCE MOVE EVERY 1.5 SECONDS
+        setInterval(() => { if(!swiper.isEnd) swiper.slideNext(); }, 1500);
+
+        // ACTIVITY TOAST CYCLES
+        setTimeout(triggerToast, 3500);
         setInterval(triggerToast, 28000);
     });
 
-    /* FUNCTIONAL ADD TO CART LOGIC */
-    function addToCart(id) {
-        $.get(`/add-to-cart/${id}/`, function(res) {
-            if (res.error === 'login_required') { 
-                window.location.href = "{% url 'userlog' %}"; 
-                return; 
-            }
-            
-            // Success Notification - Passing 'cart' triggers the green basket theme
-            showToast(`<strong>{{ product.name }}</strong> successfully added to your cart!`, 'cart');
-            
-            // Updates navbar counter if element class exists
-            if(res.cart_count) {
-                $('.cart-count').text(res.cart_count);
-            }
-        }).fail(function() {
-            showToast(`<span style="color: #ee4d2d;">Oops! Failed to add item to cart.</span>`, 'live');
+    function add(id) {
+        $('.btn-cart').html('<i class="fas fa-spinner fa-spin"></i> SECURING...').css('background', '#000');
+        $.get(`/add-to-cart/${id}/`, function() {
+            setTimeout(() => {
+                $('.btn-cart').html('<i class="fas fa-check"></i> IN BASKET').css('background', 'var(--soko-green)');
+                setTimeout(() => $('.btn-cart').html('ADD TO CART <i class="fas fa-shopping-basket"></i>').css('background', 'var(--soko-orange)'), 3000);
+            }, 800);
         });
     }
 </script>
-
 </body>
 </html>

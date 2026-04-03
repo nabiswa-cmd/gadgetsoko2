@@ -268,14 +268,38 @@
         $('#cartOverlay').toggleClass('active');
         if ($('#cartSidebar').hasClass('active')) updateCartSidebar();
     }
+function addToCart(productId) {
+    // We use a placeholder '0' and replace it with the actual ID
+    let url = "{% url 'add_to_cart' 0 %}".replace('0', productId); 
+    
+    $.ajax({
+        url: url,
+        type: 'GET',
+        success: function(res) {
+            // Check if the server returned a login redirect error
+            if (res.error === 'login_required') {
+                window.location.href = "{% url 'login' %}";
+                return;
+            }
 
-    function addToCart(productId) {
-        $.get(`/add-to-cart/${productId}/`, function(res) {
+            // Update the cart count in your navbar (ensure you have an element with this class)
             $('.cart-count').text(res.cart_count);
+            
+            // Refresh the sidebar content
             updateCartSidebar();
-            if(!$('#cartSidebar').hasClass('active')) toggleCart();
-        });
-    }
+            
+            // Open the sidebar
+            if(!$('#cartSidebar').hasClass('active')) {
+                toggleCart();
+            }
+        },
+        error: function(err) {
+            console.error("Cart Error:", err);
+            alert("Could not add to cart. Are you logged in?");
+        }
+    });
+}
+
 
     function updateCartSidebar() {
         $.get("{% url 'view_cart' %}?ajax=1", function(data) {

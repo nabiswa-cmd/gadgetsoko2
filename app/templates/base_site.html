@@ -1126,15 +1126,6 @@
 </head>
 <body>
 
-    <div class="gs-topbar d-none d-md-flex justify-content-between align-items-center px-0 py-2" style="padding-left:8%; padding-right:8%;">
-        <div>English | Swahili</div>
-        <div class="d-flex gap-3 align-items-center">
-            <a href="{% url 'login' %}">Admin Login</a>
-            <span>|</span>
-            <a href="#">Contact</a>
-        </div>
-    </div>
-
     <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
 
     <div class="mobile-sidebar" id="sidebar">
@@ -1352,186 +1343,204 @@
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    /* ── CART ── */
-    function toggleCart() {
-        {% if not request.user.is_authenticated %}
+/* ── GLOBAL CART & UI ENGINE ── */
+
+/**
+ * 1. CART TOGGLE & SYNC
+ * Opens the sidebar and pulls fresh data from the database.
+ */
+function toggleCart() {
+    {% if not request.user.is_authenticated %}
+        const loader = document.getElementById('auth-loader');
+        if(loader) loader.style.display = 'flex';
+        setTimeout(() => {
             window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
-            return;
-        {% endif %}
+        }, 600);
+        return;
+    {% endif %}
 
-        $('#cartSidebar').toggleClass('active');
-        $('#cartOverlay').toggleClass('active');
+    $('#cartSidebar').toggleClass('active');
+    $('#cartOverlay').toggleClass('active');
 
-        if ($('#cartSidebar').hasClass('active')) updateCartSidebar();
+    // Only fetch data if we are opening the cart to save resources
+    if ($('#cartSidebar').hasClass('active')) {
+        updateCartSidebar();
     }
+}
 
-    function updateCartSidebar() {
+/**
+ * 2. RE-RENDER SIDEBAR (Database Source of Truth)
+ * This ensures the Index and Products pages always show the same items.
+ */
+function updateCartSidebar() {
+    // Show a "loading" state in the total area for better UX
+    $('#sidebarTotal').html('<i class="fas fa-spinner fa-spin"></i>');
+
     $.get("{% url 'view_cart' %}?ajax=1", function(data) {
-        let h = '';
+        let htmlContent = '';
 
         if (!data.items || data.items.length === 0) {
-            h = '<p>Your cart is empty</p>';
+            htmlContent = `
+                <div class="text-center mt-5 text-muted">
+                    <i class="bi bi-cart-x fs-1"></i>
+                    <p>Your cart is empty</p>
+                </div>`;
         } else {
-            data.items.forEach(i => {
-                h += `
-                    <div class="cart-item-row">
-                        <img src="${i.image}" alt="">
-                        
+            data.items.forEach(item => {
+                htmlContent += `
+                    <div class="cart-item-row" data-id="${item.id}">
+                        <img src="${item.image}" alt="${item.name}">
                         <div class="item-info">
-                            <b>${i.name}</b>
-                            <small>KES ${i.price}</small>
-
+                            <b>${item.name}</b>
+                            <small>KES ${parseFloat(item.price).toLocaleString()}</small>
                             <div class="qty-controls">
-                                <button onclick="updateQty(${i.id}, 'decrease')" class="qty-btn">−</button>
-                                <span class="qty-num">${i.quantity}</span>
-                                <button onclick="updateQty(${i.id}, 'increase')" class="qty-btn">+</button>
+                                <button onclick="updateQty(${item.id}, 'decrease')" class="qty-btn">−</button>
+                                <span class="qty-num">${item.quantity}</span>
+                                <button onclick="updateQty(${item.id}, 'increase')" class="qty-btn">+</button>
                             </div>
                         </div>
-
-                        <button onclick="removeItem(${i.id})" class="remove-btn">&times;</button>
-                    </div>
-                `;
+                        <button onclick="removeItem(${item.id})" class="remove-btn">&times;</button>
+                    </div>`;
             });
         }
 
-        $('#cartSlides').html(h);
-        $('#sidebarTotal').text('KES ' + (data.total || 0));
-    });
-}
-/* Increase / Decrease Quantity */
-function updateQty(productId, action) {
-    $.ajax({
-        url: `/update-cart/${productId}/`,
-        method: "GET",
-        data: { action: action },
-        success: function(res) {
-            $('.cart-count').text(res.cart_count);
-            updateCartSidebar();
-        }
+        // Update the DOM elements
+        $('#cartSlides').html(htmlContent);
+        $('#sidebarTotal').text('KES ' + (data.total || 0).toLocaleString());
+        $('.cart-count').text(data.cart_count || 0);
+    }).fail(function() {
+        console.error("Could not sync cart with database.");
     });
 }
 
-/* Remove Item Completely */
+/**
+ * 3. UPDATE QUANTITY (+ / -)
+ * Connects the buttons to your Django backend.
+ */
+function updateQty(productId, action) {
+    // Determine the correct URL based on the action
+    const url = (action === 'increase') ? `/add-to-cart/${productId}/` : `/decrease-cart/${productId}/`;
+    
+    $.get(url, function(res) {
+        if (res.error) {
+            console.log("Error updating quantity:", res.error);
+            return;
+        }
+        // Refresh the UI to reflect new quantities and totals
+        updateCartSidebar();
+    });
+}
+
+/**
+ * 4. REMOVE ITEM (X)
+ * Deletes the item from the database entirely.
+ */
 function removeItem(productId) {
     $.ajax({
         url: `/remove-from-cart/${productId}/`,
         method: "GET",
         success: function(res) {
-            $('.cart-count').text(res.cart_count);
             updateCartSidebar();
         }
     });
 }
 
-    
-    /* ── MOBILE MENU (HAMBURGER) ── */
+/**
+ * 5. ADD TO CART (Main Trigger)
+ * Used on product cards in both Index and Products pages.
+ */
+function addToCart(pId) {
+    const isUserAuthenticated = "{{ request.user.is_authenticated }}" === "True";
+
+    if (!isUserAuthenticated) {
+        const loader = document.getElementById('auth-loader');
+        if(loader) loader.style.display = 'flex';
+        
+        setTimeout(function() {
+            window.location.href = "{% url 'userlog' %}?next=" + window.location.pathname;
+        }, 800); 
+        return;
+    }
+
+    // Ajax call to Django View
+    $.get(`/add-to-cart/${pId}/`, function(res) {
+        if (res.error === 'not_logged_in') {
+            window.location.href = "{% url 'userlog' %}";
+            return;
+        }
+        
+        // Sync the nav bar count
+        $('.cart-count').text(res.cart_count);
+        
+        // Open the sidebar automatically and refresh items
+        updateCartSidebar();
+        $('#cartSidebar, #cartOverlay').addClass('active');
+    });
+}
+
+/* ── LIVE SEARCH ENGINE ── */
+$(document).ready(function () {
+    function doSearch(val, $dropdown) {
+        if (val.length < 2) { $dropdown.hide(); return; }
+        $.ajax({
+            url: "{% url 'live_search' %}",
+            data: { 'q': val },
+            success: function (d) { 
+                $dropdown.html(d.html).show(); 
+            }
+        });
+    }
+
+    // Desktop search
+    $('#searchInput').on('keyup', function () {
+        doSearch($(this).val(), $('#search-results'));
+    });
+
+    // Close search on outside click
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.gs-search').length) {
+            $('.search-dropdown').hide();
+        }
+    });
+});
+
+/* ── MOBILE MENU (HAMBURGER) ── */
 function toggleMenu() {
-    // Select by class to match your CSS styling
     const sidebar = document.querySelector('.mobile-sidebar');
     const overlay = document.querySelector('.sidebar-overlay');
     
     sidebar.classList.toggle('active');
     overlay.classList.toggle('active');
 
-    // Prevent body scrolling when menu is open
-    if (sidebar.classList.contains('active')) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = 'auto';
-    }
+    // Body scroll lock
+    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
 }
 
-/* ── ADD TO CART (WITH LOADER) ── */
-function addToCart(pId) {
-    const isUserAuthenticated = "{{ request.user.is_authenticated }}" === "True";
+/* ── COOKIE PERSISTENCE ── */
+document.addEventListener("DOMContentLoaded", function() {
+    const isUserAuthenticated = "{{ user.is_authenticated }}" === "True";
+    const cookieAccepted = localStorage.getItem("gsk_cookies");
 
-    if (!isUserAuthenticated) {
-        // Show the loader immediately
-        const loader = document.getElementById('auth-loader');
-        loader.style.display = 'flex';
-        
-        // Brief delay to show off the "Techie" animation
-        setTimeout(function() {
-            window.location.href = "{% url 'userlog' %}?next=" + window.location.pathname;
-        }, 1000); 
-        return;
+    if (!isUserAuthenticated && !cookieAccepted) {
+        setTimeout(() => {
+            const popup = document.getElementById('cookie-popup');
+            if(popup) popup.classList.remove('hidden');
+        }, 2000);
     }
+});
 
-    // Ajax for Logged-in users
-    $.get(`/add-to-cart/${pId}/`, function(res) {
-        if (res.error === 'not_logged_in') {
-            document.getElementById('auth-loader').style.display = 'flex';
-            window.location.href = "{% url 'userlog' %}";
-            return;
-        }
-        $('.cart-count').text(res.cart_count);
-        updateCartSidebar();
-        
-        // Automatically slide out the cart sidebar
-        $('#cartSidebar, #cartOverlay').addClass('active');
-    });
+function acceptCookies() {
+    localStorage.setItem("gsk_cookies", "accepted");
+    closeCookiePopup();
 }
-    
 
-    /* ── LIVE SEARCH ── */
-    $(document).ready(function () {
-        function doSearch(val, $dropdown) {
-            if (val.length < 2) { $dropdown.hide(); return; }
-            $.ajax({
-                url: "{% url 'live_search' %}",
-                data: { 'q': val },
-                success: function (d) { $dropdown.html(d.html).show(); }
-            });
-        }
-
-        /* Desktop search */
-        $('#searchInput').on('keyup', function () {
-            doSearch($(this).val(), $('#search-results'));
-        });
-
-        /* Close dropdown on outside click */
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('.gs-search').length) {
-                $('.search-dropdown').hide();
-            }
-        });
-    });
-
-
-    document.addEventListener("DOMContentLoaded", function() {
-        // Check if user is logged out (Django context check)
-        const isUserAuthenticated = "{{ user.is_authenticated }}" === "True";
-        
-        // Check if they already dismissed the cookie prompt
-        const cookieAccepted = localStorage.getItem("gsk_cookies");
-
-        if (!isUserAuthenticated && !cookieAccepted) {
-            // Show the popup with a slight delay for effect
-            setTimeout(() => {
-                document.getElementById('cookie-popup').classList.remove('hidden');
-            }, 2000);
-        }
-    });
-
-    function acceptCookies() {
-        localStorage.setItem("gsk_cookies", "accepted");
-        closeCookiePopup();
-        console.log("Cookies enabled for Gadget Soko session.");
-    }
-
-    function closeCookiePopup() {
-        document.getElementById('cookie-popup').classList.add('hidden');
-    }
-
-
+function closeCookiePopup() {
+    const popup = document.getElementById('cookie-popup');
+    if(popup) popup.classList.add('hidden');
+}
 </script>
-
-
 
     </body>
 </html>

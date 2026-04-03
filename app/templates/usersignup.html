@@ -45,7 +45,7 @@
 
         /* --- ERROR MESSAGE STYLES --- */
         .error-container {
-            height: 20px; /* Prevents layout jumping when error appears/disappears */
+            height: 20px; 
             margin-bottom: 10px;
         }
 
@@ -54,33 +54,31 @@
             font-size: 13px;
             font-weight: bold;
             display: inline-block;
-            
-            /* The Wipe Effect Logic */
             mask-image: linear-gradient(to right, transparent 0%, black 0%);
             -webkit-mask-image: linear-gradient(to right, transparent 0%, black 0%);
             mask-size: 200% 100%;
             mask-position: 100% 0;
             -webkit-mask-size: 200% 100%;
             -webkit-mask-position: 100% 0;
-            
-            animation: wipeLeftToRight 3s forwards ease-in-out;
+            animation: wipeLeftToRight 4s forwards ease-in-out;
         }
 
         @keyframes wipeLeftToRight {
             0% { -webkit-mask-position: 100% 0; opacity: 1; }
-            80% { -webkit-mask-position: 100% 0; opacity: 1; } /* Stay visible for 80% of the time */
-            100% { -webkit-mask-position: 0% 0; opacity: 0; }  /* Rapid vanish from left to right */
+            80% { -webkit-mask-position: 100% 0; opacity: 1; } 
+            100% { -webkit-mask-position: 0% 0; opacity: 0; }  
         }
 
-        .login-card h2 { margin-bottom: 15px; }
+        .login-card h2 { margin-bottom: 15px; color: #333; }
 
         .login-card input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin: 8px 0;
             border: 1px solid #ddd;
             border-radius: 6px;
             outline: none;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
             transition: 0.3s;
         }
 
@@ -91,7 +89,7 @@
 
         .login-btn {
             width: 100%;
-            padding: 11px;
+            padding: 12px;
             margin-top: 10px;
             border: none;
             border-radius: 8px;
@@ -105,7 +103,7 @@
         .login-btn:hover { background: #d84324; }
 
         .divider {
-            margin: 15px 0;
+            margin: 20px 0;
             font-size: 13px;
             color: #777;
             position: relative;
@@ -115,7 +113,7 @@
             content: "";
             position: absolute;
             top: 50%;
-            width: 35%;
+            width: 30%;
             height: 1px;
             background: #ddd;
         }
@@ -152,7 +150,7 @@
 
 <div class="login-page">
     <div class="login-card">
-        <h2>Welcome</h2>
+        <h2>Welcome Back</h2>
 
         <div class="error-container">
             {% if messages %}
@@ -164,10 +162,9 @@
             {% endif %}
         </div>
 
-        <form method="POST">
+        <form method="POST" action="{% url 'secretkey' %}">
             {% csrf_token %}
-            <label for ="email" name
-            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email Address" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit" class="login-btn">Login</button>
         </form>
@@ -185,7 +182,6 @@
 </div>
 
 <script>
-    // Optional: Completely remove the element from DOM after animation finishes
     const errorEl = document.getElementById('errorMessage');
     if (errorEl) {
         errorEl.addEventListener('animationend', () => {
