@@ -583,20 +583,30 @@ def get_mpesa_access_token():
         print("Token response error:", response.text)  # log raw response for debugging
         return None
 def usersignup_view(request):
-    if request.method == "POST":
-        username = request.POST['username']
-        email = request.POST['email']
-        password1 = request.POST['password1']
-        password2 = request.POST['password2']
+    if request.user.is_authenticated:
+        return redirect('index')
 
-        if password1 == password2:
-            if User.objects.filter(username=username).exists():
-                messages.error(request, "Username exists")
-            else:
-                User.objects.create_user(username=username, email=email, password=password1)
-                return redirect('userlog')
+    if request.method == "POST":
+        username = request.POST.get('username', '').strip()
+        email    = request.POST.get('email', '').strip()
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+
+        if not username or not email or not password1:
+            messages.error(request, "All fields are required.")
+        elif password1 != password2:
+            messages.error(request, "Passwords do not match.")
+        elif len(password1) < 6:
+            messages.error(request, "Password must be at least 6 characters.")
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, "That username is already taken.")
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, "An account with that email already exists.")
         else:
-            messages.error(request, "Passwords do not match")
+            user = User.objects.create_user(username=username, email=email, password=password1)
+            login(request, user)
+            messages.success(request, f"Account created! Welcome to Gadget Soko, {username}! 🎉")
+            return redirect('index')
 
     return render(request, 'usersignup.html')
 
@@ -644,30 +654,41 @@ def search_view(request):
 
 
 def userlog_view(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+
     if request.method == "POST":
-        # Get data from the login form
-        username = request.POST.get('username')
-        password1 = request.POST.get('password') # Matching your HTML input name
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
 
-        # 1. Basic validation
-        if not username or not password1:
-            messages.error(request, "Please enter both username and password")
-            return render(request, 'userlog.html') # Replace with your actual login template name
+        if not username or not password:
+            messages.error(request, "Please enter both username and password.")
+            return render(request, 'login.html')
 
-        # 2. Authenticate the user
-        user = authenticate(request, username=username, password=password1)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            # 3. If credentials are correct, log them in
             login(request, user)
-            return redirect('index')
+            messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
+            next_url = request.GET.get('next', 'index')
+            return redirect(next_url)
         else:
-            # 4. If incorrect, send the error message that triggers the animation
-            messages.error(request, "Incorrect details")
-            return render(request, 'usersignup.html')
+            # Try authenticating by email in case user typed email
+            from django.contrib.auth.models import User as AuthUser
+            try:
+                u = AuthUser.objects.get(email=username)
+                user = authenticate(request, username=u.username, password=password)
+                if user:
+                    login(request, user)
+                    messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
+                    next_url = request.GET.get('next', 'index')
+                    return redirect(next_url)
+            except AuthUser.DoesNotExist:
+                pass
+            messages.error(request, "Incorrect username or password. Please try again.")
+            return render(request, 'login.html')
 
-    # GET request: just show the login page
-    return render(request, 'usersignup.html')
+    return render(request, 'login.html')
 def logout_view(request):
     logout(request)
     return redirect('index')

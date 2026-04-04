@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -319,11 +320,33 @@
         .btn-add:hover { background: var(--primary-hover); }
         .btn-add.added { background: var(--success) !important; }
 
+        /* ── GLOBAL TOAST MESSAGES ── */
+        #toast-container {
+            position: fixed; top: 75px; right: 20px;
+            z-index: 9000; display: flex; flex-direction: column; gap: 10px;
+            max-width: 340px;
+        }
+        .gs-toast {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 18px; border-radius: 12px; font-size: 13px;
+            font-weight: 600; color: #fff;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            animation: toastIn .4s cubic-bezier(0.175,0.885,0.32,1.275);
+            cursor: pointer;
+        }
+        @keyframes toastIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+        .gs-toast.toast-success { background: #00a650; }
+        .gs-toast.toast-error   { background: #ee4d2d; }
+        .gs-toast.toast-info    { background: #0b3a63; }
+        .gs-toast.toast-warning { background: #f39c12; }
+        .gs-toast i             { font-size: 17px; flex-shrink: 0; }
+        .gs-toast .toast-close  { margin-left: auto; opacity: .7; font-size: 16px; }
+
         @media (max-width: 767.98px) {
             .gs-logo img { height: 36px; }
             .product-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
             .img-container { height: 130px; padding: 8px; }
-            .cart-sidebar { width: 100%; right: -100%; }
+            .cart-sidebar { width: 88%; max-width: 340px; right: -100%; }
         }
 
         /* ── FOOTER ── */
@@ -414,6 +437,23 @@
 
 {# ── CSRF token for JS ── #}
 <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
+{# ── GLOBAL TOAST CONTAINER ── #}
+<div id="toast-container"></div>
+
+{# ── Render Django messages as toasts ── #}
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const msgs = [
+    {% for msg in messages %}
+    { text: "{{ msg|escapejs }}", type: "{{ msg.tags }}" },
+    {% endfor %}
+  ];
+  msgs.forEach(m => showToast(m.text, m.type || 'info'));
+});
+</script>
+{% endif %}
 
 {# ── MOBILE SIDEBAR ── #}
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
@@ -783,6 +823,25 @@ function addToCart(productId, btn) {
             if ($btn) $btn.html('<i class="fa fa-shopping-cart"></i> Add').prop('disabled', false);
         }
     });
+}
+
+/* ── TOAST NOTIFICATION SYSTEM ── */
+function showToast(message, type) {
+    type = type || 'info';
+    // normalise Django message tags
+    if (type.includes('error'))   type = 'error';
+    else if (type.includes('success')) type = 'success';
+    else if (type.includes('warning')) type = 'warning';
+    else type = 'info';
+
+    const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle', warning:'fa-exclamation-triangle' };
+    const toast = document.createElement('div');
+    toast.className = `gs-toast toast-${type}`;
+    toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span><span class="toast-close">&times;</span>`;
+    toast.onclick = () => toast.remove();
+    document.getElementById('toast-container').appendChild(toast);
+    // Auto-dismiss after 4s
+    setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .5s'; setTimeout(()=>toast.remove(), 500); }, 4000);
 }
 
 /* ── LIVE SEARCH ── */
