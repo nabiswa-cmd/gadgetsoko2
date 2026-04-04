@@ -1,31 +1,45 @@
+import requests
+import base64
+import json
+import random
+from datetime import datetime, timedelta
+from requests.auth import HTTPBasicAuth
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.urls import reverse
-
-from .models import Product, Category, ProductImage, CartItem, Order, OrderItem,SiteSettings
-
-import requests
-import base64
-from datetime import datetime
-from requests.auth import HTTPBasicAuth
-import json
-from .models import CartItem
-
-from .models import Brand
-from django.db.models import Sum
-from .models import CartItem, Brand, Product
-
-from .models import Product, Brand, CartItem
-from django.db.models import Sum
 from django.utils import timezone
+from django.db import IntegrityError, transaction
+from django.db.models import Sum, F
+
+from decimal import Decimal
+from collections import defaultdict
+from io import BytesIO
+
+from django import forms
+from django.db.models import Sum, F, Q, Count
+from django.utils.timezone import now as tz_now
+from django.utils.text import slugify
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.template.loader import render_to_string, get_template
+from xhtml2pdf import pisa
+
+from .models import (
+    Product, Category, ProductImage, CartItem, Order, OrderItem,
+    SiteSettings, Brand, ProductView, UserActivity
+)
+from .forms import SignupForm
 
 def index_view(request):
     products = Product.objects.all()
@@ -82,11 +96,7 @@ def products_view(request, brand_id=None, category_id=None):
     return render(request, 'products.html', context)
 
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.http import JsonResponse
 
-from django.http import JsonResponse
 @login_required
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user)
@@ -121,7 +131,6 @@ def view_cart(request):
         'cart_count': cart_count
     })
 
-from .models import Category
 
 def create_default_categories():
     categories = [
@@ -169,8 +178,7 @@ def customers(request):
     return render(request, 'customers.html', {
         'orders': orders
     })
-from .models import ProductView, UserActivity  # add this
-from django.shortcuts import render# Ensure Category and Brand are imported
+
 
 def products_by_category_view(request, brand_id=None, category_id=None):
     products = Product.objects.all()
@@ -197,42 +205,7 @@ def products_by_category_view(request, brand_id=None, category_id=None):
         # add cart_count here as well if needed
     }
     return render(request, 'products.html', context)
-import random
-from datetime import datetime
-from django.shortcuts import render, get_object_or_404
-from .models import Product, ProductView, UserActivity # Ensure these are imported
-import random
-from datetime import datetime
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from django.db.models import Sum
 
-# Remember to align these with your actual model names!
-from .models import Product, CartItem, ProductView, UserActivity
-
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
-from datetime import datetime
-import random
-from .models import Product, ProductView, UserActivity
-
-# 1. PRODUCT DETAIL VIEW (Displays page & logs activity)
-import random
-from datetime import datetime, timedelta
-from django.shortcuts import render, get_object_or_404
-from django.db import IntegrityError, transaction
-from django.db.models import F
-from django.utils import timezone
-
-# Import your models
-# views.py
-from django.shortcuts import render, get_object_or_404
-from django.db import transaction, IntegrityError
-from django.db.models import F
-from django.utils import timezone
-from datetime import datetime, timedelta
-import random
-from .models import Product, ProductView, UserActivity  # Correct import
 
 def product_detail(request, pk):
     # 1. Fetch the product or return 404
@@ -291,7 +264,7 @@ def product_detail(request, pk):
         'social_proof': social_proof,
         'recommended_products': recommended,
         # ADD THIS LINE: Converts the date for the JavaScript clock
-        'discount_expiry': product.discount_until.isoformat() if product.discount_until else None,
+        'discount_expiry': product.discount_expiry.isoformat() if product.discount_expiry else None,
     })
 def add_to_cart(request, product_id):
     # Guard rail: Make sure the user is logged in
@@ -330,9 +303,7 @@ def products_by_brand(request, brand_id):
         'brands': brands,
         'categories': categories
     })
-from .models import Brand
-from django.utils import timezone
-from datetime import timedelta
+
 @login_required
 
 def add_product(request):
@@ -429,66 +400,7 @@ def remove_cart(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
     item.delete()
     return JsonResponse({"status": "ok"})
-from decimal import Decimal
-def product_detail(request, pk):
-    # 1. Fetch the product or return 404
-    product = get_object_or_404(Product, id=pk)
-    
-    # --- SOCIAL PROOF LOGIC ---
-    now_time = datetime.now()
-    seed_value = int(f"{pk}{now_time.day}{now_time.hour // 12}")
-    random.seed(seed_value)
-    fake_rating = round(random.uniform(4.4, 5.0), 1)
-    
-    social_proof = {
-        'rating': fake_rating,
-        'count': random.randint(28, 145),
-        'stars': '★' * int(fake_rating) + '☆' * (5 - int(fake_rating))
-    }
 
-    # --- VIEW COUNTER ---
-    Product.objects.filter(id=pk).update(views=F('views') + 1)
-
-    # --- AUTHENTICATED USER LOGIC ---
-    if request.user.is_authenticated:
-        try:
-            with transaction.atomic():
-                ProductView.objects.update_or_create(
-                    user=request.user,
-                    product=product,
-                    defaults={'viewed_at': timezone.now()}
-                )
-        except IntegrityError:
-            pass
-
-        recent_time = timezone.now() - timedelta(minutes=5)
-        exists = UserActivity.objects.filter(
-            user=request.user, product=product, action='VIEW', timestamp__gte=recent_time
-        ).exists()
-
-        if not exists:
-            try:
-                with transaction.atomic():
-                    UserActivity.objects.create(
-                        user=request.user,
-                        action='VIEW',
-                        product=product,
-                        extra_info=f"Viewed {product.name}"
-                    )
-            except IntegrityError:
-                pass
-
-    # --- RECOMMENDATIONS ---
-    recommended = Product.objects.filter(category=product.category).exclude(id=product.id)[:10]
-
-    # --- FINAL RENDER (With Timer Context) ---
-    return render(request, 'product_detail.html', {
-        'product': product,
-        'social_proof': social_proof,
-        'recommended_products': recommended,
-        # ADD THIS LINE: Converts the date for the JavaScript clock
-        'discount_expiry': product.discount_until.isoformat() if product.discount_until else None,
-    })
 def check(request):
     # 1. ALWAYS FETCH DATA FIRST
     config, created = SiteSettings.objects.get_or_create(id=1)
@@ -618,29 +530,16 @@ def payment_instructions(request, order_id):
     })
 
 
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
-from django.db.models import Sum
-from .models import Product, CartItem
-
-from django.db.models import Sum
-from .models import UserActivity  # 👈 add this
-
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.db.models import Sum
-from .models import Product, CartItem, UserActivity
 
 
-from django import forms
-from django.contrib.auth.models import User
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import login
-from .forms import SignupForm
+
+
+
+
+
+
 
 
 def signup_view(request):
@@ -662,10 +561,6 @@ def signup_view(request):
 
     return render(request, "signup.html", {"form": form})
 
-from django.http import JsonResponse
-from django.conf import settings
-import requests
-from requests.auth import HTTPBasicAuth
 
 def get_mpesa_access_token():
     url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
@@ -700,9 +595,7 @@ def usersignup_view(request):
             messages.error(request, "Passwords do not match")
 
     return render(request, 'usersignup.html')
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
+
 
 def secretkey_view(request):
     if request.method == 'POST':
@@ -730,9 +623,7 @@ def secretkey_view(request):
 
     return render(request, 'login.html')
     
-from django.db.models import Q
-from .models import Product, Brand
-from django.shortcuts import render
+
 
 def search_view(request):
     query = request.GET.get('q')
@@ -746,15 +637,7 @@ def search_view(request):
     
     return render(request, 'search_results.html', {'results': results, 'query': query})
 
-from django.contrib.auth import login
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import login
-from django.contrib import messages
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
 
 def userlog_view(request):
     if request.method == "POST":
@@ -785,32 +668,14 @@ def logout_view(request):
     logout(request)
     return redirect('index')
 
-from django.db.models import Count, Sum
-from django.contrib.auth.models import User
-from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Sum
-from django.utils.timezone import now
-from datetime import timedelta
-from collections import defaultdict
-from django.shortcuts import render
-from django.db.models import Sum, Count
-from datetime import datetime
-from collections import defaultdict
-from .models import Product, Order, User
 
-from django.shortcuts import render
-from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Sum, Count
-from collections import defaultdict
-from datetime import datetime
-from .models import Product, Order, ProductView, User # Make sure all are imported
-from collections import defaultdict
-from datetime import datetime
-from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Sum
-from django.shortcuts import render
-from .models import Product, Order, UserActivity
-from django.contrib.auth.models import User
+
+
+
+
+
+
+
 
 @staff_member_required
 def dashboard_view(request):
@@ -867,10 +732,7 @@ def dashboard_view(request):
 
     return render(request, "dashboard.html", context)
 
-from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render
-from .models import UserActivity, Order
-from django.db.models import Sum
+
 
 @staff_member_required
 def activity_view(request):
@@ -887,20 +749,12 @@ def activity_view(request):
     }
     return render(request, "activity.html", context)
 
-from collections import defaultdict
-from datetime import datetime
-from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render
-from .models import Product, Order
-from django.db.models import Sum
 
-import json
-from django.db.models import Sum, Count
-from .models import Order, OrderItem # Adjust to your actual models
 
-import json
-from django.db.models import Sum
-from .models import Order, OrderItem 
+
+
+
+
 
 def analytics_view(request):
     # 1. Revenue by Date (Changed 'total_price' to 'total')
@@ -1008,10 +862,9 @@ def lipa_na_mpesa(phone_number, amount, account_ref, transaction_desc):
             "response_text": response.text
         }
 # ================= CALLBACK =================
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-import json
-from .models import Order  # Adjust based on your model name
+
+
+
 
 @csrf_exempt
 def mpesa_callback(request):
@@ -1074,8 +927,7 @@ def register_mpesa_urls(request):
 
     return JsonResponse(response.json())
 
-from django.shortcuts import redirect, get_object_or_404
-from .models import Product
+
 
 def update_price(request, pk):
     if request.method == "POST":
@@ -1087,8 +939,7 @@ def update_price(request, pk):
 
     return redirect('manage_products')
 
-from django.shortcuts import redirect, get_object_or_404
-from .models import Product
+
 
 def mark_out_of_stock(request, product_id):
     if request.method == "POST":
@@ -1097,14 +948,10 @@ def mark_out_of_stock(request, product_id):
         product.save()
     return redirect('manage_products')
     # app/views.py
-from django.shortcuts import render
-from django.http import JsonResponse
-from .models import Product
 
-from django.db.models import Q
-from django.http import JsonResponse
-from django.template.loader import render_to_string
-from .models import Product
+
+
+
 
 def live_search(request):
     query = request.GET.get('q', '').strip()  # get the search query
@@ -1122,7 +969,6 @@ def live_search(request):
     return JsonResponse({'html': html})
 
 
-from .models import Product
 
 
 def get_recommended_products(user):
@@ -1137,7 +983,6 @@ def get_similar_products(product):
         category=product.category
     ).exclude(id=product.id)[:6]
 
-from django.db.models import Sum,Count
 @staff_member_required
 def most_purchased_products_view(request):
     products = Product.objects.annotate(
@@ -1148,12 +993,7 @@ def most_purchased_products_view(request):
     return render(request, 'admin/most_purchased_products.html', {
         'products': products,
     })
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, update_session_auth_hash
-from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django import forms
+
 
 # Custom Password Form
 class CustomPasswordChangeForm(forms.Form):
@@ -1190,11 +1030,7 @@ class CustomPasswordChangeForm(forms.Form):
         return cleaned_data
 
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def change_password_view(request):
@@ -1217,16 +1053,10 @@ def change_password_view(request):
     return render(request, 'change_password.html', {
         'form': form
     })
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.contrib.admin.views.decorators import staff_member_required
 
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import user_passes_test
+
+
 
 # Optional: Only allow existing superusers to add new admins
 @user_passes_test(lambda u: u.is_superuser)
@@ -1255,7 +1085,7 @@ def add_admin_view(request):
 
     # Return 2: The GET request (This fixes your 'returned None' error)
     return render(request, 'add_admin.html')
-from django.contrib import messages
+
 
 def google_login_callback(request):
     # ... your login logic ...
@@ -1263,8 +1093,6 @@ def google_login_callback(request):
     return redirect('dashboard') # or wherever your dashboard is
 
 
-import random
-from datetime import datetime
 
 def get_dynamic_reviews(product_id):
     # Create a seed based on product ID and the 12-hour window
@@ -1308,10 +1136,8 @@ def remove_from_cart(request, product_id):
     return JsonResponse({
         'cart_count': sum(item['quantity'] for item in cart.values())
     })
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from .models import CartItem, Product
-import json
+
+
 
 def update_cart(request):
     if request.method == 'POST':
@@ -1349,12 +1175,9 @@ def get_cart(request):
         'quantity': item.quantity
     } for item in items]
     return JsonResponse({'cart': cart_data})
-import os
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
-from django.utils.text import slugify
-from django.conf import settings
-from .models import Brand
+
+
+
 
 @receiver(pre_save, sender=Brand)
 def auto_assign_brand_logo(sender, instance, **kwargs):
@@ -1377,11 +1200,9 @@ def auto_assign_brand_logo(sender, instance, **kwargs):
             print(f"DEBUG: File not found for {instance.name}")
 
 # app/views.py
-from io import BytesIO
-from django.http import HttpResponse
-from django.template.loader import get_template
-from xhtml2pdf import pisa
-from .models import Order
+
+
+
 
 def download_receipt(request, order_id):
     order = Order.objects.get(id=order_id, user=request.user)

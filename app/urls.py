@@ -9,8 +9,6 @@ urlpatterns = [
     path('', views.index_view, name='index'),
 
     path('index/', views.index_view, name='index'),
-    path('check/',views.check,name='check'),
-
     # App routes
     path('products/', views.products_view, name='products'),
     path('category/<int:category_id>/', views.products_view, name='products_by_category'),
@@ -51,8 +49,7 @@ urlpatterns = [
     path('mark-out-of-stock/<int:product_id>/', views.mark_out_of_stock, name='mark_out_of_stock'),
 
 
-    # Allauth / Google login
-    path('accounts/', include('allauth.urls')),
+    # Allauth handled in proj/urls.py
     path('live-search/', views.live_search, name='live_search'),
     path('update-cart/<int:product_id>/', views.update_cart, name='update_cart'),
     path('remove-from-cart/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),

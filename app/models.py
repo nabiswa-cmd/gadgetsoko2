@@ -60,12 +60,6 @@ class Product(models.Model):
 
     @property
     def discounted_price(self):
-        if self.discount > 0:
-            return self.price - (self.price * (self.discount / 100))
-        return self.price
-    
-    @property
-    def discounted_price(self):
         if self.is_on_sale and self.discount > 0:
             return self.price * (1 - self.discount / 100)
         return self.price
@@ -163,11 +157,6 @@ class SiteSettings(models.Model):
     discounts_active = models.BooleanField(default=True)
     class Meta:
         verbose_name_plural = "Site Settings"
-# models.py
-from django.db import models
-from django.contrib.auth.models import User
-from app.models import Product  # Assuming Product is imported from the same app
-
 class ProductView(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='viewed_products')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
