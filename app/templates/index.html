@@ -531,7 +531,7 @@
         </div>
         <div class="service">
             <i class="fa-solid fa-hand-holding-dollar"></i>
-            <p>Money Back</p>
+            <>Money Back</p>
         </div>
         <div class="service">
             <i class="fa-solid fa-location-dot"></i>
@@ -613,7 +613,7 @@
     /* --- CART LOGIC --- */
     function addToCart(pId) {
         $.get(`/add-to-cart/${pId}/`, function(res) {
-            if (res.error === 'not_logged_in') { window.location.href = "{% url 'userlog' %}"; return; }
+            if (res.error === 'not_logged_in') { window.location.href = "{% url 'usersignup' %}"; return; }
             $('.cart-count').text(res.cart_count);
         });
     }

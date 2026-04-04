@@ -532,19 +532,78 @@ def payment_instructions(request, order_id):
         'order': order,
         'method': order.payment_status # Or order.payment_method depending on your model
     })
+def userlog_view (request):  # this is log in yaani sign in 
+    if request.user.is_authenticated:
+        return redirect('index')
 
+    if request.method == "POST":
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
 
+        if not username or not password:
+            messages.error(request, "Please enter both username and password.")
+            return render(request, 'login.html')
 
+        user = authenticate(request, username=username, password=password)
 
+        if user is not None:
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
+            next_url = request.GET.get('next', 'index')
+            return redirect(next_url)
+        else:
+            # Try authenticating by email in case user typed email
+            from django.contrib.auth.models import User as AuthUser
+            try:
+                u = AuthUser.objects.get(email=username)
+                user = authenticate(request, username=u.username, password=password)
+                if user:
+                    login(request, user)
+                    messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
+                    next_url = request.GET.get('next', 'index')
+                    return redirect(next_url)
+            except AuthUser.DoesNotExist:
+                pass
+            messages.error(request, "Incorrect username or password. Please try again.")
+            return render(request, 'usersignup.html')
 
+    return render(request, 'userlog.html')
+def usersignup_view (request):  # this is log in yaani sign in 
+    if request.user.is_authenticated:
+        return redirect('index')
 
+    if request.method == "POST":
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
 
+        if not username or not password:
+            messages.error(request, "Please enter both username and password.")
+            return render(request, 'login.html')
 
+        user = authenticate(request, username=username, password=password)
 
+        if user is not None:
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
+            next_url = request.GET.get('next', 'index')
+            return redirect(next_url)
+        else:
+            # Try authenticating by email in case user typed email
+            from django.contrib.auth.models import User as AuthUser
+            try:
+                u = AuthUser.objects.get(email=username)
+                user = authenticate(request, username=u.username, password=password)
+                if user:
+                    login(request, user)
+                    messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
+                    next_url = request.GET.get('next', 'index')
+                    return redirect(next_url)
+            except AuthUser.DoesNotExist:
+                pass
+            messages.error(request, "Incorrect username or password. Please try again.")
+            return render(request, 'usersignup.html')
 
-
-
-
+    return render(request, 'usersignup.html')
 
 def signup_view(request):
     if request.method == "POST":
@@ -653,42 +712,7 @@ def search_view(request):
 
 
 
-def userlog_view(request):
-    if request.user.is_authenticated:
-        return redirect('index')
 
-    if request.method == "POST":
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '').strip()
-
-        if not username or not password:
-            messages.error(request, "Please enter both username and password.")
-            return render(request, 'login.html')
-
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
-            next_url = request.GET.get('next', 'index')
-            return redirect(next_url)
-        else:
-            # Try authenticating by email in case user typed email
-            from django.contrib.auth.models import User as AuthUser
-            try:
-                u = AuthUser.objects.get(email=username)
-                user = authenticate(request, username=u.username, password=password)
-                if user:
-                    login(request, user)
-                    messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
-                    next_url = request.GET.get('next', 'index')
-                    return redirect(next_url)
-            except AuthUser.DoesNotExist:
-                pass
-            messages.error(request, "Incorrect username or password. Please try again.")
-            return render(request, 'login.html')
-
-    return render(request, 'login.html')
 def logout_view(request):
     logout(request)
     return redirect('index')

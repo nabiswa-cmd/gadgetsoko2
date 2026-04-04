@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -54,7 +55,10 @@
         input, select, textarea { 
             width: 100%; padding: 12px; border: 1.5px solid var(--border); 
             border-radius: 8px; font-size: 15px; box-sizing: border-box;
+            background: white;
         }
+        select { cursor: pointer; }
+        select:disabled { background: #f5f5f5; color: #aaa; cursor: not-allowed; }
 
         /* Payment Options */
         .payment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
@@ -90,6 +94,9 @@
         }
         .btn-submit.ready { background: var(--primary); cursor: pointer; box-shadow: 0 4px 12px rgba(255, 90, 44, 0.3); }
         .hidden { display: none; }
+
+        /* Nairobi area selector */
+        .area-hint { font-size: 11px; color: #999; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -100,8 +107,8 @@
         
         <label>Select Your Location</label>
         <div class="location-picker">
-            <button type="button" class="loc-btn active" id="btn-nairobi" onclick="updateLocation('nairobi')">Nairobi</button>
-            <button type="button" class="loc-btn" id="btn-outside" onclick="updateLocation('outside')">Upcountry</button>
+            <button type="button" class="loc-btn active" id="btn-nairobi" onclick="updateLocation('nairobi')">📍 Nairobi</button>
+            <button type="button" class="loc-btn" id="btn-outside" onclick="updateLocation('outside')">🚚 Upcountry</button>
         </div>
 
         <form method="POST" action="{% url 'check' %}" id="checkout-form">
@@ -124,29 +131,50 @@
                 </div>
             </div>
 
+            <!-- NAIROBI FIELDS -->
             <div id="nairobi-fields">
                 <div class="form-group">
-                    <label>Nearest Estate / Landmark</label>
+                    <label>Nearest Estate / Area</label>
                     <select name="nairobi_area">
                         <option value="CBD">CBD / Town</option>
                         <option value="Westlands">Westlands</option>
                         <option value="Eastlands">Eastlands</option>
                         <option value="Roysambu">Roysambu</option>
                         <option value="Langata">Langata</option>
+                        <option value="Karen">Karen</option>
+                        <option value="Kasarani">Kasarani</option>
+                        <option value="Embakasi">Embakasi</option>
+                        <option value="Kibera">Kibera</option>
+                        <option value="Dagoretti">Dagoretti</option>
+                        <option value="Ruaraka">Ruaraka</option>
+                        <option value="Makadara">Makadara</option>
+                        <option value="Pumwani">Pumwani</option>
                     </select>
                 </div>
             </div>
 
+            <!-- UPCOUNTRY FIELDS: County + Town cascading dropdowns -->
             <div id="outside-fields" class="hidden">
-                <div class="form-group">
-                    <label>Destination Town</label>
-                    <input type="text" name="outside_town" placeholder="e.g. Mombasa, Kisumu">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>County</label>
+                        <select name="county" id="county-select" onchange="populateTowns()">
+                            <option value="">-- Select County --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Town / Sub-County</label>
+                        <select name="outside_town" id="town-select" disabled>
+                            <option value="">-- Select County First --</option>
+                        </select>
+                    </div>
                 </div>
+                <p class="area-hint"><i class="fa fa-info-circle"></i> Your parcel will be sent via courier to the nearest pickup agent in your town.</p>
             </div>
 
             <div class="form-group">
-                <label>Detailed Address</label>
-                <textarea name="address" rows="2" placeholder="Building name, Floor, Room number..." required></textarea>
+                <label>Detailed Address / Instructions</label>
+                <textarea name="address" rows="2" placeholder="Building name, Floor, Room number, Landmark..." required></textarea>
             </div>
 
             <h3><i class="fa fa-credit-card"></i> Payment Method</h3>
@@ -203,6 +231,95 @@
 const subtotal = parseFloat("{{ subtotal|default:0 }}");
 const shippingNairobi = parseFloat("{{ shipping_nairobi|default:0 }}");
 const shippingOutside = parseFloat("{{ max_shipping|default:0 }}");
+
+// ─── ALL 47 KENYA COUNTIES + THEIR MAIN TOWNS ───────────────────────────────
+const kenyaData = {
+    "Baringo":       ["Kabarnet","Eldama Ravine","Mogotio","Marigat","Eldoret Road","Kabartonjo","Tenges"],
+    "Bomet":         ["Bomet","Sotik","Longisa","Chepalungu","Konoin"],
+    "Bungoma":       ["Bungoma","Webuye","Kimilili","Chwele","Tongaren","Sirisia","Bumula"],
+    "Busia":         ["Busia","Malaba","Nambale","Butula","Funyula","Matayos","Port Victoria"],
+    "Elgeyo-Marakwet":["Iten","Eldoret (EMK)","Tambach","Kapsowar","Chepterwai","Lelan"],
+    "Embu":          ["Embu","Runyenjes","Mbeere","Siakago","Ishiara","Ena"],
+    "Garissa":       ["Garissa","Dadaab","Fafi","Hulugho","Ijara","Lagdera"],
+    "Homa Bay":      ["Homa Bay","Mbita","Ndhiwa","Rangwe","Suba","Karachuonyo","Kasipul"],
+    "Isiolo":        ["Isiolo","Merti","Garbatulla","Kinna","Modogashe"],
+    "Kajiado":       ["Kajiado","Ngong","Ongata Rongai","Kitengela","Loitoktok","Namanga","Magadi"],
+    "Kakamega":      ["Kakamega","Mumias","Butere","Khwisero","Matungu","Lugari","Likuyani","Shinyalu"],
+    "Kericho":       ["Kericho","Litein","Londiani","Kipkelion","Bureti","Belgut"],
+    "Kiambu":        ["Thika","Kiambu","Ruiru","Limuru","Githunguri","Lari","Kikuyu","Kabete"],
+    "Kilifi":        ["Kilifi","Malindi","Mtwapa","Kaloleni","Rabai","Ganze","Magarini","Watamu"],
+    "Kirinyaga":     ["Kerugoya","Kutus","Mwea","Gichugu","Ndia","Kirinyaga Central"],
+    "Kisii":         ["Kisii","Ogembo","Suneka","Ekerenyo","Nyamache","Masimba","Gucha"],
+    "Kisumu":        ["Kisumu","Ahero","Muhoroni","Nyando","Nyakach","Seme","Winam"],
+    "Kitui":         ["Kitui","Mwingi","Mutomo","Migwani","Zombe","Ikutha","Tseikuru"],
+    "Kwale":         ["Kwale","Msambweni","Ukunda","Diani","Lungalunga","Kinango"],
+    "Laikipia":      ["Nanyuki","Nyahururu","Rumuruti","Ol Kalou","Laikipia West"],
+    "Lamu":          ["Lamu","Mpeketoni","Mokowe","Witu","Faza","Kiunga","Hindi"],
+    "Machakos":      ["Machakos","Athi River","Mavoko","Kangundo","Matungulu","Yatta","Masinga"],
+    "Makueni":       ["Wote","Makindu","Sultan Hamud","Mtito Andei","Kibwezi","Nunguni"],
+    "Mandera":       ["Mandera","Elwak","Rhamu","Banisa","Lafey","Takaba","Kotulo"],
+    "Marsabit":      ["Marsabit","Moyale","Sololo","Laisamis","North Horr","Saku"],
+    "Meru":          ["Meru","Nkubu","Maua","Timau","Mikinduri","Githongo","Laare","Buuri"],
+    "Migori":        ["Migori","Rongo","Awendo","Uriri","Suna East","Suna West","Nyatike","Kuria"],
+    "Mombasa":       ["Mombasa CBD","Nyali","Bamburi","Likoni","Kisauni","Changamwe","Jomvu"],
+    "Murang'a":      ["Murang'a","Kangema","Mathioya","Kiharu","Kigumo","Maragua","Kandara","Gatanga"],
+    "Nairobi":       ["CBD","Westlands","Kasarani","Embakasi","Langata","Dagoretti","Kibra","Ruaraka","Makadara","Starehe","Mathare","Pumwani"],
+    "Nakuru":        ["Nakuru","Naivasha","Gilgil","Molo","Njoro","Rongai","Subukia","Bahati"],
+    "Nandi":         ["Kapsabet","Nandi Hills","Mosoriot","Chesumei","Mosop","Emgwen","Aldai","Tinderet"],
+    "Narok":         ["Narok","Kilgoris","Mara","Emurua Dikirr","Narok North","Transmara"],
+    "Nyamira":       ["Nyamira","Keroka","Nyansiongo","Manga","North Mugirango"],
+    "Nyandarua":     ["Ol Kalou","Engineer","Ndaragua","Kinangop","Kipipiri"],
+    "Nyeri":         ["Nyeri","Karatina","Othaya","Mukurwe-ini","Tetu","Mathira","Kieni"],
+    "Samburu":       ["Maralal","Baragoi","Archer's Post","South Hor","Wamba"],
+    "Siaya":         ["Siaya","Bondo","Yala","Ugenya","Ugunja","Gem","Rarieda"],
+    "Taita-Taveta":  ["Voi","Wundanyi","Mwatate","Taveta","Kasigau"],
+    "Tana River":    ["Hola","Garsen","Bura","Madogo","Galole"],
+    "Tharaka-Nithi": ["Chuka","Marimanti","Kathwana","Igamba-Ng'ombe","Tharaka"],
+    "Trans-Nzoia":   ["Kitale","Kiminini","Endebess","Saboti","Kwanza"],
+    "Turkana":       ["Lodwar","Kakuma","Lokichar","Kalokol","Loima","Kibish"],
+    "Uasin Gishu":   ["Eldoret","Turbo","Moiben","Soy","Ainabkoi","Kapseret","Kesses"],
+    "Vihiga":        ["Vihiga","Mbale","Hamisi","Emuhaya","Luanda"],
+    "Wajir":         ["Wajir","Habaswein","Bute","Eldas","Tarbaj","Kutulo","Griftu"],
+    "West Pokot":    ["Kapenguria","Makutano","Alale","Kacheliba","Sigor","Chesegon"]
+};
+
+// Populate county dropdown on load
+function initCounties() {
+    const countySelect = document.getElementById('county-select');
+    const counties = Object.keys(kenyaData).sort();
+    counties.forEach(county => {
+        const opt = document.createElement('option');
+        opt.value = county;
+        opt.textContent = county;
+        countySelect.appendChild(opt);
+    });
+}
+
+function populateTowns() {
+    const county = document.getElementById('county-select').value;
+    const townSelect = document.getElementById('town-select');
+    townSelect.innerHTML = '';
+    
+    if (!county) {
+        townSelect.innerHTML = '<option value="">-- Select County First --</option>';
+        townSelect.disabled = true;
+        return;
+    }
+
+    townSelect.disabled = false;
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '-- Select Town --';
+    townSelect.appendChild(placeholder);
+
+    const towns = kenyaData[county] || [];
+    towns.forEach(town => {
+        const opt = document.createElement('option');
+        opt.value = town;
+        opt.textContent = town;
+        townSelect.appendChild(opt);
+    });
+}
 
 function updateLocation(loc) {
     const btnNairobi = document.getElementById('btn-nairobi');
@@ -265,6 +382,7 @@ function validateAgreements() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    initCounties();
     updateLocation('nairobi');
     
     document.getElementById('checkout-form').onsubmit = function(e) {
@@ -276,6 +394,19 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             return false;
         }
+
+        // Validate county + town for upcountry
+        const region = document.getElementById('region-input').value;
+        if (region === 'outside') {
+            const county = document.getElementById('county-select').value;
+            const town = document.getElementById('town-select').value;
+            if (!county || !town) {
+                alert("Please select your County and Town.");
+                e.preventDefault();
+                return false;
+            }
+        }
+
         this.querySelector('.btn-submit').innerText = "Processing...";
     };
 });

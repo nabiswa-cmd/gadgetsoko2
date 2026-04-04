@@ -83,7 +83,7 @@
     </div>
     {% endif %}
 
-    <form method="POST" action="{% url 'usersignup' %}">
+    <form method="POST" action="{% url 'signup' %}">
       {% csrf_token %}
 
       <div class="auth-field">
@@ -115,7 +115,7 @@
       <button type="submit" class="auth-btn">Create Account</button>
     </form>
 
-    <p class="auth-link">Already have an account? <a href="{% url 'userlog' %}">Sign in</a></p>
+    <p class="auth-link">Already have an account? <a href="{% url 'usersignup' %}">Sign in</a></p>
   </div>
 </div>
 
