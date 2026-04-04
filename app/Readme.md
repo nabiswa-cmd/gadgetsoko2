@@ -4,14 +4,14 @@
 
 ---
 
-## 🌍 Live Deployment
+## Live Deployment
 
 - **Platform:** Vercel / Render
 - **URL:** https://gadgetsoko.vercel.app
 
 ---
 
-## ✨ Features
+## ✨Features
 
 ### Storefront
 - Browse products by **category** or **brand**
@@ -91,27 +91,7 @@ gadgetsoko2/
 
 ---
 
-## ⚙️ Setup & Installation
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/nabiswa-cmd/gadgetsoko2.git
-cd gadgetsoko2
-```
-
-### 2. Create and activate a virtual environment
-```bash
-python -m venv venv
-source venv/bin/activate        # macOS/Linux
-venv\Scripts\activate           # Windows
-```
-
-### 3. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Create a `.env` file in the project root
+### `.env` file in the project root
 ```env
 SECRET_KEY=your-secure-random-secret-key
 DEBUG=True
