@@ -514,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 {% if request.user.is_authenticated %}
                     <a href="{% url 'logout' %}" class="text-white fw-bold small"><i class="bi bi-box-arrow-right"></i> Logout</a>
                 {% else %}
-                    <a href="{% url 'userlog' %}" class="text-white fw-bold small"><i class="bi bi-person-circle"></i> Login</a>
+                    <a href="{% url 'usersignup' %}" class="text-white fw-bold small"><i class="bi bi-person-circle"></i> Login</a>
                 {% endif %}
             </div>
             <button class="d-md-none border-0 bg-transparent text-white fs-4" data-bs-toggle="collapse" data-bs-target="#mobileSearchCollapse">

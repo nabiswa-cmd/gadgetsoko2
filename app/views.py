@@ -604,7 +604,7 @@ def usersignup_view(request):
             messages.error(request, "An account with that email already exists.")
         else:
             user = User.objects.create_user(username=username, email=email, password=password1)
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, f"Account created! Welcome to Gadget Soko, {username}! 🎉")
             return redirect('index')
 
