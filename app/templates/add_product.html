@@ -9,59 +9,79 @@
     
     <style>
         :root { --soko-orange: #ee4d2d; --soko-black: #1a1a1a; }
-        body { font-family: 'Inter', sans-serif; background: #f9f9f9; padding: 40px; }
-        form { max-width: 600px; background: #fff; padding: 30px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin: auto; }
-        label { font-weight: 800; text-transform: uppercase; font-size: 12px; display: block; margin-top: 20px; color: var(--soko-black); }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 2px; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f9f9f9; padding: 10px; }
         
-        /* IMAGE UPLOAD BOX */
+        form { 
+            max-width: 700px; 
+            background: #fff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            margin: 20px auto; 
+        }
+
+        /* Responsive Grid Logic */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr; /* Stacks on mobile */
+            }
+            form { padding: 15px; }
+        }
+
+        label { font-weight: 800; text-transform: uppercase; font-size: 11px; display: block; margin-top: 15px; color: var(--soko-black); }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        
         .upload-container { 
             border: 2px dashed #ccc; padding: 20px; text-align: center; 
-            margin-top: 10px; cursor: pointer; transition: 0.3s; 
+            margin-top: 10px; cursor: pointer; transition: 0.3s; border-radius: 8px;
         }
         .upload-container:hover { border-color: var(--soko-orange); background: #fff8f7; }
         
         #image-preview-grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
-            gap: 15px; margin-top: 15px; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); 
+            gap: 10px; margin-top: 15px; 
         }
 
-        /* Container for each preview image + delete button */
-        .preview-wrapper {
-            position: relative;
-            width: 80px;
-            height: 80px;
-        }
-        .preview-img { 
-            width: 100%; height: 100%; object-fit: cover; 
-            border-radius: 4px; border: 1px solid #eee; 
-        }
+        .preview-wrapper { position: relative; width: 70px; height: 70px; }
+        .preview-img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
         .remove-btn {
             position: absolute; top: -5px; right: -5px;
             background: #ff4444; color: white; border-radius: 50%;
-            width: 20px; height: 20px; font-size: 12px; line-height: 20px;
+            width: 18px; height: 18px; font-size: 10px; line-height: 18px;
             text-align: center; cursor: pointer; font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .btn { 
             background: var(--soko-orange); color: white; border: none; 
-            padding: 18px; width: 100%; font-weight: 800; margin-top: 30px; 
-            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            padding: 16px; width: 100%; font-weight: 800; margin-top: 25px; 
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; border-radius: 4px;
+        }
+
+        .section-title {
+            border-left: 4px solid var(--soko-orange);
+            padding-left: 10px;
+            margin: 25px 0 10px 0;
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--soko-black);
         }
     </style>
-</head>
-<body>
-
-<h2 style="text-align: center; font-weight: 900; text-transform: uppercase;">New Product Entry</h2>
 
 <form method="POST" enctype="multipart/form-data" id="productForm">
     {% csrf_token %}
 
+    <h2 style="text-align: center; font-weight: 900; text-transform: uppercase; margin-bottom: 20px;">New Product Entry</h2>
+
     <label>Product Name</label>
     <input type="text" name="name" placeholder="e.g. Samsung Galaxy S24" required>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="form-grid">
         <div>
             <label>Brand</label>
             <select name="brand" required>
@@ -77,17 +97,34 @@
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="section-title">PRICING & SHIPPING</div>
+    
+    <div class="form-grid">
         <div>
-            <label>Price (KES)</label>
+            <label>Base Price (KES)</label>
             <input type="number" name="price" required step="0.01">
         </div>
         <div>
-            <label>Discount (%)</label>
-            <input type="number" name="discount" value="0" step="0.01">
+            <label>Shipping Fee (KES)</label>
+            <input type="number" name="shipping_fee" value="0" step="0.01">
         </div>
     </div>
 
+    <div class="section-title">FLASH SALE SETTINGS</div>
+    
+    <div class="form-grid">
+        <div>
+            <label>Discount (%)</label>
+            <input type="number" name="discount" value="0" step="0.01" placeholder="e.g. 10">
+        </div>
+        <div>
+            <label>Sale Duration (Hours)</label>
+            <input type="number" name="discount_duration_hours" value="0" placeholder="e.g. 24">
+        </div>
+    </div>
+    <p style="font-size: 11px; color: #777; margin-top: 5px;">* Note: The sale starts immediately upon saving if hours > 0.</p>
+
+    <div class="section-title">CATEGORIZATION</div>
     <label>Category</label>
     <select name="category">
         <option value="">-- Select Existing Category --</option>
@@ -97,83 +134,58 @@
     </select>
     <input type="text" name="new_category" placeholder="Or type a new category name..." style="margin-top: 10px;">
 
-    <label><i class="fas fa-images"></i> Product Gallery (Add Multiple Photos)</label>
+    <div class="section-title">MEDIA & DETAILS</div>
+    <label><i class="fas fa-images"></i> Product Gallery</label>
     <div class="upload-container" onclick="document.getElementById('file-input').click()">
         <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #ccc;"></i>
-        <p style="font-size: 13px; color: #777;">Click to add photos (can select multiple times)</p>
-        
+        <p style="font-size: 12px; color: #777;">Tap to upload photos</p>
         <input type="file" id="file-input" name="images" multiple style="display: none;" onchange="handleFileSelect(event)">
-        
         <div id="image-preview-grid"></div>
     </div>
 
-    <label>Specifications & Details</label>
-    <textarea name="specifications" rows="5" placeholder="Display: 6.8 inch... RAM: 12GB..."></textarea>
+    <label>Specifications</label>
+    <textarea name="specifications" rows="4" placeholder="Display: 6.8 inch... RAM: 12GB..."></textarea>
 
     <button type="submit" class="btn">Confirm & Publish</button>
 </form>
 
 <script>
-    // Global array to hold all files across multiple selection clicks
     let fileBuffer = [];
-
     function handleFileSelect(event) {
         const previewGrid = document.getElementById('image-preview-grid');
         const files = Array.from(event.target.files);
-
         files.forEach(file => {
-            // 1. Check if it's an image
-            if (!file.type.startsWith('image/')) {
-                alert(file.name + " is not an image file.");
-                return;
-            }
-
-            // 2. Add to our global buffer
-            fileBuffer.append = fileBuffer.push(file);
-
-            // 3. Create the UI preview
+            if (!file.type.startsWith('image/')) return;
+            fileBuffer.push(file);
             const reader = new FileReader();
             reader.onload = function(e) {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'preview-wrapper';
-
                 const img = document.createElement('img');
                 img.src = e.target.result;
                 img.className = 'preview-img';
-
                 const removeBtn = document.createElement('div');
                 removeBtn.innerHTML = '&times;';
                 removeBtn.className = 'remove-btn';
-                
-                // Handle removing an image from the selection
                 removeBtn.onclick = function(ex) {
-                    ex.stopPropagation(); // Stop click from opening file picker
+                    ex.stopPropagation();
                     wrapper.remove();
-                    // Remove from array
                     fileBuffer = fileBuffer.filter(f => f !== file);
                     updateInput();
                 };
-
                 wrapper.appendChild(img);
                 wrapper.appendChild(removeBtn);
                 previewGrid.appendChild(wrapper);
             };
             reader.readAsDataURL(file);
         });
-
-        // 4. Sync the buffer to the actual input field
         updateInput();
     }
-
     function updateInput() {
         const fileInput = document.getElementById('file-input');
         const dataTransfer = new DataTransfer();
-        
-        fileBuffer.forEach(file => {
-            dataTransfer.items.add(file);
-        });
-
+        fileBuffer.forEach(file => dataTransfer.items.add(file));
         fileInput.files = dataTransfer.files;
     }
 </script>
-{%endblock%}
+{% endblock %}

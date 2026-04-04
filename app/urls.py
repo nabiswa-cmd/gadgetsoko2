@@ -61,7 +61,9 @@ urlpatterns = [
     path('increase-cart/<int:item_id>/', views.increase_cart, name='increase_cart'),
     path('decrease-cart/<int:item_id>/', views.decrease_cart, name='decrease_cart'),
     path('remove-cart/<int:item_id>/', views.remove_cart, name='remove_cart'),
-    path('search/',views.search_view,name="search")
+    path('search/',views.search_view,name="search"),
+    # urls.py
+    path('receipt/download/<int:order_id>/', views.download_receipt, name='download_receipt')
 
     
 ]

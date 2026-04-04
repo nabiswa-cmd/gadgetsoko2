@@ -427,6 +427,15 @@
     text-transform: uppercase;
     margin-top: 2px;
 }
+.product-info h3 {
+    font-size: 14px;
+    height: 40px; /* Adjust based on your font size */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Shows only 2 lines of text */
+    -webkit-box-orient: vertical;
+    margin-bottom: 8px;
+}
 </style>
 
 
@@ -448,14 +457,21 @@
                 {% endif %}
             </div>
             <h3>{{ product.name }}</h3>
-            <div class="price">
-                {% if product.discount > 0 %}
-                    <span class="old-price">KES {{ product.price }}</span>
-                    <strong class="new-price">KES {{ product.discounted_price }}</strong>
-                {% else %}
-                    <strong>KES {{ product.price }}</strong>
-                {% endif %}
-            </div>
+            <div class="price-box">
+    {% if product.discount > 0 %}
+        <span class="old-price" style="text-decoration: line-through; color: #999; font-size: 12px; margin-right: 5px;">
+            KES {{ product.price|floatformat:0 }}
+        </span>
+        
+        <span class="current-price" style="color: var(--primary-orange); font-weight: bold;">
+            KES {{ product.discounted_price|floatformat:0 }}
+        </span>
+    {% else %}
+        <span class="current-price" style="color: var(--navy-blue); font-weight: bold;">
+            KES {{ product.price|floatformat:0 }}
+        </span>
+    {% endif %}
+</div>
             <div class="product-actions">
                 <a href="{% url 'product_detail' product.id %}" class="btn-view"><i class="fa fa-eye"></i> VIEW</a>
                 <button class="btn-add" onclick="addToCart({{ product.id }})"><i class="fa fa-shopping-cart"></i> ADD</button>
@@ -468,7 +484,7 @@
 </section>
     
     <section class="products">
-        <h2>🔥 Quick Sales</h2>
+        <h2>🔥 les</h2>
         <div class="product-grid">
             {% for product in quick_sales %}
             <div class="product">
@@ -488,9 +504,14 @@
                 </div>
                 <h3>{{ product.name }}</h3>
                 <div class="price">
-                    <span class="old-price">KES {{ product.price }}</span>
-                    <strong class="new-price">KES {{ product.discounted_price }}</strong>
-                </div>
+    <span class="old-price" style="text-decoration: line-through; color: #999;">
+        KES {{ product.price|floatformat:0 }}
+    </span>
+    <strong class="new-price" style="color: #ee4d2d;">
+        KES {{ product.discounted_price|floatformat:0 }}
+    </strong>
+</div>
+                
                 <div class="product-actions">
                     <a href="{% url 'product_detail' product.id %}" class="btn-view"><i class="fa fa-eye"></i> VIEW</a>
                     <button class="btn-add" onclick="addToCart({{ product.id }})"><i class="fa fa-shopping-cart"></i> ADD</button>
@@ -553,6 +574,22 @@
         $('#live-activity-box').css('left', '20px');
         setTimeout(dismissActivity, 8000);
     }
+    data.items.forEach(item => {
+    // Calculate subtotal for this specific item
+    let subtotal = item.price * item.quantity;
+    
+    html += `
+    <div style="display:flex; gap:10px; padding:10px; border-bottom:1px solid #eee; align-items:center;">
+        <img src="${item.image}" style="width:45px; height:45px; border-radius:4px; object-fit:cover;">
+        <div style="flex:1;">
+            <h5 style="margin:0; font-size:12px; text-transform:capitalize;">${item.name}</h5>
+            <small>KES ${Math.round(item.price).toLocaleString()} x ${item.quantity}</small>
+        </div>
+        <div style="font-weight:bold; color:var(--primary-orange); font-size:12px;">
+            KES ${Math.round(subtotal).toLocaleString()}
+        </div>
+    </div>`;
+});
 
     function dismissActivity() { $('#live-activity-box').css('left', '-450px'); }
 

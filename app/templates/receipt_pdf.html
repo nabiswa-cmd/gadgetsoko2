@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header-table {
+            width: 100%;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo-text {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0056b3;
+            text-transform: uppercase;
+        }
+        .receipt-label {
+            font-size: 24px;
+            color: #777;
+            text-align: right;
+        }
+        .info-table {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            width: 150px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .items-table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            text-align: left;
+            padding: 10px;
+            color: #0056b3;
+        }
+        .items-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .totals-table {
+            width: 40%;
+            margin-left: 60%;
+            margin-top: 20px;
+        }
+        .totals-table td {
+            padding: 5px;
+        }
+        .grand-total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0056b3;
+            border-top: 2px solid #0056b3;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="logo-text">Gadget Soko Kenya</div>
+                <div style="font-size: 12px; color: #666;">Quality Electronics & Tech Solutions</div>
+            </td>
+            <td class="receipt-label">OFFICIAL RECEIPT</td>
+        </tr>
+    </table>
+
+    <table class="info-table">
+        <tr>
+            <td class="info-label">Order ID:</td>
+            <td>#{{ order.id }}</td>
+            <td class="info-label">Date:</td>
+            <td>{{ order.created_at|date:"D, d M Y" }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Customer Name:</td>
+            <td>{{ order.name }}</td>
+            <td class="info-label">Payment Mode:</td>
+            <td>{{ order.payment_method|upper }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Phone:</td>
+            <td>{{ order.phone }}</td>
+            <td class="info-label">Email:</td>
+            <td>{{ order.email }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Destination:</td>
+            <td colspan="3">{{ order.destination }}</td>
+        </tr>
+    </table>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Item Description</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>KES {{ item.price }}</td>
+                <td>KES {{ item.total_price }}</td> </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totals-table">
+        <tr>
+            <td>Subtotal:</td>
+            <td style="text-align: right;">KES {{ subtotal }}</td>
+        </tr>
+        <tr>
+            <td>Shipping:</td>
+            <td style="text-align: right;">KES {{ order.shipping_fee }}</td>
+        </tr>
+        <tr class="grand-total">
+            <td><strong>TOTAL PAID:</strong></td>
+            <td style="text-align: right;"><strong>KES {{ order.total }}</strong></td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        <p>Thank you for shopping with Gadget Soko Kenya!</p>
+        <p><em>This is a computer-generated receipt. No signature is required.</em></p>
+        <p>Visit us: www.gadgetsoko.co.ke | Contact: +254 7XX XXX XXX</p>
+    </div>
+
+</body>
+</html>

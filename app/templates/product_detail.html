@@ -141,6 +141,27 @@
         <div id="t-meta" style="font-size: 10px; font-weight: 900; color: var(--soko-orange); text-transform: uppercase; margin-top: 3px;">Kilimani • 4m ago</div>
     </div>
 </div>
+{% if discount_expiry %}
+<div class="timer-container">
+    {% if product.discount > 0 %}
+        <div class="discount-tag">-{{ product.discount }}%</div>
+        
+        {# Use the property we created in the model #}
+        {% if product.discount_expiry %}
+            <div class="timer-badge" data-expiry="{{ product.discount_expiry|date:'Y-m-d H:i:s' }}">
+                <i class="fas fa-clock"></i>
+                <span class="countdown-text">Calculating...</span>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+{% if product.is_on_sale %}
+    <div style="color: #ff5a2c; font-weight: 800; background: #fff8f6; padding: 10px; border-radius: 8px;">
+        ⚡ FLASH SALE ENDS IN: <span id="timer"></span>
+    </div>
+
+{% endif %}
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -180,6 +201,39 @@
         picked.forEach(r => html += `<div class="rev-item"><p>"${r.m}"</p><div class="rev-user">${r.u} • Verified Client</div></div>`);
         $('#rev-engine').html(html);
     }
+    function updateTimers() {
+    $('.timer-badge').each(function() {
+        const expiryStr = $(this).data('expiry');
+        if (!expiryStr) return;
+
+        // Create date object (Replacing space with 'T' for better cross-browser compatibility)
+        const expiry = new Date(expiryStr.replace(' ', 'T')).getTime();
+        const now = new Date().getTime();
+        const diff = expiry - now;
+
+        const $card = $(this).closest('.product-card');
+
+        if (diff <= 0) {
+            $(this).html("<i class='fas fa-clock'></i> Offer Ended");
+            $(this).css('background', '#888');
+            // Optional: Hide the old price/discount tag if you want to show the sale is over
+            $card.find('.old-price').hide();
+            return;
+        }
+
+        // Calculate hours, minutes, seconds
+        const h = Math.floor(diff / (1000 * 60 * 60)); // Total hours (can be > 24)
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+        // Display leading zeros for better UI (05h 09m 02s)
+        const displayH = h.toString().padStart(2, '0');
+        const displayM = m.toString().padStart(2, '0');
+        const displayS = s.toString().padStart(2, '0');
+
+        $(this).find('.countdown-text').text(`${displayH}h ${displayM}m ${displayS}s`);
+    });
+}
 
     /* THE 1000+ COMBINATION ACTIVITY ENGINE */
     const locations = ["Kilimani", "CBD", "Eldoret", "Mombasa Road", "Kisumu", "Thika", "Nakuru", "Kitengela", "Rongai", "Westlands", "Kasarani", "Syokimau", "Lavington", "Lodwar", "Embu", "Garrisa", "Nanyuki"];

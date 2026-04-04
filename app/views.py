@@ -8,8 +8,9 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
+from django.urls import reverse
 
-from .models import Product, Category, ProductImage, CartItem, Order, OrderItem
+from .models import Product, Category, ProductImage, CartItem, Order, OrderItem,SiteSettings
 
 import requests
 import base64
@@ -24,38 +25,38 @@ from .models import CartItem, Brand, Product
 
 from .models import Product, Brand, CartItem
 from django.db.models import Sum
+from django.utils import timezone
 
 def index_view(request):
     products = Product.objects.all()
     brands = Brand.objects.all()
 
     recommended_products = get_recommended_products(request.user)
-    
+
+    # ✅ FIXED: properly inside the function
     quick_sales = Product.objects.filter(
         discount__gt=0,
-        stock__gt=0
+        stock__gt=0,
+        
     ).order_by('-discount')[:8]
 
-    # 🔥 ADDED: Fetch the last 20 products added to the database
-    # This orders by the highest ID first (which are the newest inserts)
+    # Latest products
     featured_products = Product.objects.all().order_by('-id')[:20]
 
-    # ✅ SAFE cart count
+    # Cart count
     cart_count = 0
-
     if request.user.is_authenticated:
         result = CartItem.objects.filter(user=request.user).aggregate(
             total=Sum('quantity')
         )
         cart_count = result['total'] or 0
 
-    # Added 'featured_products' to the context dictionary below
     return render(request, 'index.html', {
         'products': products,
         'brands': brands,
         'recommended_products': recommended_products,
         'quick_sales': quick_sales,
-        'featured_products': featured_products,  # 👈 Pass it to index.html here
+        'featured_products': featured_products,
         'cart_count': cart_count
     })
 # Make sure category_id is included here!
@@ -87,47 +88,37 @@ from django.http import JsonResponse
 
 from django.http import JsonResponse
 @login_required
-
-@login_required
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user)
-    
-    # Calculate totals for both AJAX and Normal renders
-    # Use the property 'discounted_price' as defined in your Product model
-    total = sum(item.quantity * item.product.discounted_price for item in cart_items)
+
+    # ✅ Use ONE pricing logic
+    total = sum(item.quantity * item.product.final_price for item in cart_items)
     cart_count = sum(item.quantity for item in cart_items)
 
     if request.GET.get('ajax'):
         items = []
         for item in cart_items:
             product = item.product
-            price = product.discounted_price
+            price = product.final_price
+
             items.append({
                 'id': item.id,
-                'price': f"{price:,.2f}",
+                'price': float(price),
                 'name': product.name,
-               
                 'quantity': item.quantity,
                 'image': product.images.first().image.url if product.images.first() else '/static/images/default.png'
             })
-        return JsonResponse({'items': items, 'total': float(total), 'cart_count': cart_count})
 
-    # This handles the actual page visit
+        return JsonResponse({
+            'items': items,
+            'total': float(total),
+            'cart_count': cart_count
+        })
+
     return render(request, 'cart.html', {
         'cart_items': cart_items,
         'total': total,
         'cart_count': cart_count
-    })
-    
-    # Regular (non-AJAX) return
-    return render(request, 'app/cart.html', {'cart_items': cart_items})
-
-    # ✅ NORMAL PAGE (THIS WAS MISSING)
-    total = sum(item.quantity * item.product.discounted_price for item in cart_items)
-
-    return render(request, 'cart.html', {
-        'cart_items': cart_items,
-        'total': total
     })
 
 from .models import Category
@@ -219,78 +210,89 @@ from django.db.models import Sum
 # Remember to align these with your actual model names!
 from .models import Product, CartItem, ProductView, UserActivity
 
+from django.shortcuts import render, get_object_or_404
+from django.utils import timezone
+from datetime import datetime
+import random
+from .models import Product, ProductView, UserActivity
 
-# ==========================================
 # 1. PRODUCT DETAIL VIEW (Displays page & logs activity)
-# ==========================================
+import random
+from datetime import datetime, timedelta
+from django.shortcuts import render, get_object_or_404
+from django.db import IntegrityError, transaction
+from django.db.models import F
+from django.utils import timezone
+
+# Import your models
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.db import transaction, IntegrityError
+from django.db.models import F
+from django.utils import timezone
+from datetime import datetime, timedelta
+import random
+from .models import Product, ProductView, UserActivity  # Correct import
+
 def product_detail(request, pk):
+    # 1. Fetch the product or return 404
     product = get_object_or_404(Product, id=pk)
     
-    # --- DYNAMIC REVIEWS & RATINGS LOGIC ---
-    now = datetime.now()
-    time_chunk = 0 if now.hour < 12 else 1
-    seed_value = int(f"{pk}{now.year}{now.month}{now.day}{time_chunk}")
+    # --- SOCIAL PROOF LOGIC ---
+    now_time = datetime.now()
+    seed_value = int(f"{pk}{now_time.day}{now_time.hour // 12}")
     random.seed(seed_value)
-
     fake_rating = round(random.uniform(4.4, 5.0), 1)
-    fake_count = random.randint(28, 145)
-    
-    potential_comments = [
-        "Best quality in Nairobi! Delivery was super fast.",
-        "Authentic gadget, TingsTech never disappoints.",
-        "Value for money. Using it for 2 weeks now, no issues.",
-        "The packaging was professional. Highly recommended!",
-        "Cheaper than other shops and works perfectly.",
-        "Great customer service, SokoBot helped me track my order.",
-        "Original product. I was skeptical but Gadget Soko is legit.",
-        "Fast shipping to Mombasa, received in 24 hours!"
-    ]
-    
-    selected_reviews = random.sample(potential_comments, 3)
     
     social_proof = {
         'rating': fake_rating,
-        'count': fake_count,
-        'reviews': selected_reviews,
+        'count': random.randint(28, 145),
         'stars': '★' * int(fake_rating) + '☆' * (5 - int(fake_rating))
     }
-    # ---------------------------------------
 
-    # Increment product views safely
-    product.views += 1
-    product.save(update_fields=['views'])
+    # --- VIEW COUNTER ---
+    Product.objects.filter(id=pk).update(views=F('views') + 1)
 
+    # --- AUTHENTICATED USER LOGIC ---
     if request.user.is_authenticated:
-        # OLD SYSTEM
-        ProductView.objects.create(
-            user=request.user,
-            product=product
-        )
+        try:
+            with transaction.atomic():
+                ProductView.objects.update_or_create(
+                    user=request.user,
+                    product=product,
+                    defaults={'viewed_at': timezone.now()}
+                )
+        except IntegrityError:
+            pass
 
-        # NEW SYSTEM
-        UserActivity.objects.create(
-            user=request.user,
-            action='VIEW',
-            product=product,
-            extra_info=f"Viewed {product.name}"
-        )
+        recent_time = timezone.now() - timedelta(minutes=5)
+        exists = UserActivity.objects.filter(
+            user=request.user, product=product, action='VIEW', timestamp__gte=recent_time
+        ).exists()
 
-    # --- RECOMMENDED PRODUCTS (THE ROPE) ---
-    # Fetch up to 10 products from the same category, excluding the current one
-    recommended_products = Product.objects.filter(
-        category=product.category
-    ).exclude(id=product.id)[:10]
+        if not exists:
+            try:
+                with transaction.atomic():
+                    UserActivity.objects.create(
+                        user=request.user,
+                        action='VIEW',
+                        product=product,
+                        extra_info=f"Viewed {product.name}"
+                    )
+            except IntegrityError:
+                pass
 
+    # --- RECOMMENDATIONS ---
+    recommended = Product.objects.filter(category=product.category).exclude(id=product.id)[:10]
+
+    # --- FINAL RENDER (With Timer Context) ---
     return render(request, 'product_detail.html', {
         'product': product,
         'social_proof': social_proof,
-        'recommended_products': recommended_products, # New context variable
+        'recommended_products': recommended,
+        # ADD THIS LINE: Converts the date for the JavaScript clock
+        'discount_expiry': product.discount_until.isoformat() if product.discount_until else None,
     })
-
-
-# ==========================================
-# 2. ADD TO CART VIEW (Called by AJAX)
-# ==========================================
 def add_to_cart(request, product_id):
     # Guard rail: Make sure the user is logged in
     if not request.user.is_authenticated:
@@ -373,11 +375,21 @@ def add_product(request):
             brand=brand,
             specifications=specifications
         )
+        discount = request.POST.get("discount")
+        duration = request.POST.get("discount_duration_hours")
+        # Convert safely
+        discount = float(discount) if discount else 0
+        duration = int(duration) if duration and duration.isdigit() else 0
 
-        # ✅ Set the expiry date if offer_days exists
-        if offer_days and int(offer_days) > 0:
-            product.discount_expiry = timezone.now() + timedelta(days=int(offer_days))
-            product.save()
+        product.discount = discount
+        product.discount_duration_hours = duration
+
+# ✅ AUTO-START SALE
+        if discount > 0 and duration > 0:
+            product.discount_start_time = timezone.now()
+
+        product.save()
+
 
         images = request.FILES.getlist('images')
         for img in images:
@@ -417,51 +429,109 @@ def remove_cart(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
     item.delete()
     return JsonResponse({"status": "ok"})
+from decimal import Decimal
+def product_detail(request, pk):
+    # 1. Fetch the product or return 404
+    product = get_object_or_404(Product, id=pk)
+    
+    # --- SOCIAL PROOF LOGIC ---
+    now_time = datetime.now()
+    seed_value = int(f"{pk}{now_time.day}{now_time.hour // 12}")
+    random.seed(seed_value)
+    fake_rating = round(random.uniform(4.4, 5.0), 1)
+    
+    social_proof = {
+        'rating': fake_rating,
+        'count': random.randint(28, 145),
+        'stars': '★' * int(fake_rating) + '☆' * (5 - int(fake_rating))
+    }
 
-from .models import UserActivity
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .models import CartItem, Order, OrderItem, UserActivity
-# Assuming your M-Pesa function is imported from a utility file
-from .utils import lipa_na_mpesa 
+    # --- VIEW COUNTER ---
+    Product.objects.filter(id=pk).update(views=F('views') + 1)
 
+    # --- AUTHENTICATED USER LOGIC ---
+    if request.user.is_authenticated:
+        try:
+            with transaction.atomic():
+                ProductView.objects.update_or_create(
+                    user=request.user,
+                    product=product,
+                    defaults={'viewed_at': timezone.now()}
+                )
+        except IntegrityError:
+            pass
+
+        recent_time = timezone.now() - timedelta(minutes=5)
+        exists = UserActivity.objects.filter(
+            user=request.user, product=product, action='VIEW', timestamp__gte=recent_time
+        ).exists()
+
+        if not exists:
+            try:
+                with transaction.atomic():
+                    UserActivity.objects.create(
+                        user=request.user,
+                        action='VIEW',
+                        product=product,
+                        extra_info=f"Viewed {product.name}"
+                    )
+            except IntegrityError:
+                pass
+
+    # --- RECOMMENDATIONS ---
+    recommended = Product.objects.filter(category=product.category).exclude(id=product.id)[:10]
+
+    # --- FINAL RENDER (With Timer Context) ---
+    return render(request, 'product_detail.html', {
+        'product': product,
+        'social_proof': social_proof,
+        'recommended_products': recommended,
+        # ADD THIS LINE: Converts the date for the JavaScript clock
+        'discount_expiry': product.discount_until.isoformat() if product.discount_until else None,
+    })
 def check(request):
-    # 1. Fetch Cart Items
+    # 1. ALWAYS FETCH DATA FIRST
+    config, created = SiteSettings.objects.get_or_create(id=1)
     cart_items = CartItem.objects.filter(user=request.user)
     
+    # 2. Redirect if cart is empty
     if not cart_items:
         messages.warning(request, "Your cart is empty.")
         return redirect('view_cart')
 
-    # 2. Calculate Subtotal (using discounted_price as requested)
-    subtotal = sum(item.quantity * item.product.discounted_price for item in cart_items)
+    # ✅ SINGLE SOURCE OF TRUTH
+    subtotal = sum(item.quantity * item.product.final_price for item in cart_items)
 
+    # --- NEW: CALCULATE MAX SHIPPING FEE ---
+    # Find the highest shipping_fee among all products currently in the cart
+    product_shipping_fees = [item.product.shipping_fee for item in cart_items]
+    max_cart_shipping = max(product_shipping_fees) if product_shipping_fees else Decimal('0.00')
+
+    # 4. Handle Order Submission
     if request.method == "POST":
-        # --- GET FORM DATA ---
         name = request.POST.get("name")
         email = request.POST.get("email")
         phone = request.POST.get("phone")
         address = request.POST.get("address")
-        region = request.POST.get("region")  # 'nairobi' or 'outside'
+        region = request.POST.get("region") # 'nairobi' or 'outside'
         payment_method = request.POST.get("payment_method")
 
-        # --- PHONE NUMBER FORMATTING (M-PESA REQUIREMENT) ---
-        # Converts 07... or +254... to 2547...
+        # --- UPDATED SHIPPING LOGIC ---
+        # If outside Nairobi, use the highest product fee. If Nairobi, use SiteSettings (usually 0).
+        shipping_fee = max_cart_shipping if region == "outside" else config.shipping_fee_nairobi
+        final_total = subtotal + shipping_fee
+
+        # Phone Number Formatting
         clean_phone = phone.strip().replace("+", "")
         if clean_phone.startswith("0"):
             clean_phone = "254" + clean_phone[1:]
         elif not clean_phone.startswith("254"):
             clean_phone = "254" + clean_phone
 
-        # --- CALCULATE SHIPPING & FINAL TOTAL ---
-        shipping_fee = 300 if region == "outside" else 0
-        final_total = subtotal + shipping_fee
-
-        # --- DETERMINE DESTINATION STRING ---
         location_area = request.POST.get("nairobi_area") if region == "nairobi" else request.POST.get("outside_town")
         full_destination = f"{location_area} - {address}"
 
-        # --- 3. CREATE THE ORDER RECORD ---
+        # Create the Order
         order = Order.objects.create(
             user=request.user,
             name=name,
@@ -469,66 +539,75 @@ def check(request):
             phone=clean_phone,
             destination=full_destination,
             total=final_total,
-            shipping_fee=shipping_fee, # Recommended to add this field to your Model
+            shipping_fee=shipping_fee,
+            region=region, # Added to track region in DB
             status="Pending",
             payment_status="Awaiting Payment",
             payment_method=payment_method
         )
 
-        # --- 4. CREATE ORDER ITEMS ---
+        # Create Order Items & Summary
+        items_summary = ""
         for item in cart_items:
+            item_price = item.product.final_price
+                        
             OrderItem.objects.create(
                 order=order,
                 product=item.product,
                 quantity=item.quantity,
-                price=item.product.discounted_price
+                price=item_price
             )
+            items_summary += f"- {item.product.name} (x{item.quantity}) @ KES {item_price}\n"
 
-        # --- 5. LOG ACTIVITY ---
-        UserActivity.objects.create(
-            user=request.user,
-            action='CHECKOUT',
-            extra_info=f"Order #{order.id} | {region} | Total: KES {final_total}"
-        )
+        # Generate Receipt URL
+        current_domain = request.get_host() 
+        protocol = 'https' if request.is_secure() else 'http'
+        download_url = f"{protocol}://{current_domain}{reverse('download_receipt', args=[order.id])}"
 
-        # --- 6. HANDLE PAYMENT LOGIC ---
+        # Send Email
+        try:
+            subject = f"Order Confirmed - Gadget Soko #{order.id}"
+            email_body = f"Hello {name},\n\nYour order #{order.id} is confirmed.\n\nItems:\n{items_summary}\nShipping: KES {shipping_fee}\nTotal: KES {final_total}\n\nReceipt: {download_url}"
+            send_mail(subject, email_body, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
+        except Exception as e:
+            print(f"Email failed: {e}")
+
+        # Handle M-Pesa
         if payment_method == "mpesa":
             try:
                 response = lipa_na_mpesa(
                     phone_number=clean_phone,
-                    amount=int(final_total), # M-Pesa API expects Integers
+                    amount=int(final_total),
                     account_ref=f"GSK{order.id}",
                     transaction_desc="Gadget Purchase"
                 )
-
                 if response.get('ResponseCode') == '0':
-                    order.mpesa_checkout_id = response.get('CheckoutRequestID')
+                    order.checkout_request_id = response.get('CheckoutRequestID')
                     order.status = 'STK_Sent'
                     order.save()
-                    messages.success(request, f"Hambo {name}, M-Pesa prompt sent! Complete it to finish your shopping.")
-                else:
-                    messages.error(request, "STK Push failed. Please follow manual Paybill instructions.")
-            except Exception as e:
-                messages.error(request, "Payment gateway error. Please try again.")
+            except:
+                messages.error(request, "M-Pesa Gateway Error.")
 
         elif payment_method == "pod":
             order.payment_status = "Pay on Delivery"
             order.status = "Confirmed"
             order.save()
-            messages.success(request, f"Hello {name}, your order #{order.id} is confirmed! We'll call you for delivery.")
 
-        # --- 7. CLEAR CART & REDIRECT ---
-        cart_items.delete() 
+        # Clear Cart
+        cart_items.delete()
+        messages.success(request, f"Order #{order.id} placed successfully!")
         return redirect('payment_instructions', order_id=order.id)
 
-    # --- GET REQUEST: RENDER PAGE ---
+    # 5. GET Request
     context = {
-        'subtotal': subtotal,
-        'cart_items': cart_items,
-        'shipping_outside': 300
+        'subtotal': subtotal, 
+        'cart_items': cart_items, 
+        'config': config,
+        'max_shipping': max_cart_shipping, # Pass the highest fee to the template
+        'shipping_nairobi': config.shipping_fee_nairobi
     }
+    
     return render(request, 'check.html', context)
-
 def payment_instructions(request, order_id):
     # Fetch the order and ensure it belongs to the logged-in user
     order = get_object_or_404(Order, id=order_id, user=request.user)
@@ -1296,3 +1375,23 @@ def auto_assign_brand_logo(sender, instance, **kwargs):
             print(f"DEBUG: Found it! Assigned {relative_path} to {instance.name}")
         else:
             print(f"DEBUG: File not found for {instance.name}")
+
+# app/views.py
+from io import BytesIO
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from .models import Order
+
+def download_receipt(request, order_id):
+    order = Order.objects.get(id=order_id, user=request.user)
+    template = get_template('payment_instructions.html') # Create this simple HTML file
+    context = {'order': order}
+    html = template.render(context)
+    
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+    
+    if not pdf.err:
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
+    return HttpResponse("Error generating PDF", status=400)

@@ -78,3 +78,13 @@ class ProductViewAdmin(admin.ModelAdmin):
     def user_email(self, obj):
         return obj.user.email
     user_email.short_description = 'Customer Gmail'
+
+# admin.py
+from django.contrib import admin
+from .models import SiteSettings
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    # Prevent the admin from creating multiple settings objects
+    def has_add_permission(self, request):
+        return not SiteSettings.objects.exists()

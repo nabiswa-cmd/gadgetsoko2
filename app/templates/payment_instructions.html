@@ -1,266 +1,175 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Receipt | Gadget Soko Kenya</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
-
-        :root { 
-            --soko-orange: #ff5a2c; 
-            --soko-dark: #1a1a1a;
-            --success: #00a650;
-            --bg: #fdfdfd; 
-            --paper: #ffffff;
-        }
-
+        @page { size: A4; margin: 1cm; }
+        
         body { 
-            font-family: 'Outfit', sans-serif; 
-            background-color: var(--bg); 
-            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-            background-size: 20px 20px;
-            margin: 0; 
-            padding: 20px; 
-            color: var(--soko-dark);
+            font-family: 'Helvetica', 'Arial', sans-serif; 
+            background-color: #fdfdfd; 
+            margin: 0; padding: 20px; 
+            color: #1a1a1a;
         }
 
         .receipt { 
-            max-width: 480px; 
-            margin: 30px auto; 
-            background: var(--paper); 
+            width: 440px; 
+            margin: 0 auto; 
+            background: #ffffff; 
             border-radius: 24px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
-            position: relative;
             border: 1px solid #f1f1f1;
+            position: relative;
         }
 
-        .receipt::before {
-            content: '';
+        /* Mocking the dotted side decoration with a border since radial-gradients fail in PDF */
+        .side-decoration {
             position: absolute;
-            left: -10px;
+            left: 0;
             top: 20%;
             height: 60%;
-            width: 20px;
-            background-image: radial-gradient(#e5e7eb 5px, transparent 5px);
-            background-size: 20px 30px;
+            border-left: 4px dotted #e5e7eb;
         }
 
-        .header { 
-            text-align: center; 
-            padding: 30px 20px 20px; 
-        }
-
-        .header img.logo {
-            width: 150px;
-            margin-bottom: 15px;
-        }
+        .header { text-align: center; padding: 30px 20px 10px; }
 
         .success-icon {
-            width: 70px;
-            height: 70px;
-            background: #f0fdf4;
-            color: var(--success);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin: 0 auto 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #f0fdf4;
+            color: #00a650;
+            border-radius: 30px;
+            line-height: 60px;
+            font-size: 30px;
+            margin: 0 auto 15px;
             border: 2px solid #dcfce7;
+            text-align: center;
         }
 
-        .header h2 { margin: 0; font-size: 24px; font-weight: 800; color: var(--soko-dark); }
+        .header h2 { margin: 0; font-size: 24px; font-weight: bold; color: #1a1a1a; }
         .header p { color: #6b7280; font-size: 14px; margin-top: 5px; }
 
-        .info-grid { padding: 0 30px; margin-top: 10px; }
-        .info-row { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 12px 0; 
-            border-bottom: 1px solid #f9fafb;
-            font-size: 15px; 
+        .info-table {
+            width: 100%;
+            padding: 0 30px;
+            border-collapse: collapse;
         }
-        .info-row span:first-child { color: #9ca3af; font-weight: 500; }
-        .info-row span:last-child { font-weight: 600; color: var(--soko-dark); }
+
+        .info-row td {
+            padding: 10px 0;
+            border-bottom: 1px solid #f9fafb;
+            font-size: 14px;
+        }
+
+        .label { color: #9ca3af; text-align: left; width: 50%; }
+        .value { color: #1a1a1a; text-align: right; font-weight: bold; width: 50%; }
 
         .price-section { 
-            background: #fff8f6; 
+            background-color: #fff8f6; 
             margin: 20px 30px; 
             padding: 20px; 
             border-radius: 16px; 
             text-align: center;
-            border: 1px dashed var(--soko-orange);
+            border: 1px dashed #ff5a2c;
         }
-        .price-label { font-size: 13px; font-weight: 600; color: var(--soko-orange); text-transform: uppercase; letter-spacing: 1px; }
-        .price-amount { font-size: 32px; font-weight: 800; color: var(--soko-dark); display: block; margin-top: 5px; }
+        .price-label { font-size: 12px; font-weight: bold; color: #ff5a2c; text-transform: uppercase; }
+        .price-amount { font-size: 30px; font-weight: bold; color: #1a1a1a; display: block; margin-top: 5px; }
 
         .payment-instructions { 
             margin: 20px 30px; 
             padding: 20px; 
-            background: var(--soko-dark); 
-            color: white; 
+            background-color: #1a1a1a; 
+            color: #ffffff; 
             border-radius: 16px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
+        
         .instr-title { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
             font-size: 14px; 
-            font-weight: 600; 
+            font-weight: bold; 
             margin-bottom: 12px;
             color: #d1d5db;
+            text-align: center;
         }
+
         .pay-details { 
-            background: rgba(255,255,255,0.05); 
+            background-color: #2a2a2a; 
             padding: 15px; 
             border-radius: 12px;
             text-align: center;
         }
-        .pay-value { font-size: 22px; font-weight: 800; color: var(--soko-orange); display: block; margin: 5px 0; letter-spacing: 1px; }
+        .pay-value { font-size: 20px; font-weight: bold; color: #ff5a2c; display: block; margin: 5px 0; }
         .pay-ref { font-size: 12px; color: #9ca3af; }
 
-        .actions { 
-            padding: 20px 30px 40px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-        }
-        .btn { 
-            padding: 16px; 
-            border-radius: 14px; 
-            text-align: center; 
-            text-decoration: none; 
-            font-weight: 700; 
-            transition: all 0.3s;
-            font-size: 15px;
-        }
-        .btn-main { background: var(--soko-orange); color: white; box-shadow: 0 8px 20px rgba(255,90,44,0.2); }
-        .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
-        .btn-outline { color: #6b7280; font-weight: 600; font-size: 14px; }
-
         .stamp {
-            position: absolute;
-            top: 100px;
-            right: 40px;
-            border: 3px solid #f87171;
+            text-align: center;
+            border: 2px solid #f87171;
             color: #f87171;
-            padding: 5px 10px;
-            font-weight: 800;
+            padding: 4px;
+            font-weight: bold;
+            width: 80px;
+            margin: 0 auto;
             text-transform: uppercase;
-            transform: rotate(-15deg);
-            opacity: 0.3;
-            border-radius: 4px;
-            pointer-events: none;
-        }
-
-        @media print { 
-            .actions, .receipt::before { display: none; } 
-            body { background: white; } 
-            .receipt { box-shadow: none; border: 1px solid #eee; } 
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
 
 <div class="receipt">
-    <div class="stamp">
-        {% if order.payment_status == "Paid" %}
-            Paid
-        {% elif order.payment_method == "pod" %}
-            COD
-        {% else %}
-            Awaiting Pay
-        {% endif %}
-    </div>
+    <div class="side-decoration"></div>
 
     <div class="header">
-        <!-- Gadget Soko Logo -->
-        <img src="{% static 'images/logo.png' %}" alt="Gadget Soko" class="logo">
-        <div class="success-icon">
-            <i class="fas fa-check"></i>
+        <div class="stamp">
+            {% if order.payment_status == "Paid" %}PAID{% else %}PENDING{% endif %}
         </div>
+        <div class="success-icon">✔</div>
         <h2>Order Confirmed!</h2>
         <p>Order #GSK-{{ order.id }} has been registered.</p>
     </div>
 
-    <!-- Customer Info -->
-    <div class="info-grid">
-        <div class="info-row"><span>Customer</span><span>{{ order.name }}</span></div>
-        <div class="info-row"><span>Email</span><span>{{ order.email }}</span></div>
-        <div class="info-row"><span>Phone</span><span>{{ order.phone }}</span></div>
-        <div class="info-row"><span>Destination</span><span>{{ order.destination }}</span></div>
-        <div class="info-row"><span>Placed On</span><span>{{ order.created_at|date:"M d, H:i" }}</span></div>
-    </div>
-
-    <!-- Items -->
-    <div class="info-grid">
+    <table class="info-table">
+        <tr class="info-row"><td class="label">Customer</td><td class="value">{{ order.name }}</td></tr>
+        <tr class="info-row"><td class="label">Phone</td><td class="value">{{ order.phone }}</td></tr>
+        <tr class="info-row"><td class="label">Destination</td><td class="value">{{ order.destination }}</td></tr>
+        <tr class="info-row"><td class="label">Placed On</td><td class="value">{{ order.created_at|date:"M d, H:i" }}</td></tr>
+        
         {% for item in order.items.all %}
-            <div class="info-row">
-                <span>{{ item.product.name }} x {{ item.quantity }}</span>
-                <span>KES {{ item.subtotal }}</span>
-            </div>
+        <tr class="info-row">
+            <td class="label">{{ item.product.name }} x {{ item.quantity }}</td>
+            <td class="value">KES {{ item.subtotal }}</td>
+        </tr>
         {% endfor %}
-        <div class="info-row">
-            <span>Shipping Fee</span>
-            <span>KES {{ order.shipping_fee }}</span>
-        </div>
-    </div>
+        
+        <tr class="info-row">
+            <td class="label">Shipping Fee</td>
+            <td class="value">KES {{ order.shipping_fee }}</td>
+        </tr>
+    </table>
 
-    <!-- Total -->
     <div class="price-section">
-        <span class="price-label">Total Amount Due</span>
-        <span class="price-amount">KES {{ order.total }}</span>
+        <div class="price-label">Total Amount Due</div>
+        <div class="price-amount">KES {{ order.total }}</div>
     </div>
 
-    <!-- Payment Instructions -->
     <div class="payment-instructions">
-        {% if order.payment_method == 'equity' %}
-            <div class="instr-title"><i class="fas fa-university"></i> Equity Bank Instructions</div>
+        {% if order.payment_method == 'mpesa' %}
+            <div class="instr-title">M-Pesa Express (STK)</div>
             <div class="pay-details">
-                <span class="pay-value">Till: 7788990</span>
-                <span class="pay-ref">Ref: #GSK-{{ order.id }}</span>
+                <span class="pay-value">Paybill: 400200</span>
+                <span class="pay-ref">Acc: {{ order.id }}</span>
             </div>
-            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">
-                Go to Equity Mobile -> Pay Merchant -> Till Number
-            </p>
-        {% elif order.payment_method == 'pochi' %}
-            <div class="instr-title"><i class="fas fa-mobile-alt"></i> Pochi La Biashara</div>
-            <div class="pay-details">
-                <span class="pay-value">0722 000 000</span>
-                <span class="pay-ref">Name: GADGET SOKO KENYA</span>
-            </div>
-            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">
-                M-Pesa -> Lipa na M-Pesa -> Pochi la Biashara
-            </p>
-        {% elif order.payment_method == 'mpesa' %}
-            <div class="instr-title"><i class="fas fa-bolt"></i> M-Pesa Express (STK)</div>
-            <div class="pay-details">
-                <p style="font-size: 13px; margin: 0;">Check your phone for a PIN prompt.</p>
-            </div>
-            <p style="font-size: 11px; margin-top: 10px; color: #9ca3af; text-align: center;">
-                If no prompt appeared, use Paybill <b>400200</b> Acc: <b>{{ order.id }}</b>
-            </p>
         {% else %}
-            <div class="instr-title"><i class="fas fa-truck"></i> Cash on Delivery</div>
+            <div class="instr-title">Cash on Delivery</div>
             <div class="pay-details">
-                <p style="font-size: 13px; margin: 0;">Payment will be collected upon delivery.</p>
+                <span class="pay-value">KES {{ order.total }}</span>
+                <span class="pay-ref">Pay upon arrival</span>
             </div>
         {% endif %}
     </div>
-
-    <div class="actions">
-        <a href="{% url 'index' %}" class="btn btn-main">Continue Shopping</a>
-        <a href="javascript:window.print()" class="btn btn-outline"><i class="fas fa-print"></i> Save Receipt as PDF</a>
+    
+    <div style="text-align: center; font-size: 10px; color: #9ca3af; padding-bottom: 20px;">
+        Thank you for choosing Gadget Soko Kenya!
     </div>
 </div>
-
-<script>
-    console.log("Gadget Soko: Order #GSK-{{ order.id }} successfully rendered.");
-</script>
 
 </body>
 </html>

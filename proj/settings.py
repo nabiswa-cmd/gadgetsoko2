@@ -195,12 +195,20 @@ CLIENT_ID=os.getenv("CLIENT_ID")
 CLIENT_SECRET=os.getenv("SECRET_SECRET")
 
 
+# settings.py
+# settings.py
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'sammytings2@gmail.com'
-EMAIL_HOST_PASSWORD = 'qlaj stnc oeyn hcvc'
+
+
+EMAIL_HOST_USER =  os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+
+DEFAULT_FROM_EMAIL = 'Gadget Soko <sammytings2@gmail.com>'
 
 
 SOCIALACCOUNT_PROVIDERS = {

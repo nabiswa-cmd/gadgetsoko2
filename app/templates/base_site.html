@@ -1116,8 +1116,36 @@
 
     /* Mobile tweak */
     @media (max-width: 480px) {
+        
         .cookie-card { left: 10px; right: 10px; bottom: 10px; }
     }
+    /* Fix image containers to be consistent */
+.img-container {
+    width: 100%;
+    height: 140px; /* Shorter for mobile grid */
+    background: #fdfdfd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.img-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Ensure the title doesn't break the layout */
+.product-info h3 {
+    font-size: 13px;
+    margin: 8px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 32px; /* Fixed height for alignment */
+}
 
 
 
@@ -1540,6 +1568,58 @@ function closeCookiePopup() {
     const popup = document.getElementById('cookie-popup');
     if(popup) popup.classList.add('hidden');
 }
+
+/**
+ * GADGET SOKO - DYNAMIC COUNTDOWN ENGINE
+ * This script finds every element with 'data-expiry' and starts a clock.
+ */
+function initCountdowns() {
+    // Select all elements that have an expiry attribute
+    const timerElements = document.querySelectorAll('[data-expiry]');
+
+    timerElements.forEach(container => {
+        const expiryStr = container.getAttribute('data-expiry');
+        // Find the specific span where the numbers should go
+        const display = container.querySelector('.countdown-text') || container;
+
+        if (!expiryStr || expiryStr === "None") {
+            container.style.display = 'none';
+            return;
+        }
+
+        // Parse the ISO date string from Django
+        const expiryTime = new Date(expiryStr).getTime();
+
+        // Update the timer every 1 second
+        const interval = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = expiryTime - now;
+
+            // If the countdown is finished
+            if (distance < 0) {
+                clearInterval(interval);
+                display.innerHTML = "OFFER EXPIRED";
+                container.style.opacity = "0.6";
+                return;
+            }
+
+            // Time calculations for hours, minutes, and seconds
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Formatting: Ensure 2 digits (e.g., 05 instead of 5)
+            const h = hours < 10 ? "0" + hours : hours;
+            const m = minutes < 10 ? "0" + minutes : minutes;
+            const s = seconds < 10 ? "0" + seconds : seconds;
+
+            display.innerHTML = `${h}h ${m}m ${s}s`;
+        }, 1000);
+    });
+}
+
+// Start the timers once the page has loaded
+document.addEventListener('DOMContentLoaded', initCountdowns);
 </script>
 
     </body>
