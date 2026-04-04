@@ -147,12 +147,7 @@
 </head>
 
 <body>
-
-<div class="login-page">
-    <div class="login-card">
-        <h2>Welcome Back</h2>
-
-        <div class="error-container">
+ <div class="error-container">
             {% if messages %}
                 {% for message in messages %}
                     <span class="error-msg" id="errorMessage">
@@ -161,6 +156,11 @@
                 {% endfor %}
             {% endif %}
         </div>
+<div class="login-page">
+    <div class="login-card">
+        <h2>Welcome Back</h2>
+
+       
 
         <form method="POST" action="{% url 'secretkey' %}">
             {% csrf_token %}

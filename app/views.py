@@ -98,10 +98,10 @@ def products_view(request, brand_id=None, category_id=None):
 
 
 @login_required
+@login_required
 def view_cart(request):
-    cart_items = CartItem.objects.filter(user=request.user)
+    cart_items = CartItem.objects.filter(user=request.user).select_related('product')
 
-    # ✅ Use ONE pricing logic
     total = sum(item.quantity * item.product.final_price for item in cart_items)
     cart_count = sum(item.quantity for item in cart_items)
 
@@ -109,20 +109,24 @@ def view_cart(request):
         items = []
         for item in cart_items:
             product = item.product
-            price = product.final_price
-
+            first_image = product.images.first()
+            if first_image:
+                image_url = first_image.image.url
+            elif product.image:
+                image_url = product.image.url
+            else:
+                image_url = '/static/images/default.png'
             items.append({
                 'id': item.id,
-                'price': float(price),
+                'price': float(product.final_price),
                 'name': product.name,
                 'quantity': item.quantity,
-                'image': product.images.first().image.url if product.images.first() else '/static/images/default.png'
+                'image': image_url,
             })
-
         return JsonResponse({
             'items': items,
             'total': float(total),
-            'cart_count': cart_count
+            'cart_count': cart_count,
         })
 
     return render(request, 'cart.html', {
@@ -375,31 +379,31 @@ def add_product(request):
     })
 
 @login_required
+@login_required
 def increase_cart(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
     item.quantity += 1
     item.save()
-    return JsonResponse({"status": "ok"})
+    return JsonResponse({"success": True, "quantity": item.quantity})
 
 
 @login_required
 def decrease_cart(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
-    
     if item.quantity > 1:
         item.quantity -= 1
         item.save()
+        return JsonResponse({"success": True, "quantity": item.quantity})
     else:
         item.delete()
-
-    return JsonResponse({"status": "ok"})
+        return JsonResponse({"success": True, "quantity": 0, "removed": True})
 
 
 @login_required
 def remove_cart(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
     item.delete()
-    return JsonResponse({"status": "ok"})
+    return JsonResponse({"success": True})
 
 def check(request):
     # 1. ALWAYS FETCH DATA FIRST
@@ -590,7 +594,7 @@ def usersignup_view(request):
                 messages.error(request, "Username exists")
             else:
                 User.objects.create_user(username=username, email=email, password=password1)
-                return redirect('login')
+                return redirect('userlog')
         else:
             messages.error(request, "Passwords do not match")
 
@@ -604,7 +608,7 @@ def secretkey_view(request):
 
         if not username or not password:
             messages.error(request, "Please enter both username and password.")
-            return redirect('login')
+            return redirect('userlog')
 
         user = authenticate(request, username=username, password=password)
 
@@ -619,7 +623,7 @@ def secretkey_view(request):
                 return redirect('index')  # Redirect normal users
         else:
             messages.error(request, "Invalid username or password.")
-            return redirect('login')
+            return redirect('userlog')
 
     return render(request, 'login.html')
     

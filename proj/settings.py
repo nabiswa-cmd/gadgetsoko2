@@ -165,7 +165,7 @@ SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'https://your-app-name.onrender.com')
 # ---------------------------------------------------------------------------
 
 CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('SECRET_SECRET')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

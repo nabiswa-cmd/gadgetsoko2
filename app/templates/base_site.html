@@ -6,15 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}GadgetSoko{% endblock %}</title>
 
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/logo.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <link rel="apple-touch-icon" href="{% static 'images/logo.png' %}">
-    <link rel="shortcut icon" href="{% static 'images/logo.png' %}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/logo.png' %}">
-<link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/logo.png' %}">
-
-<link rel="apple-touch-icon" href="{% static 'images/logo.png' %}">
-
-<link rel="shortcut icon" href="{% static 'images/logo.png' %}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -57,250 +50,258 @@
         a { text-decoration: none; color: inherit; transition: var(--transition); }
         button { cursor: pointer; transition: var(--transition); }
 
-        /* ============================================================
-           TOPBAR — hidden on mobile via Bootstrap d-none d-md-flex
-        ============================================================ */
-        .gs-topbar {
-            background: var(--navy);
-            color: rgba(255,255,255,0.8);
-            font-size: 12.5px;
-        }
-        .gs-topbar a { color: rgba(255,255,255,0.75); }
-        .gs-topbar a:hover { color: var(--white); }
-
-        /* ============================================================
-           NAVBAR
-        ============================================================ */
+        /* ── NAVBAR ── */
         .gs-navbar {
             background: var(--primary) !important;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            position: sticky; top: 0; z-index: 1000;
             box-shadow: 0 2px 10px rgba(238,77,45,0.3);
+            margin-bottom: 0 !important;
         }
 
         .gs-logo img { height: 42px; display: block; }
 
-        /* Nav links */
         .gs-nav-link {
             position: relative;
             color: rgba(255,255,255,0.92) !important;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 600; font-size: 14px;
             padding: 7px 11px !important;
             border-radius: var(--radius-sm);
             white-space: nowrap;
         }
-
         .gs-nav-link::after {
-            content: "";
-            position: absolute;
-            left: 0; bottom: 0;
-            width: 0; height: 2px;
+            content: ""; position: absolute;
+            left: 0; bottom: 0; width: 0; height: 2px;
             background: linear-gradient(90deg, var(--white), gold, var(--white));
             transition: width 0.35s ease;
         }
-
         .gs-nav-link:hover::after { width: 100%; }
 
-        /* Mobile collapsible menu styling */
-        .navbar-collapse .gs-nav-link {
-            padding: 9px 14px !important;
-        }
-
-        /* Search bar */
+        /* Search */
         .gs-search {
-            display: flex;
-            align-items: center;
+            display: flex; align-items: center;
             background: rgba(255,255,255,0.15);
-            border-radius: 50px;
-            overflow: hidden;
-            position: relative;
+            border-radius: 50px; overflow: hidden; position: relative;
             border: 1.5px solid rgba(255,255,255,0.45);
             backdrop-filter: blur(4px);
-            transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
             min-width: 0;
         }
-
         .gs-search:focus-within {
             background: var(--white);
             border-color: var(--white);
             box-shadow: 0 4px 18px rgba(0,0,0,0.18);
         }
-
         .gs-search input {
-            flex: 1;
-            padding: 8px 6px 8px 14px;
-            border: none;
-            outline: none;
-            font-size: 13px;
-            font-family: inherit;
-            background: transparent;
-            color: var(--white);
-            min-width: 0;
-            width: 100%;
+            flex: 1; padding: 8px 6px 8px 14px;
+            border: none; outline: none; font-size: 13px;
+            font-family: inherit; background: transparent;
+            color: var(--white); min-width: 0; width: 100%;
         }
-
         .gs-search input::placeholder { color: rgba(255,255,255,0.75); }
         .gs-search:focus-within input { color: var(--text-main); }
         .gs-search:focus-within input::placeholder { color: var(--text-muted); }
 
         .gs-search-btn {
-            background: transparent;
-            border: none;
-            color: rgba(255,255,255,0.9);
-            padding: 0 13px;
-            font-size: 15px;
-            height: 38px;
-            display: flex;
-            align-items: center;
+            background: transparent; border: none;
+            color: rgba(255,255,255,0.9); padding: 0 13px;
+            font-size: 15px; height: 38px;
+            display: flex; align-items: center;
             border-left: 1px solid rgba(255,255,255,0.25);
             flex-shrink: 0;
-            transition: color 0.2s, background 0.2s;
         }
-
         .gs-search-btn:hover { background: rgba(255,255,255,0.15); }
         .gs-search:focus-within .gs-search-btn { color: var(--primary); border-left-color: var(--border); }
-        .gs-search:focus-within .gs-search-btn:hover { background: var(--bg-light); }
 
         .search-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            width: 100%;
-            background: var(--white);
-            z-index: 200;
-            box-shadow: var(--shadow-md);
-            border-radius: var(--radius-sm);
-            display: none;
-            overflow: hidden;
+            position: absolute; top: calc(100% + 8px); left: 0; width: 100%;
+            background: var(--white); z-index: 200;
+            box-shadow: var(--shadow-md); border-radius: var(--radius-sm);
+            display: none; overflow: hidden;
         }
 
         /* Cart icon */
         .gs-cart-icon {
-            position: relative;
-            color: var(--white);
-            font-size: 22px;
-            cursor: pointer;
-            padding: 4px 6px;
+            position: relative; color: var(--white);
+            font-size: 22px; cursor: pointer; padding: 4px 6px; flex-shrink: 0;
+        }
+        .cart-count {
+            position: absolute; top: -4px; right: -8px;
+            background: var(--white); color: var(--primary);
+            font-size: 10px; font-weight: 700;
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ── MOBILE SIDEBAR ── */
+        .mobile-sidebar {
+            position: fixed; top: 0; left: -300px;
+            width: 280px; height: 100vh;
+            background: #d73d1f; z-index: 3000;
+            transition: var(--transition);
+            padding: 25px 20px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+        }
+        .mobile-sidebar.active { left: 0; }
+        .sidebar-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6); display: none;
+            z-index: 2999; backdrop-filter: blur(3px);
+        }
+        .sidebar-overlay.active { display: block; }
+        .mobile-links { list-style: none; padding: 0; }
+        .mobile-links li a {
+            color: white; font-size: 16px; font-weight: 500;
+            display: block; padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .mobile-links li a:hover { color: gold; padding-left: 10px; }
+
+        /* ── CART SIDEBAR ── */
+        .cart-sidebar {
+            position: fixed; top: 0; right: -420px;
+            width: 380px; height: 100%;
+            background: var(--white);
+            box-shadow: -5px 0 20px rgba(0,0,0,0.15);
+            z-index: 2000; transition: right 0.4s ease;
+            display: flex; flex-direction: column;
+        }
+        .cart-sidebar.active { right: 0; }
+        .cart-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: none; z-index: 1999;
+        }
+        .cart-overlay.active { display: block; }
+
+        .cart-header {
+            padding: 18px 20px;
+            background: var(--bg-light);
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .cart-header h3 { font-size: 17px; color: var(--navy); font-family: 'Syne', sans-serif; margin: 0; }
+        .cart-header small { color: var(--text-muted); font-size: 12px; }
+        .close-cart {
+            background: none; border: none;
+            font-size: 28px; color: var(--text-muted); line-height: 1;
+        }
+
+        /* Cart items list */
+        .cart-items-container { flex: 1; overflow-y: auto; padding: 0; }
+
+        .cart-item-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .cart-item-row img {
+            width: 55px; height: 55px;
+            object-fit: cover; border-radius: 8px;
+            border: 1px solid var(--border); flex-shrink: 0;
+        }
+        .cart-item-row .item-info { flex: 1; min-width: 0; }
+        .cart-item-row .item-info b {
+            font-size: 13px; display: block;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .cart-item-row .item-info small { color: var(--text-muted); font-size: 11px; }
+        .cart-item-subtotal {
+            font-weight: 700; color: var(--primary);
+            font-size: 13px; white-space: nowrap;
             flex-shrink: 0;
         }
 
-        .cart-count {
-            position: absolute;
-            top: -4px; right: -8px;
+        /* Qty controls */
+        .qty-controls { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+        .qty-btn {
+            width: 24px; height: 24px;
+            border: 1px solid var(--border);
+            background: var(--bg-light); border-radius: 6px;
+            font-weight: bold; font-size: 14px; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .qty-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .qty-num { min-width: 22px; text-align: center; font-size: 13px; font-weight: 700; }
+
+        /* Remove btn */
+        .remove-btn {
+            background: transparent; border: none;
+            font-size: 18px; color: #ccc; flex-shrink: 0;
+        }
+        .remove-btn:hover { color: #e53935; }
+
+        /* Cart empty / loading */
+        .cart-empty {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 60px 20px; color: #bbb; text-align: center;
+        }
+        .cart-empty i { font-size: 48px; margin-bottom: 15px; }
+        .cart-empty p { font-size: 14px; }
+
+        /* Cart footer */
+        .cart-footer-panel {
+            padding: 18px 20px;
+            border-top: 1px solid var(--border);
             background: var(--white);
-            color: var(--primary);
-            font-size: 10px;
-            font-weight: 700;
-            width: 18px; height: 18px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-shrink: 0;
         }
-
-        /* Mobile: search inside collapse */
-        .mobile-search-wrap {
-            padding: 6px 0 4px;
+        .cart-footer-panel .total-row {
+            display: flex; justify-content: space-between;
+            font-weight: 700; margin-bottom: 14px; font-size: 15px;
         }
-
-        /* ============================================================
-           MAIN
-        ============================================================ */
-        .gs-main {
-            flex: 1;
-            padding: 25px 8%;
+        .cart-footer-panel .total-row span:last-child { color: var(--primary); font-size: 18px; }
+        .checkout-btn {
+            display: block; width: 100%;
+            background: var(--primary); color: var(--white) !important;
+            text-align: center; padding: 13px;
+            border-radius: var(--radius-sm);
+            font-weight: 700; font-size: 15px;
         }
+        .checkout-btn:hover { background: var(--primary-hover); }
 
-        /* Banner */
-        .banner, .slider {
-            margin-top: 0;
-            width: 100%;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
+        /* ── MAIN ── */
+        .gs-main { flex: 1; padding: 10px 8% 25px; }
+        @media (max-width: 767.98px) { .gs-main { padding: 5px 3% 15px; } }
 
-        .banner img, .slider img {
-            width: 100%;
-            height: 320px;
-            object-fit: contain;
-            display: block;
-            background: #000;
-        }
-
-        /* ============================================================
-           PRODUCT GRID
-        ============================================================ */
+        /* ── PRODUCT GRID ── */
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 20px;
         }
-
         .product-card, .product {
-            background: var(--white);
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
-            position: relative;
+            background: var(--white); border-radius: var(--radius-md);
+            border: 1px solid var(--border); overflow: hidden;
+            display: flex; flex-direction: column;
+            transition: var(--transition); position: relative;
         }
-
         .product-card:hover, .product:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-5px); box-shadow: var(--shadow-md);
         }
-
         .img-container {
-            width: 100%;
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fafafa;
-            border-bottom: 1px solid var(--border);
-            padding: 16px;
-            overflow: hidden;
+            width: 100%; height: 160px;
+            display: flex; align-items: center; justify-content: center;
+            background: #fafafa; border-bottom: 1px solid var(--border);
+            padding: 12px; overflow: hidden;
         }
-
         .img-container img {
-            max-width: 100%; max-height: 100%;
-            object-fit: contain;
+            max-width: 100%; max-height: 100%; object-fit: contain;
             transition: transform 0.4s ease;
-            display: block;
         }
-
-        .product-card:hover .img-container img,
-        .product:hover .img-container img { transform: scale(1.06); }
-
-        .product-card h3, .product h3 {
-            font-size: 14px; font-weight: 600;
-            padding: 10px 14px 4px;
-            line-height: 1.35; min-height: 46px;
-            color: var(--text-main);
+        .product-card:hover .img-container img { transform: scale(1.06); }
+        .product-info { padding: 10px 14px 4px; }
+        .product-info h3 {
+            font-size: 13px; font-weight: 600; line-height: 1.35;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+            min-height: 36px; color: var(--text-main);
         }
-
-        .price { padding: 4px 14px 10px; }
-
-        .old-price {
-            text-decoration: line-through;
-            color: var(--text-muted);
-            font-size: 12px; margin-right: 5px;
-        }
-
-        .new-price { color: var(--primary); font-weight: 700; font-size: 17px; }
-
         .product-actions {
             display: flex; gap: 8px;
-            padding: 0 12px 14px;
-            margin-top: auto;
+            padding: 8px 12px 14px; margin-top: auto;
         }
-
         .btn-view, .btn-add {
             flex: 1; padding: 9px 6px;
             font-size: 12px; font-weight: 700;
@@ -309,987 +310,259 @@
             display: flex; align-items: center;
             justify-content: center; gap: 5px;
         }
-
         .btn-view {
-            background: var(--bg-light);
-            color: var(--navy);
+            background: var(--bg-light); color: var(--navy);
             border: 1px solid var(--border);
         }
-
         .btn-view:hover { background: var(--navy); color: var(--white); border-color: var(--navy); }
-
         .btn-add { background: var(--primary); color: var(--white); border: none; }
         .btn-add:hover { background: var(--primary-hover); }
+        .btn-add.added { background: var(--success) !important; }
 
-        /* ============================================================
-           CART SIDEBAR
-        ============================================================ */
-        .cart-sidebar {
-            position: fixed; top: 0; right: -400px;
-            width: 350px; height: 100%;
-            background: var(--white);
-            box-shadow: -5px 0 20px rgba(0,0,0,0.15);
-            z-index: 2000; transition: right 0.4s ease;
-            display: flex; flex-direction: column;
-        }
-
-        .cart-sidebar.active { right: 0; }
-
-        .cart-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            display: none; z-index: 1999;
-        }
-
-        .cart-overlay.active { display: block; }
-
-        .cart-header {
-            padding: 18px 20px;
-            background: var(--bg-light);
-            display: flex; justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .cart-header h3 { font-size: 17px; color: var(--navy); font-family: 'Syne', sans-serif; }
-
-        .close-cart {
-            background: none; border: none;
-            font-size: 26px; color: var(--text-muted); cursor: pointer; line-height: 1;
-        }
-
-        .cart-items-container { flex: 1; overflow-y: auto; padding: 14px; }
-
-        .cart-item-row {
-            display: flex; align-items: center; gap: 10px;
-            padding-bottom: 12px; margin-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .cart-item-row img {
-            width: 52px; height: 52px;
-            object-fit: cover; border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .cart-item-row .item-info { flex: 1; }
-        .cart-item-row .item-info b { font-size: 13px; display: block; }
-        .cart-item-row .item-info small { color: var(--text-muted); font-size: 12px; }
-
-        .cart-footer-panel {
-            padding: 18px 20px;
-            border-top: 1px solid var(--border);
-            background: var(--white);
-        }
-
-        .cart-footer-panel .total-row {
-            display: flex; justify-content: space-between;
-            font-weight: 700; margin-bottom: 14px; font-size: 15px;
-        }
-
-        .cart-footer-panel .total-row span:last-child { color: var(--primary); }
-
-        .checkout-btn {
-            display: block; width: 100%;
-            background: var(--primary); color: var(--white) !important;
-            text-align: center; padding: 13px;
-            border-radius: var(--radius-sm);
-            font-weight: 700; font-size: 15px;
-        }
-
-        .checkout-btn:hover { background: var(--primary-hover); }
-
-        /* ============================================================
-           FOOTER
-        ============================================================ */
-        .gs-footer {
-            background: var(--navy); color: var(--white);
-            padding: 70px 8% 0;
-            margin-top: 50px;
-            border-top: 5px solid var(--primary);
-        }
-
-        .footer-container {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr;
-            gap: 50px; padding-bottom: 50px;
-        }
-
-        .footer-column h3 {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.1rem; color: var(--white);
-            margin-bottom: 22px; position: relative;
-            padding-bottom: 12px;
-        }
-
-        .footer-column h3::after {
-            content: ''; position: absolute;
-            left: 0; bottom: 0;
-            width: 40px; height: 3px;
-            background: var(--primary);
-        }
-
-        .footer-column p { color: rgba(255,255,255,0.7); font-size: 14px; line-height: 2; }
-
-        .footer-column a {
-            display: block; width: fit-content;
-            color: rgba(255,255,255,0.7);
-            font-size: 14px; line-height: 2.1;
-            position: relative;
-        }
-
-        .footer-column a::before {
-            content: '→'; position: absolute;
-            left: -12px; opacity: 0;
-            color: var(--primary); transition: var(--transition);
-        }
-
-        .footer-column a:hover { color: var(--white); padding-left: 14px; }
-        .footer-column a:hover::before { left: 0; opacity: 1; }
-
-        .social-icons { display: flex; gap: 12px; margin-top: 6px; }
-
-        .social-icons a {
-            width: 40px; height: 40px;
-            background: rgba(255,255,255,0.1);
-            display: flex; align-items: center;
-            justify-content: center; border-radius: 50%;
-            font-size: 17px; min-width: 40px;
-        }
-
-        .social-icons a::before { display: none; }
-
-        .social-icons a:hover {
-            background: var(--primary); color: var(--white);
-            transform: rotate(360deg);
-            padding-left: 0 !important;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 20px 0; text-align: center;
-            font-size: 13px; color: rgba(255,255,255,0.5);
-        }
-
-        .footer-bottom strong { color: var(--primary); }
-
-        /* ============================================================
-           RESPONSIVE OVERRIDES
-        ============================================================ */
         @media (max-width: 767.98px) {
             .gs-logo img { height: 36px; }
-
-            .gs-main { padding: 15px 3%; }
-
-            .banner, .slider { border-radius: 0; }
-            .banner img, .slider img { height: 180px; }
-
-            .product-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-
-            .img-container { height: 145px; padding: 10px; }
-            .product-card h3, .product h3 { font-size: 12.5px; min-height: 36px; }
-
+            .product-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .img-container { height: 130px; padding: 8px; }
             .cart-sidebar { width: 100%; right: -100%; }
+        }
 
-            .footer-container {
-                grid-template-columns: 1fr;
-                gap: 28px; text-align: center;
-            }
-
+        /* ── FOOTER ── */
+        .gs-footer {
+            background: var(--navy); color: rgba(255,255,255,0.85);
+            padding: 60px 8% 20px; margin-top: 60px;
+            border-top: 5px solid var(--primary);
+        }
+        .footer-container {
+            display: grid; grid-template-columns: 1.2fr 1fr 1fr;
+            gap: 40px; padding-bottom: 35px;
+        }
+        .footer-column h3 {
+            font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
+            color: white; margin-bottom: 18px;
+            position: relative; padding-bottom: 10px;
+        }
+        .footer-column h3::after {
+            content: ""; position: absolute; left: 0; bottom: 0;
+            width: 45px; height: 3px;
+            background: var(--primary); border-radius: 10px;
+        }
+        .footer-column p { font-size: 13px; margin-bottom: 10px; line-height: 1.8; color: rgba(255,255,255,0.75); }
+        .footer-column i { color: var(--primary); margin-right: 8px; }
+        .footer-column a {
+            display: block; color: rgba(255,255,255,0.75);
+            font-size: 13px; margin-bottom: 9px; transition: 0.25s ease;
+        }
+        .footer-column a:hover { color: white; transform: translateX(6px); }
+        .footer-social { display: flex; gap: 12px; margin-top: 15px; }
+        .footer-social a {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 15px; transition: 0.35s ease;
+        }
+        .footer-social a:hover { background: var(--primary); transform: rotate(360deg) scale(1.1); }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.12);
+            padding-top: 18px; text-align: center;
+            font-size: 12.5px; color: rgba(255,255,255,0.65); line-height: 1.8;
+        }
+        .footer-bottom strong { color: var(--primary); }
+        .dev-contact { color: rgba(255,255,255,0.8); font-weight: 700; }
+        .dev-contact:hover { color: white; text-decoration: underline; }
+        @media (max-width: 768px) {
+            .gs-footer { padding: 45px 5% 20px; text-align: center; }
+            .footer-container { grid-template-columns: 1fr; gap: 28px; }
             .footer-column h3::after { left: 50%; transform: translateX(-50%); }
-            .footer-column a { margin: 0 auto; }
-            .social-icons { justify-content: center; }
-            .gs-footer { padding-top: 36px; }
+            .footer-social { justify-content: center; }
         }
 
-        /* Ensure Bootstrap navbar-collapse dark bg doesn't override */
-        .navbar-collapse.collapse.show,
-        .navbar-collapse.collapsing {
-            background: var(--primary);
-            padding: 0 10px 10px;
-            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+        /* ── AUTH LOADER ── */
+        #auth-loader {
+            display: none; position: fixed; inset: 0;
+            background: rgba(255,255,255,0.95); z-index: 9999;
+            flex-direction: column; align-items: center;
+            justify-content: center; text-align: center;
+            backdrop-filter: blur(8px);
         }
-        /* Hamburger Toggle Button */
-.hamburger-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.8rem;
-    padding: 0;
-    margin-right: 15px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-}
+        .cart-flipper { animation: flipCart 0.6s infinite linear; display: inline-block; }
+        @keyframes flipCart { 0%{transform:rotateY(0deg)} 100%{transform:rotateY(360deg)} }
 
-/* Sidebar Styling */
-.mobile-sidebar {
-    background-color:#d73d1f;
-    position: fixed;
-    top: 0;
-    left: -300px; /* Hidden state */
-    width: 280px;
-    height: 100vh;
-    background:#d73d1f;
-    z-index: 3000;
-    transition: var(--transition);
-    padding: 25px 20px;
-    box-shadow: 5px 0 15px rgba(0,0,0,0.2);
-}
-
-.mobile-sidebar.active {
-    left: 0; /* Visible state */
-}
-
-.sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    z-index: 2999;
-    backdrop-filter: blur(3px);
-}
-
-.sidebar-overlay.active {
-    display: block;
-}
-
-/* Sidebar Links */
-.mobile-links {
-    list-style: none;
-    padding: 0;
-}
-
-.mobile-links li a {
-    color: white;
-    font-size: 16px;
-    font-weight: 500;
-    display: block;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    transition: 0.2s;
-}
-
-.mobile-links li a:hover {
-    color: var(--primary);
-    padding-left: 10px;
-}
-
-
-    /* ==========================================
-       CHATBOT AT THE RIGHT
-    ========================================== */
-    .chatbot-trigger {
-        position: fixed;
-        bottom: 30px;
-        right: 30px; /* Positioned on the right */
-        background: var(--navy);
-        color: white;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        cursor: pointer;
-        z-index: 4000;
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.2);
-        /* Human-sketched aesthetic */
-        border: 3px solid var(--primary);
-        transition: var(--transition);
-    }
-
-    .chatbot-trigger:hover {
-        transform: scale(1.1) rotate(5deg); /* Tilted slightly inward on the right */
-        background: var(--primary);
-        border-color: var(--navy);
-    }
-
-    /* Responsive for mobile */
-    @media (max-width: 768px) {
-        .chatbot-trigger { 
-            bottom: 20px; 
-            right: 20px; 
-            width: 50px; 
-            height: 50px; 
-            font-size: 24px; 
+        /* ── COOKIE POPUP ── */
+        .cookie-card {
+            position: fixed; bottom: 20px; left: 20px; right: 20px;
+            max-width: 420px; background: #111; color: white;
+            padding: 20px; z-index: 9999;
+            border: 2px solid var(--primary);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            box-shadow: 8px 8px 0px rgba(255,90,44,0.2);
+            display: flex; flex-direction: column;
+            transition: transform 0.4s ease-in-out;
         }
-    }
-    /* Remove the bottom shadow and margin from the Navbar */
-.gs-navbar {
-    margin-bottom: 0 !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional: Soften the shadow */
-}
-
-/* Adjust the main container padding */
-.gs-main {
-    flex: 1;
-    /* Reduced top padding from 25px to 10px (or 0) */
-    padding: 10px 8% 25px; 
-}
-
-/* Remove any top margin from the banner/slider itself */
-.banner, .slider {
-    margin-top: 0 !important;
-    margin-bottom: 20px;
-}
-
-/* Mobile specific: further tighten the gap on small screens */
-@media (max-width: 767.98px) {
-    .gs-main {
-        padding: 5px 3% 15px;
-    }
-}
-/* =====================================
-   CLEAN TRUSTWORTHY SECTION HEADINGS
-===================================== */
-.section h2,
-.products h2 {
-    font-family: 'Syne', sans-serif !important;
-    font-size: 26px;
-    font-weight: 800;
-    color: var(--navy);
-    margin-bottom: 16px;
-    letter-spacing: -0.5px;
-    position: relative;
-    padding-left: 12px;
-}
-
-/* Left border accent */
-.section h2::before,
-.products h2::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 4px;
-    width: 5px;
-    height: 70%;
-    background: var(--primary);
-    border-radius: 10px;
-}
-
-/* Featured + Quick Sales spacing */
-.products {
-    margin-top: 28px;
-    margin-bottom: 35px;
-}
-
-/* =====================================
-   SHOP BY BRAND (COMPACT + CLEAN)
-===================================== */
-#categories {
-    margin-top: 25px;
-    margin-bottom: 35px;
-}
-
-/* Brand container */
-.category-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 15px;
-    padding: 12px;
-    background: white;
-    border-radius: 14px;
-    border: 1px solid rgba(0,0,0,0.06);
-}
-
-/* Brand name pills (VERY HUMAN STYLE) */
-.category-grid a {
-    padding: 7px 14px;
-    border-radius: 30px;
-    background: #f8fafc;
-    border: 1px solid rgba(0,0,0,0.08);
-    font-size: 13px;
-    font-weight: 700;
-    color: #0b3a63;
-    font-family: 'DM Sans', sans-serif;
-    transition: 0.2s ease;
-    white-space: nowrap;
-}
-
-/* Hover effect (simple, realistic) */
-.category-grid a:hover {
-    background: #fff;
-    border-color: rgba(238, 77, 45, 0.4);
-    color: var(--primary);
-    transform: translateY(-2px);
-}
-
-/* =====================================
-   MOBILE FIXES (FONT + SPACING)
-===================================== */
-@media (max-width: 768px) {
-
-    .section h2,
-    .products h2 {
-        font-family: 'Syne', sans-serif !important;
-        font-size: 19px !important;
-        font-weight: 800;
-        margin-bottom: 12px;
-        padding-left: 10px;
-        letter-spacing: -0.3px;
-    }
-
-    .section h2::before,
-    .products h2::before {
-        width: 4px;
-        top: 3px;
-    }
-
-    /* Brand grid becomes super compact */
-    .category-grid {
-        padding: 10px;
-        gap: 8px;
-    }
-
-    .category-grid a {
-        font-size: 12px;
-        padding: 6px 12px;
-        font-weight: 700;
-    }
-}
-/* ================================
-   FOOTER
-================================ */
-.gs-footer {
-    background: var(--navy);
-    color: rgba(255,255,255,0.85);
-    padding: 60px 8% 20px;
-    margin-top: 60px;
-    border-top: 5px solid var(--primary);
-}
-
-.footer-container {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr;
-    gap: 40px;
-    padding-bottom: 35px;
-}
-
-.footer-column h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    color: white;
-    margin-bottom: 18px;
-    position: relative;
-    padding-bottom: 10px;
-}
-
-.footer-column h3::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 45px;
-    height: 3px;
-    background: var(--primary);
-    border-radius: 10px;
-}
-
-.footer-column p {
-    font-size: 13px;
-    margin-bottom: 10px;
-    line-height: 1.8;
-}
-
-.footer-column i {
-    color: var(--primary);
-    margin-right: 8px;
-}
-
-/* Quick links */
-.footer-column a {
-    display: block;
-    color: rgba(255,255,255,0.75);
-    font-size: 13px;
-    margin-bottom: 9px;
-    transition: 0.25s ease;
-}
-
-.footer-column a:hover {
-    color: white;
-    transform: translateX(6px);
-}
-
-/* Social icons */
-.footer-social {
-    display: flex;
-    gap: 12px;
-    margin-top: 15px;
-}
-
-.footer-social a {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.12);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 15px;
-    transition: 0.35s ease;
-}
-
-/* Rotate effect */
-.footer-social a:hover {
-    background: var(--primary);
-    transform: rotate(360deg) scale(1.1);
-}
-
-/* Footer bottom */
-.footer-bottom {
-    border-top: 1px solid rgba(255,255,255,0.12);
-    padding-top: 18px;
-    text-align: center;
-    font-size: 12.5px;
-    color: rgba(255,255,255,0.65);
-    line-height: 1.8;
-}
-
-.footer-bottom strong {
-    color: var(--primary);
-}
-
-.dev-contact {
-    color: rgba(255,255,255,0.8);
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.dev-contact:hover {
-    color: white;
-    text-decoration: underline;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .gs-footer {
-        padding: 45px 5% 20px;
-        text-align: center;
-    }
-
-    .footer-container {
-        grid-template-columns: 1fr;
-        gap: 28px;
-    }
-
-    .footer-column h3::after {
-        left: 50%;
-        transform: translateX(-50%);
-    }
-
-    .footer-social {
-        justify-content: center;
-    }
-}
-/* Quantity Controls */
-.qty-controls {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 5px;
-}
-
-.qty-btn {
-    width: 26px;
-    height: 26px;
-    border: 1px solid var(--border);
-    background: var(--bg-light);
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.qty-btn:hover {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-}
-
-.qty-num {
-    min-width: 20px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-/* Remove button */
-.remove-btn {
-    background: transparent;
-    border: none;
-    font-size: 20px;
-    color: #aaa;
-    cursor: pointer;
-    margin-left: 6px;
-    transition: 0.2s;
-}
-
-.remove-btn:hover {
-    color: red;
-}
-
-
-<style>
-    /* Cart Flipping Animation */
-    .cart-flipper {
-        animation: flipCart 0.6s infinite linear;
-        display: inline-block;
-    }
-    @keyframes flipCart {
-        0% { transform: rotateY(0deg); }
-        100% { transform: rotateY(360deg); }
-    }
-    .cookie-card {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        right: 20px;
-        max-width: 400px;
-        background: #111; /* Dark techie theme */
-        color: white;
-        padding: 20px;
-        z-index: 9999;
-        /* Sketched-look border */
-        border: 2px solid var(--primary);
-        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
-        box-shadow: 8px 8px 0px rgba(255, 90, 44, 0.2);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.4s ease-in-out;
-    }
-
-    .cookie-card.hidden {
-        transform: translateY(150%);
-    }
-
-    .cookie-content {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .cookie-icon i {
-        font-size: 30px;
-        color: var(--primary);
-        filter: drop-shadow(0 0 5px var(--primary));
-    }
-
-    .cookie-text h4 {
-        margin: 0;
-        font-family: 'Courier New', monospace; /* Techie font */
-        color: var(--primary);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .cookie-text p {
-        margin: 5px 0 0;
-        font-size: 13px;
-        opacity: 0.9;
-    }
-
-    .cookie-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-    }
-
-    .btn-accept {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 5px;
-        font-weight: bold;
-        cursor: pointer;
-        flex: 1;
-    }
-
-    .btn-close {
-        background: transparent;
-        color: #888;
-        border: 1px solid #444;
-        padding: 8px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .btn-accept:hover { background: #e44d22; }
-
-    /* Mobile tweak */
-    @media (max-width: 480px) {
-        .cookie-card { left: 10px; right: 10px; bottom: 10px; }
-    }
-        /* Cart Flipping Animation */
-    .cart-flipper {
-        animation: flipCart 0.6s infinite linear;
-        display: inline-block;
-    }
-    @keyframes flipCart {
-        0% { transform: rotateY(0deg); }
-        100% { transform: rotateY(360deg); }
-    }
-    .cookie-card {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        right: 20px;
-        max-width: 400px;
-        background: #111; /* Dark techie theme */
-        color: white;
-        padding: 20px;
-        z-index: 9999;
-        /* Sketched-look border */
-        border: 2px solid var(--primary);
-        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
-        box-shadow: 8px 8px 0px rgba(255, 90, 44, 0.2);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.4s ease-in-out;
-    }
-
-    .cookie-card.hidden {
-        transform: translateY(150%);
-    }
-
-    .cookie-content {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .cookie-icon i {
-        font-size: 30px;
-        color: var(--primary);
-        filter: drop-shadow(0 0 5px var(--primary));
-    }
-
-    .cookie-text h4 {
-        margin: 0;
-        font-family: 'Courier New', monospace; /* Techie font */
-        color: var(--primary);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .cookie-text p {
-        margin: 5px 0 0;
-        font-size: 13px;
-        opacity: 0.9;
-    }
-
-    .cookie-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-    }
-
-    .btn-accept {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 5px;
-        font-weight: bold;
-        cursor: pointer;
-        flex: 1;
-    }
-
-    .btn-close {
-        background: transparent;
-        color: #888;
-        border: 1px solid #444;
-        padding: 8px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .btn-accept:hover { background: #e44d22; }
-
-    /* Mobile tweak */
-    @media (max-width: 480px) {
-        
-        .cookie-card { left: 10px; right: 10px; bottom: 10px; }
-    }
-    /* Fix image containers to be consistent */
-.img-container {
-    width: 100%;
-    height: 140px; /* Shorter for mobile grid */
-    background: #fdfdfd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-}
-
-.img-container img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
-/* Ensure the title doesn't break the layout */
-.product-info h3 {
-    font-size: 13px;
-    margin: 8px 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    height: 32px; /* Fixed height for alignment */
-}
-
-
-
+        .cookie-card.hidden { transform: translateY(150%); }
+        .cookie-content { display: flex; align-items: center; gap: 15px; }
+        .cookie-icon i { font-size: 30px; color: var(--primary); }
+        .cookie-text h4 { margin: 0; font-family: 'Courier New', monospace; color: var(--primary); text-transform: uppercase; }
+        .cookie-text p { margin: 5px 0 0; font-size: 13px; opacity: 0.9; }
+        .cookie-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-accept { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 5px; font-weight: bold; flex: 1; }
+        .btn-accept:hover { background: #e44d22; }
+        .btn-close { background: transparent; color: #888; border: 1px solid #444; padding: 8px 15px; border-radius: 5px; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
 
-    <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
+{# ── CSRF token for JS ── #}
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
 
-    <div class="mobile-sidebar" id="sidebar">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <img src="{% static 'images/logo.png' %}" style="height: 35px;">
-            <button class="text-white bg-transparent border-0 fs-2" onclick="toggleMenu()">&times;</button>
-        </div>
-        <ul class="mobile-links" style="list-style:none; padding:0;">
-            <li class="mb-3"><a href="{% url 'index' %}" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-house-door me-2"></i> Home</a></li>
-<li class="mb-3"><a href="{% url 'products' %}" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-laptop me-2"></i> Products</a></li>
-<li class="mb-3"><a href="{% url 'index' %}#categories" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-grid me-2"></i> Categories</a></li>
-<li class="mb-3"><a href="{% url 'index' %}#services" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-tools me-2"></i> Services</a></li>
-<li class="mb-3"><a href="{% url 'index' %}#contacts" class="text-white text-decoration-none" onclick="toggleMenu()"><i class="bi bi-envelope me-2"></i> Contact</a></li>
-
-<hr class="text-white-50 my-3"> {% if user.is_authenticated %}
-    <li class="mb-3">
-        <a href="{% url 'account_logout' %}" class="text-white text-decoration-none" onclick="toggleMenu()">
-            <i class="bi bi-box-arrow-right me-2"></i> Logout ({{ user.username }})
-        </a>
-    </li>
-{% else %}
-    <li class="mb-3">
-        <a href="{% url 'userlog' %}" class="text-white text-decoration-none" onclick="toggleMenu()">
-            <i class="bi bi-person-check me-2"></i> Login
-        </a>
-    </li>
-{% endif %}
-        </ul>
+{# ── MOBILE SIDEBAR ── #}
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
+<div class="mobile-sidebar" id="mobileSidebar">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <img src="{% static 'images/logo.png' %}" style="height:35px;">
+        <button class="text-white bg-transparent border-0 fs-2" onclick="toggleMenu()">&times;</button>
     </div>
+    <ul class="mobile-links">
+        <li><a href="{% url 'index' %}" onclick="toggleMenu()"><i class="bi bi-house-door me-2"></i>Home</a></li>
+        <li><a href="{% url 'products' %}" onclick="toggleMenu()"><i class="bi bi-laptop me-2"></i>Products</a></li>
+        <li><a href="{% url 'index' %}#categories" onclick="toggleMenu()"><i class="bi bi-grid me-2"></i>Categories</a></li>
+        <li><a href="{% url 'index' %}#services" onclick="toggleMenu()"><i class="bi bi-tools me-2"></i>Services</a></li>
+        <li><a href="{% url 'index' %}#contacts" onclick="toggleMenu()"><i class="bi bi-envelope me-2"></i>Contact</a></li>
+        <hr class="text-white-50 my-3">
+        {% if user.is_authenticated %}
+            <li><a href="{% url 'logout' %}" onclick="toggleMenu()"><i class="bi bi-box-arrow-right me-2"></i>Logout ({{ user.username }})</a></li>
+        {% else %}
+            <li><a href="{% url 'userlog' %}" onclick="toggleMenu()"><i class="bi bi-person-check me-2"></i>Login</a></li>
+        {% endif %}
+    </ul>
+</div>
 
-    <nav class="gs-navbar navbar navbar-expand-md">
-        <div class="container-fluid px-3" style="padding-left:8% !important; padding-right:8% !important;">
-            
-            <div class="d-flex align-items-center d-md-none">
-                <button class="bg-transparent border-0 text-white fs-2 me-2" onclick="toggleMenu()">
-                    <i class="bi bi-list"></i>
-                </button>
-                <a class="gs-logo navbar-brand p-0" href="{% url 'index' %}">
-                    <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 30px;">
-                </a>
-            </div>
+{# ── NAVBAR ── #}
+<nav class="gs-navbar navbar navbar-expand-md">
+    <div class="container-fluid" style="padding-left:8% !important; padding-right:8% !important;">
 
-            <div class="d-none d-md-flex align-items-center gap-3">
-                <a class="gs-logo navbar-brand p-0" href="{% url 'index' %}">
-                    <img src="{% static 'images/logo.png' %}" alt="Gadget Soko Logo">
-                </a>
-                <div class="d-flex align-items-center gap-1">
-                    <a href="{% url 'index' %}" class="gs-nav-link">Home</a>
-                    <a href="{% url 'products' %}" class="gs-nav-link">Products</a>
-                    <a href="{% url 'index' %}#categories" class="gs-nav-link">Categories</a>
-                    <a href="{% url 'index' %}#services" class="gs-nav-link">Services</a>
-                    <a href="{% url 'index' %}#contacts" class="gs-nav-link">Contacts</a>
-                </div>
-            </div>
+        <div class="d-flex align-items-center d-md-none">
+            <button class="bg-transparent border-0 text-white fs-2 me-2" onclick="toggleMenu()">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="gs-logo navbar-brand p-0" href="{% url 'index' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" style="height:30px;">
+            </a>
+        </div>
 
-            <form action="{% url 'search' %}" method="GET" class="gs-search d-none d-md-flex mx-auto" style="width: 35%; max-width: 450px;">
-                <input type="text" name="q" id="searchInput" placeholder="Search gadgets..." autocomplete="off">
-                <button type="submit" class="gs-search-btn"><i class="bi bi-search"></i></button>
-                <div id="search-results" class="search-dropdown"></div>
-            </form>
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="d-none d-md-block">
-                    {% if request.user.is_authenticated %}
-                        <a href="{% url 'logout' %}" class="text-white fw-bold small"><i class="bi bi-box-arrow-right"></i> Logout</a>
-                    {% else %}
-                        <a href="{% url 'userlog' %}" class="text-white fw-bold small"><i class="bi bi-person-circle"></i> Login</a>
-                    {% endif %}
-                </div>
-                <button class="d-md-none border-0 bg-transparent text-white fs-4" data-bs-toggle="collapse" data-bs-target="#mobileSearchCollapse">
-                    <i class="bi bi-search"></i>
-                </button>
-                <div class="gs-cart-icon" onclick="toggleCart()">
-                    <i class="fa fa-shopping-cart"></i>
-                    <span class="cart-count">{{ cart_count|default:0 }}</span>
-                </div>
+        <div class="d-none d-md-flex align-items-center gap-3">
+            <a class="gs-logo navbar-brand p-0" href="{% url 'index' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Gadget Soko">
+            </a>
+            <div class="d-flex align-items-center gap-1">
+                <a href="{% url 'index' %}" class="gs-nav-link">Home</a>
+                <a href="{% url 'products' %}" class="gs-nav-link">Products</a>
+                <a href="{% url 'index' %}#categories" class="gs-nav-link">Categories</a>
+                <a href="{% url 'index' %}#services" class="gs-nav-link">Services</a>
+                <a href="{% url 'index' %}#contacts" class="gs-nav-link">Contacts</a>
             </div>
         </div>
-    </nav>
 
-    <div class="collapse d-md-none w-100" id="mobileSearchCollapse">
-        <div class="px-3 pb-3 pt-1" style="background:var(--primary);">
-            <form action="{% url 'search' %}" method="GET" class="gs-search w-100">
-                <input type="text" name="q" placeholder="Search gadgets...">
-                <button type="submit" class="gs-search-btn"><i class="bi bi-search"></i></button>
-            </form>
+        <form action="{% url 'search' %}" method="GET" class="gs-search d-none d-md-flex mx-auto" style="width:35%;max-width:450px;">
+            <input type="text" name="q" id="searchInput" placeholder="Search gadgets..." autocomplete="off">
+            <button type="submit" class="gs-search-btn"><i class="bi bi-search"></i></button>
+            <div id="search-results" class="search-dropdown"></div>
+        </form>
+
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-none d-md-block">
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="text-white fw-bold small"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                {% else %}
+                    <a href="{% url 'userlog' %}" class="text-white fw-bold small"><i class="bi bi-person-circle"></i> Login</a>
+                {% endif %}
+            </div>
+            <button class="d-md-none border-0 bg-transparent text-white fs-4" data-bs-toggle="collapse" data-bs-target="#mobileSearchCollapse">
+                <i class="bi bi-search"></i>
+            </button>
+            <div class="gs-cart-icon" onclick="toggleCart()">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="cart-count">{{ cart_count|default:0 }}</span>
+            </div>
         </div>
     </div>
+</nav>
 
-    <!-- CART OVERLAY -->
+{# Mobile search #}
+<div class="collapse d-md-none w-100" id="mobileSearchCollapse">
+    <div class="px-3 pb-3 pt-1" style="background:var(--primary);">
+        <form action="{% url 'search' %}" method="GET" class="gs-search w-100">
+            <input type="text" name="q" placeholder="Search gadgets...">
+            <button type="submit" class="gs-search-btn"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+</div>
+
+{# ── CART OVERLAY + SIDEBAR ── #}
 <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
 <div class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
-        <h3>Your Cart</h3>
+        <div>
+            <h3>Your Cart</h3>
+            <small id="cartItemCount">0 items</small>
+        </div>
         <button class="close-cart" onclick="toggleCart()">&times;</button>
     </div>
 
     <div class="cart-items-container" id="cartSlides">
-        <p class="text-muted">Loading cart...</p>
+        <div class="cart-empty">
+            <i class="bi bi-cart-x"></i>
+            <p>Your cart is empty</p>
+        </div>
     </div>
 
     <div class="cart-footer-panel">
         <div class="total-row">
-            <span>Total:</span>
+            <span>Subtotal</span>
             <span id="sidebarTotal">KES 0</span>
         </div>
-
-        <a href="{% url 'check' %}" class="checkout-btn">
-            Proceed to Checkout
-        </a>
+        <a href="{% url 'check' %}" class="checkout-btn">Proceed to Checkout &rarr;</a>
+        <p style="text-align:center;margin:8px 0 0;font-size:11px;color:#bbb;">Free delivery within Nairobi CBD</p>
     </div>
 </div>
 
+{# ── AUTH LOADER ── #}
+<div id="auth-loader">
+    <div class="cart-flipper" style="font-size:50px;color:var(--primary);margin-bottom:20px;">
+        <i class="fa fa-shopping-cart"></i>
+    </div>
+    <h3 style="font-family:'Syne',sans-serif;font-weight:800;color:var(--navy);">Logging you into Gadget Soko...</h3>
+    <p style="color:var(--text-muted);">Almost there! After logging in, you can fill your cart.</p>
+</div>
 
-    <main class="gs-main">
-        {% block content %}{% endblock %}
-    </main>
+{# ── COOKIE POPUP ── #}
+<div id="cookie-popup" class="cookie-card hidden">
+    <div class="cookie-content">
+        <div class="cookie-icon"><i class="fa-solid fa-cookie-bite"></i></div>
+        <div class="cookie-text">
+            <h4>Syncing Your Tech...</h4>
+            <p>We use cookies to remember your cart. Is that cool?</p>
+        </div>
+    </div>
+    <div class="cookie-actions">
+        <button onclick="acceptCookies()" class="btn-accept">Enable</button>
+        <button onclick="closeCookiePopup()" class="btn-close">Later</button>
+    </div>
+</div>
+
+{# ── MAIN CONTENT ── #}
+<main class="gs-main">
+    {% block content %}{% endblock %}
+</main>
+
+{# ── FOOTER ── #}
 <footer class="gs-footer" id="footer">
     <div class="footer-container">
-
-        <!-- LOCATION -->
         <div class="footer-column">
             <h3>Our Location</h3>
-            <p>
-                <i class="fa-solid fa-location-dot"></i>
-                Nairobi, Kenya <br>
-                Along Mombasa Road / CBD Delivery Available
-            </p>
-
-            <p style="margin-top:12px;">
-                <i class="fa-solid fa-clock"></i>
-                Open: Mon - Sat (8:00AM - 7:00PM)
-            </p>
+            <p><i class="fa-solid fa-location-dot"></i>Nairobi, Kenya<br>Along Mombasa Road / CBD Delivery Available</p>
+            <p style="margin-top:12px;"><i class="fa-solid fa-clock"></i>Open: Mon - Sat (8:00AM - 7:00PM)</p>
         </div>
-
-        <!-- QUICK LINKS -->
         <div class="footer-column">
             <h3>Quick Links</h3>
             <a href="{% url 'index' %}">Home</a>
@@ -1298,329 +571,280 @@
             <a href="{% url 'index' %}#services">Services</a>
             <a href="{% url 'index' %}#contacts">Contact</a>
         </div>
-
-        <!-- CONTACTS + SOCIALS -->
         <div class="footer-column">
             <h3>Contacts</h3>
-
-            <p>
-                <i class="fa-solid fa-phone"></i>
-                +254 7XX XXX XXX
-            </p>
-
-            <p>
-                <i class="fa-solid fa-envelope"></i>
-                support@gadgetsokokenya.com
-            </p>
-
-            <p>
-                <i class="fa-brands fa-whatsapp"></i>
-                WhatsApp: +254 7XX XXX XXX
-            </p>
-
+            <p><i class="fa-solid fa-phone"></i>+254 7XX XXX XXX</p>
+            <p><i class="fa-solid fa-envelope"></i>support@gadgetsokokenya.com</p>
+            <p><i class="fa-brands fa-whatsapp"></i>WhatsApp: +254 7XX XXX XXX</p>
             <div class="footer-social">
-                <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
-
     </div>
-    <div id="auth-loader" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; backdrop-filter:blur(8px);">
-    <div class="cart-flipper" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;">
-        <i class="fa fa-shopping-cart"></i>
-    </div>
-    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; color: var(--navy);">Logging you into Gadget Soko...</h3>
-    <p style="color: var(--text-muted);">Almost there! After logging in, you can fill your cart.</p>
-</div>
-<div id="cookie-popup" class="cookie-card hidden">
-    <div class="cookie-content">
-        <div class="cookie-icon">
-            <i class="fa-solid fa-cookie-bite"></i>
-        </div>
-        <div class="cookie-text">
-            <h4>Syncing Your Tech...</h4>
-            <p>We use cookies to remember your cart and optimize your gadget hunt. Is that cool?</p>
-        </div>
-        <div class="cookie-actions">
-            <button onclick="acceptCookies()" class="btn-accept">Enable</button>
-            <button onclick="closeCookiePopup()" class="btn-close">Later</button>
-        </div>
-    </div>
-</div>
-
-
-    <!-- FOOTER BOTTOM -->
     <div class="footer-bottom">
-        <p>
-            © {{ year|default:"2026" }} Gadget Soko Kenya. All Rights Reserved.
-        </p>
-
-        <p>
-            Developed by <strong>Sammy Tings</strong> |
-            Contact: <a href="tel:+2547XXXXXXXX" class="dev-contact">+254 7XX XXX XXX</a> |
-            Email: <a href="mailto:sammytings@email.com" class="dev-contact">sammytings@email.com</a>
+        <p>© {{ year|default:"2026" }} Gadget Soko Kenya. All Rights Reserved.</p>
+        <p>Developed by <strong>Sammy Tings</strong> |
+           <a href="tel:+2547XXXXXXXX" class="dev-contact">+254 7XX XXX XXX</a> |
+           <a href="mailto:sammytings@email.com" class="dev-contact">sammytings@email.com</a>
         </p>
     </div>
-    
 </footer>
 
-<!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Bootstrap 5 JS -->
 
 <script>
-/* ── GLOBAL CART & UI ENGINE ── */
+// ═══════════════════════════════════════════════════════════
+//  SINGLE GLOBAL CART ENGINE  —  used by every page
+// ═══════════════════════════════════════════════════════════
 
-/**
- * 1. CART TOGGLE & SYNC
- * Opens the sidebar and pulls fresh data from the database.
- */
+const csrfToken = document.getElementById('csrf-token').value;
+const isLoggedIn = "{{ request.user.is_authenticated }}" === "True";
+
+/* ── 1. OPEN / CLOSE SIDEBAR ── */
 function toggleCart() {
-    {% if not request.user.is_authenticated %}
-        const loader = document.getElementById('auth-loader');
-        if(loader) loader.style.display = 'flex';
+    if (!isLoggedIn) {
+        document.getElementById('auth-loader').style.display = 'flex';
         setTimeout(() => {
-            window.location.href = "{% url 'userlog' %}?next={{ request.path }}";
-        }, 600);
+            window.location.href = "{% url 'userlog' %}?next=" + encodeURIComponent(window.location.pathname);
+        }, 700);
         return;
-    {% endif %}
-
+    }
+    const isOpening = !$('#cartSidebar').hasClass('active');
     $('#cartSidebar').toggleClass('active');
     $('#cartOverlay').toggleClass('active');
-
-    // Only fetch data if we are opening the cart to save resources
-    if ($('#cartSidebar').hasClass('active')) {
-        updateCartSidebar();
-    }
+    if (isOpening) loadCartItems();
 }
 
-/**
- * 2. RE-RENDER SIDEBAR (Database Source of Truth)
- * This ensures the Index and Products pages always show the same items.
- */
-function updateCartSidebar() {
-    // Show a "loading" state in the total area for better UX
-    $('#sidebarTotal').html('<i class="fas fa-spinner fa-spin"></i>');
+/* ── 2. FETCH & RENDER CART FROM SERVER ── */
+function loadCartItems() {
+    $('#cartSlides').html(`
+        <div class="cart-empty" style="color:#bbb;">
+            <i class="fa fa-spinner fa-spin" style="font-size:32px;margin-bottom:12px;"></i>
+            <p>Loading...</p>
+        </div>`);
 
-    $.get("{% url 'view_cart' %}?ajax=1", function(data) {
-        let htmlContent = '';
-
-        if (!data.items || data.items.length === 0) {
-            htmlContent = `
-                <div class="text-center mt-5 text-muted">
-                    <i class="bi bi-cart-x fs-1"></i>
-                    <p>Your cart is empty</p>
-                </div>`;
-        } else {
-            data.items.forEach(item => {
-                htmlContent += `
-                    <div class="cart-item-row" data-id="${item.id}">
-                        <img src="${item.image}" alt="${item.name}">
-                        <div class="item-info">
-                            <b>${item.name}</b>
-                            <small>KES ${parseFloat(item.price).toLocaleString()}</small>
-                            <div class="qty-controls">
-                                <button onclick="updateQty(${item.id}, 'decrease')" class="qty-btn">−</button>
-                                <span class="qty-num">${item.quantity}</span>
-                                <button onclick="updateQty(${item.id}, 'increase')" class="qty-btn">+</button>
-                            </div>
-                        </div>
-                        <button onclick="removeItem(${item.id})" class="remove-btn">&times;</button>
-                    </div>`;
-            });
-        }
-
-        // Update the DOM elements
-        $('#cartSlides').html(htmlContent);
-        $('#sidebarTotal').text('KES ' + (data.total || 0).toLocaleString());
-        $('.cart-count').text(data.cart_count || 0);
-    }).fail(function() {
-        console.error("Could not sync cart with database.");
-    });
-}
-
-/**
- * 3. UPDATE QUANTITY (+ / -)
- * Connects the buttons to your Django backend.
- */
-function updateQty(productId, action) {
-    // Determine the correct URL based on the action
-    const url = (action === 'increase') ? `/add-to-cart/${productId}/` : `/decrease-cart/${productId}/`;
-    
-    $.get(url, function(res) {
-        if (res.error) {
-            console.log("Error updating quantity:", res.error);
-            return;
-        }
-        // Refresh the UI to reflect new quantities and totals
-        updateCartSidebar();
-    });
-}
-
-/**
- * 4. REMOVE ITEM (X)
- * Deletes the item from the database entirely.
- */
-function removeItem(productId) {
     $.ajax({
-        url: `/remove-from-cart/${productId}/`,
-        method: "GET",
-        success: function(res) {
-            updateCartSidebar();
-        }
+        url: "{% url 'view_cart' %}",
+        type: 'GET',
+        data: { ajax: '1', t: Date.now() },
+        success: function(data) {
+            // If Django redirected and we got back HTML, handle gracefully
+            if (typeof data !== 'object' || !data.items) {
+                showCartLoginPrompt();
+                return;
+            }
+            renderCartItems(data);
+        },
+        error: function() { showCartLoginPrompt(); }
     });
 }
 
-/**
- * 5. ADD TO CART (Main Trigger)
- * Used on product cards in both Index and Products pages.
- */
-function addToCart(pId) {
-    const isUserAuthenticated = "{{ request.user.is_authenticated }}" === "True";
+function showCartLoginPrompt() {
+    $('#cartSlides').html(`
+        <div class="cart-empty">
+            <i class="fas fa-lock"></i>
+            <p>Please <a href="{% url 'userlog' %}" style="color:var(--primary);font-weight:bold;">log in</a> to view your cart.</p>
+        </div>`);
+    $('#sidebarTotal').text('KES 0');
+    $('#cartItemCount').text('0 items');
+}
 
-    if (!isUserAuthenticated) {
-        const loader = document.getElementById('auth-loader');
-        if(loader) loader.style.display = 'flex';
-        
-        setTimeout(function() {
-            window.location.href = "{% url 'userlog' %}?next=" + window.location.pathname;
-        }, 800); 
+/* ── 3. RENDER CART ITEMS ── */
+function renderCartItems(data) {
+    const items = data.items || [];
+    const totalQty = items.reduce((s, i) => s + i.quantity, 0);
+
+    // Update counters
+    $('#cartItemCount').text(totalQty + (totalQty === 1 ? ' item' : ' items'));
+    $('#sidebarTotal').text('KES ' + Math.round(data.total || 0).toLocaleString());
+    $('.cart-count').text(totalQty > 0 ? totalQty : '0');
+
+    if (items.length === 0) {
+        $('#cartSlides').html(`
+            <div class="cart-empty">
+                <i class="bi bi-cart-x"></i>
+                <p>Your cart is empty!<br><small>Add products to get started.</small></p>
+            </div>`);
         return;
     }
 
-    // Ajax call to Django View
-    $.get(`/add-to-cart/${pId}/`, function(res) {
-        if (res.error === 'not_logged_in') {
-            window.location.href = "{% url 'userlog' %}";
-            return;
-        }
-        
-        // Sync the nav bar count
-        $('.cart-count').text(res.cart_count);
-        
-        // Open the sidebar automatically and refresh items
-        updateCartSidebar();
-        $('#cartSidebar, #cartOverlay').addClass('active');
+    const defaultImg = "{% static 'images/default.png' %}";
+    let html = '';
+    items.forEach(function(item) {
+        const subtotal = Math.round(item.price * item.quantity);
+        const imgSrc   = item.image.startsWith('http') ? item.image : window.location.origin + item.image;
+
+        html += `
+        <div class="cart-item-row" id="cart-row-${item.id}">
+            <img src="${imgSrc}" onerror="this.src='${defaultImg}'" alt="${item.name}">
+            <div class="item-info">
+                <b title="${item.name}">${item.name}</b>
+                <small>KES ${Math.round(item.price).toLocaleString()} each</small>
+                <div class="qty-controls">
+                    <button class="qty-btn" onclick="changeQty(${item.id}, -1)">&#8722;</button>
+                    <span class="qty-num" id="qty-${item.id}">${item.quantity}</span>
+                    <button class="qty-btn" onclick="changeQty(${item.id}, 1)">&#43;</button>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+                <span class="cart-item-subtotal" id="sub-${item.id}">KES ${subtotal.toLocaleString()}</span>
+                <button class="remove-btn" onclick="removeCartItem(${item.id})" title="Remove">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>`;
     });
+
+    $('#cartSlides').html(html);
 }
 
-/* ── LIVE SEARCH ENGINE ── */
-$(document).ready(function () {
-    function doSearch(val, $dropdown) {
-        if (val.length < 2) { $dropdown.hide(); return; }
-        $.ajax({
-            url: "{% url 'live_search' %}",
-            data: { 'q': val },
-            success: function (d) { 
-                $dropdown.html(d.html).show(); 
-            }
-        });
+/* ── 4. CHANGE QUANTITY (+ / -) ── */
+function changeQty(itemId, delta) {
+    // Optimistic UI update immediately
+    const $qty    = $('#qty-' + itemId);
+    const current = parseInt($qty.text()) || 1;
+    const newQty  = current + delta;
+
+    if (newQty < 1) {
+        removeCartItem(itemId);
+        return;
     }
 
-    // Desktop search
-    $('#searchInput').on('keyup', function () {
-        doSearch($(this).val(), $('#search-results'));
+    // Instantly update the number and recalculate subtotal shown
+    $qty.text(newQty);
+    const priceText = $('#sub-' + itemId).closest('.cart-item-row').find('small').text();
+    const unitPrice = parseInt(priceText.replace(/[^0-9]/g, '')) || 0;
+    $('#sub-' + itemId).text('KES ' + (unitPrice * newQty).toLocaleString());
+
+    // Hit the correct Django URL
+    const url = delta > 0 ? '/increase-cart/' + itemId + '/' : '/decrease-cart/' + itemId + '/';
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: { csrfmiddlewaretoken: csrfToken },
+        success: function() { loadCartItems(); },   // re-fetch for accurate total
+        error: function()   { loadCartItems(); }
     });
-
-    // Close search on outside click
-    $(document).on('click', function (e) {
-        if (!$(e.target).closest('.gs-search').length) {
-            $('.search-dropdown').hide();
-        }
-    });
-});
-
-/* ── MOBILE MENU (HAMBURGER) ── */
-function toggleMenu() {
-    const sidebar = document.querySelector('.mobile-sidebar');
-    const overlay = document.querySelector('.sidebar-overlay');
-    
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-
-    // Body scroll lock
-    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
 }
 
-/* ── COOKIE PERSISTENCE ── */
-document.addEventListener("DOMContentLoaded", function() {
-    const isUserAuthenticated = "{{ user.is_authenticated }}" === "True";
-    const cookieAccepted = localStorage.getItem("gsk_cookies");
+/* ── 5. REMOVE ITEM ── */
+function removeCartItem(itemId) {
+    $('#cart-row-' + itemId).fadeOut(200, function() { $(this).remove(); });
+    $.ajax({
+        url: '/remove-cart/' + itemId + '/',
+        type: 'POST',
+        data: { csrfmiddlewaretoken: csrfToken },
+        success: function() { loadCartItems(); },
+        error: function()   { loadCartItems(); }
+    });
+}
 
-    if (!isUserAuthenticated && !cookieAccepted) {
+/* ── 6. ADD TO CART (called from product cards) ── */
+function addToCart(productId, btn) {
+    if (!isLoggedIn) {
+        document.getElementById('auth-loader').style.display = 'flex';
         setTimeout(() => {
-            const popup = document.getElementById('cookie-popup');
-            if(popup) popup.classList.remove('hidden');
-        }, 2000);
+            window.location.href = "{% url 'userlog' %}?next=" + encodeURIComponent(window.location.pathname);
+        }, 700);
+        return;
     }
-});
 
-function acceptCookies() {
-    localStorage.setItem("gsk_cookies", "accepted");
-    closeCookiePopup();
-}
+    const $btn = btn ? $(btn) : null;
+    if ($btn) $btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
 
-function closeCookiePopup() {
-    const popup = document.getElementById('cookie-popup');
-    if(popup) popup.classList.add('hidden');
-}
-
-/**
- * GADGET SOKO - DYNAMIC COUNTDOWN ENGINE
- * This script finds every element with 'data-expiry' and starts a clock.
- */
-function initCountdowns() {
-    // Select all elements that have an expiry attribute
-    const timerElements = document.querySelectorAll('[data-expiry]');
-
-    timerElements.forEach(container => {
-        const expiryStr = container.getAttribute('data-expiry');
-        // Find the specific span where the numbers should go
-        const display = container.querySelector('.countdown-text') || container;
-
-        if (!expiryStr || expiryStr === "None") {
-            container.style.display = 'none';
-            return;
-        }
-
-        // Parse the ISO date string from Django
-        const expiryTime = new Date(expiryStr).getTime();
-
-        // Update the timer every 1 second
-        const interval = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = expiryTime - now;
-
-            // If the countdown is finished
-            if (distance < 0) {
-                clearInterval(interval);
-                display.innerHTML = "OFFER EXPIRED";
-                container.style.opacity = "0.6";
+    const url = "{% url 'add_to_cart' 0 %}".replace('/0/', '/' + productId + '/');
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: { csrfmiddlewaretoken: csrfToken },
+        success: function(res) {
+            if (res.error === 'login_required') {
+                window.location.href = "{% url 'userlog' %}";
                 return;
             }
+            if (res.success) {
+                if ($btn) {
+                    $btn.html('<i class="fa fa-check"></i> Added').addClass('added');
+                    setTimeout(() => $btn.html('<i class="fa fa-shopping-cart"></i> Add').removeClass('added').prop('disabled', false), 1800);
+                }
+                $('.cart-count').text(res.cart_count);
+                if (!$('#cartSidebar').hasClass('active')) {
+                    $('#cartSidebar').addClass('active');
+                    $('#cartOverlay').addClass('active');
+                }
+                loadCartItems();
+            }
+        },
+        error: function() {
+            if ($btn) $btn.html('<i class="fa fa-shopping-cart"></i> Add').prop('disabled', false);
+        }
+    });
+}
 
-            // Time calculations for hours, minutes, and seconds
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+/* ── LIVE SEARCH ── */
+$(document).ready(function() {
+    function doSearch(val, $drop) {
+        if (val.length < 2) { $drop.hide(); return; }
+        $.ajax({
+            url: "{% url 'live_search' %}",
+            data: { q: val },
+            success: function(d) { $drop.html(d.html).show(); }
+        });
+    }
+    $('#searchInput').on('keyup', function() { doSearch($(this).val(), $('#search-results')); });
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.gs-search').length) $('.search-dropdown').hide();
+    });
+});
 
-            // Formatting: Ensure 2 digits (e.g., 05 instead of 5)
-            const h = hours < 10 ? "0" + hours : hours;
-            const m = minutes < 10 ? "0" + minutes : minutes;
-            const s = seconds < 10 ? "0" + seconds : seconds;
+/* ── MOBILE MENU ── */
+function toggleMenu() {
+    document.getElementById('mobileSidebar').classList.toggle('active');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+    document.body.style.overflow = document.getElementById('mobileSidebar').classList.contains('active') ? 'hidden' : 'auto';
+}
 
+/* ── COUNTDOWN TIMERS ── */
+function initCountdowns() {
+    document.querySelectorAll('[data-expiry]').forEach(function(el) {
+        const expiryStr = el.getAttribute('data-expiry');
+        const display   = el.querySelector('.countdown-text') || el;
+        if (!expiryStr || expiryStr === 'None') { el.style.display = 'none'; return; }
+        const expiry = new Date(expiryStr).getTime();
+        const tick = setInterval(function() {
+            const diff = expiry - Date.now();
+            if (diff < 0) {
+                clearInterval(tick);
+                display.innerHTML = 'EXPIRED';
+                el.style.opacity = '0.6';
+                return;
+            }
+            const h = String(Math.floor(diff / 3600000)).padStart(2,'0');
+            const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+            const s = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
             display.innerHTML = `${h}h ${m}m ${s}s`;
         }, 1000);
     });
 }
-
-// Start the timers once the page has loaded
 document.addEventListener('DOMContentLoaded', initCountdowns);
+
+/* ── COOKIE NOTICE ── */
+document.addEventListener('DOMContentLoaded', function() {
+    if (!isLoggedIn && !localStorage.getItem('gsk_cookies')) {
+        setTimeout(() => {
+            const p = document.getElementById('cookie-popup');
+            if (p) p.classList.remove('hidden');
+        }, 2000);
+    }
+});
+function acceptCookies() { localStorage.setItem('gsk_cookies','accepted'); closeCookiePopup(); }
+function closeCookiePopup() { const p=document.getElementById('cookie-popup'); if(p) p.classList.add('hidden'); }
 </script>
 
-    </body>
+{% block extra_js %}{% endblock %}
+</body>
 </html>

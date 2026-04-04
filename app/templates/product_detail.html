@@ -1,298 +1,344 @@
+{% extends 'base_site.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} | GADGET SOKO</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+{% block title %}{{ product.name }} | Gadget Soko{% endblock %}
 
-    <style>
-        :root {
-            --soko-orange: #ee4d2d;
-            --soko-green: #25D366;
-            --soko-blue: #007bff;
-            --soko-black: #111;
-            --soko-gray: #f8f8f8;
-            --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<style>
+    :root {
+        --soko-orange: #ee4d2d;
+        --soko-green:  #25D366;
+        --soko-blue:   #007bff;
+        --spring:      cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
 
-        body { font-family: 'Inter', sans-serif; background: #fff; color: var(--soko-black); margin: 0; overflow-x: hidden; }
-        .wrapper { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .wrapper { max-width: 1200px; margin: 0 auto; padding: 10px 20px 60px; }
 
-        /* TOP NAV */
-        .top-nav { padding: 10px 0 30px 0; }
-        .back-link { text-decoration: none; color: #999; font-weight: 800; font-size: 12px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-        .back-link:hover { color: var(--soko-orange); transform: translateX(-5px); }
+    .back-link {
+        text-decoration: none; color: #999; font-weight: 800;
+        font-size: 12px; text-transform: uppercase;
+        display: inline-flex; align-items: center; gap: 8px;
+        margin-bottom: 24px; transition: 0.2s;
+    }
+    .back-link:hover { color: var(--soko-orange); transform: translateX(-5px); }
 
-        /* GRID */
-        .product-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; }
-        .stage { background: var(--soko-gray); height: 500px; border-radius: 25px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid #eee; }
-        .stage img { max-width: 80%; max-height: 80%; object-fit: contain; transition: 0.1s linear; }
+    /* ── PRODUCT GRID ── */
+    .product-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; }
 
-        /* BADGES */
-        .badge-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .soko-badge { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 900; text-transform: uppercase; border: 1px solid #eee; }
-        .b-stock { background: #e6fff0; color: #2ecc71; }
-        .b-rating { background: #fffbe6; color: #f1c40f; }
+    .stage {
+        background: #f8f8f8; height: 480px; border-radius: 20px;
+        display: flex; align-items: center; justify-content: center;
+        position: relative; overflow: hidden; border: 1px solid #eee;
+    }
+    .stage img { max-width: 80%; max-height: 80%; object-fit: contain; transition: 0.1s linear; }
 
-        /* TYPOGRAPHY */
-        .p-title { font-size: 52px; font-weight: 900; margin: 0; line-height: 0.9; letter-spacing: -2px; }
-        .p-price { font-size: 60px; font-weight: 900; margin: 25px 0; letter-spacing: -3px; }
-        .p-price span { font-size: 22px; color: var(--soko-orange); vertical-align: top; }
+    /* ── BADGES ── */
+    .badge-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .soko-badge { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 900; text-transform: uppercase; border: 1px solid #eee; }
+    .b-stock  { background: #e6fff0; color: #2ecc71; }
+    .b-rating { background: #fffbe6; color: #f1c40f; }
+    .b-sale   { background: #fff0ed; color: var(--soko-orange); }
 
-        /* CART BUTTON */
-        .btn-cart { width: 100%; padding: 25px; border-radius: 18px; background: var(--soko-orange); color: #fff; border: none; font-weight: 900; font-size: 20px; cursor: pointer; transition: 0.3s var(--spring); display: flex; align-items: center; justify-content: center; gap: 15px; }
-        .btn-cart:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(238, 77, 45, 0.3); }
+    /* ── TYPOGRAPHY ── */
+    .p-brand { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .p-title { font-size: 42px; font-weight: 900; margin: 0 0 6px; line-height: 1; letter-spacing: -2px; }
+    .p-price-box { margin: 20px 0; }
+    .p-old-price { font-size: 16px; color: #aaa; text-decoration: line-through; }
+    .p-price { font-size: 52px; font-weight: 900; color: var(--soko-orange); letter-spacing: -2px; line-height: 1; }
+    .p-price span { font-size: 20px; vertical-align: top; margin-top: 6px; display: inline-block; }
 
-        /* REVIEWS */
-        .rev-section { margin-top: 80px; }
-        .rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
-        .rev-item p { font-size: 16px; color: #333; font-style: italic; margin: 0 0 10px 0; line-height: 1.5; }
-        .rev-user { font-weight: 900; font-size: 11px; color: var(--soko-orange); text-transform: uppercase; }
+    /* ── DISCOUNT TIMER ── */
+    .timer-banner {
+        display: flex; align-items: center; gap: 10px;
+        background: #fff8f5; border: 1px solid #ffd5c8;
+        border-radius: 10px; padding: 10px 16px; margin-bottom: 20px;
+        font-weight: 800; font-size: 14px; color: var(--soko-orange);
+    }
+    .timer-banner i { font-size: 18px; }
 
-        /* THE ROPE & DOTS */
-        .rope-wrap { margin-top: 100px; padding-bottom: 120px; position: relative; }
-        .rope-item { background: #fff; padding: 20px; border-radius: 20px; border: 1px solid #eee; transition: 0.4s var(--spring); }
-        .rope-item:hover { transform: translateY(-10px); border-color: var(--soko-orange); }
-        
-        .dot-bar { display: flex; justify-content: center; gap: 10px; margin-top: 30px; }
-        .dot { width: 10px; height: 10px; background: #ddd; border-radius: 50%; transition: 0.4s var(--spring); }
-        .dot.active { width: 35px; background: var(--soko-orange); border-radius: 10px; }
+    /* ── ADD TO CART BUTTON ── */
+    .btn-cart {
+        width: 100%; padding: 22px; border-radius: 16px;
+        background: var(--soko-orange); color: #fff; border: none;
+        font-weight: 900; font-size: 18px; cursor: pointer;
+        transition: 0.3s var(--spring);
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        margin-top: 28px;
+    }
+    .btn-cart:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(238,77,45,0.3); }
+    .btn-cart.in-cart { background: #00a650; }
 
-        /* FLOATING ACTION HUB */
-        .floating-hub { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 99999; }
-        .f-btn { width: 65px; height: 65px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); transition: 0.3s var(--spring); text-decoration: none; border: none; cursor: pointer; }
-        .f-btn:hover { transform: scale(1.1) rotate(10deg); }
-        .bg-wa { background: var(--soko-green); }
-        .bg-call { background: var(--soko-blue); }
+    /* ── SPECS ── */
+    .specs-box { margin-top: 20px; padding: 16px; background: #fafafa; border-radius: 12px; border: 1px solid #eee; font-size: 14px; line-height: 1.8; color: #444; }
 
-        /* LIVE ACTIVITY TOAST */
-        #soko-pill { position: fixed; bottom: -120px; left: 20px; background: #fff; padding: 15px 25px; border-radius: 100px; display: flex; align-items: center; gap: 15px; box-shadow: 0 25px 60px rgba(0,0,0,0.15); border: 1px solid #eee; z-index: 99999; transition: 0.6s var(--spring); min-width: 300px; }
-        #soko-pill.active { bottom: 30px; }
+    /* ── REVIEWS ── */
+    .rev-section { margin-top: 70px; }
+    .rev-section h3 { font-weight: 900; font-size: 20px; text-transform: uppercase; margin-bottom: 28px; }
+    .rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; }
+    .rev-item { background: #fafafa; border-radius: 14px; padding: 20px; border: 1px solid #eee; }
+    .rev-item p { font-size: 14px; color: #333; font-style: italic; margin: 0 0 10px; line-height: 1.6; }
+    .rev-user { font-weight: 900; font-size: 11px; color: var(--soko-orange); text-transform: uppercase; }
 
-        @media (max-width: 900px) { .product-grid { grid-template-columns: 1fr; } .p-title { font-size: 38px; } }
-    </style>
-</head>
-<body>
+    /* ── RELATED PRODUCTS ── */
+    .rope-wrap { margin-top: 70px; }
+    .rope-wrap h3 { font-weight: 900; font-size: 20px; text-transform: uppercase; margin-bottom: 20px; }
+    .rope-item {
+        background: #fff; padding: 16px; border-radius: 16px;
+        border: 1px solid #eee; transition: 0.35s var(--spring);
+    }
+    .rope-item:hover { transform: translateY(-8px); border-color: var(--soko-orange); }
+    .dot-bar { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
+    .dot { width: 10px; height: 10px; background: #ddd; border-radius: 50%; transition: 0.4s var(--spring); }
+    .dot.active { width: 30px; background: var(--soko-orange); border-radius: 10px; }
 
+    /* ── FLOATING ACTION BUTTONS ── */
+    .floating-hub { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 14px; z-index: 800; }
+    .f-btn {
+        width: 58px; height: 58px; border-radius: 50%; color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+        transition: 0.3s var(--spring); text-decoration: none; border: none; cursor: pointer;
+    }
+    .f-btn:hover { transform: scale(1.12) rotate(8deg); }
+    .bg-wa   { background: var(--soko-green); }
+    .bg-call { background: var(--soko-blue); }
+
+    /* ── LIVE ACTIVITY TOAST ── */
+    #soko-pill {
+        position: fixed; bottom: -130px; left: 20px;
+        background: #fff; padding: 14px 22px; border-radius: 100px;
+        display: flex; align-items: center; gap: 14px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.12); border: 1px solid #eee;
+        z-index: 800; transition: 0.6s var(--spring); min-width: 280px;
+    }
+    #soko-pill.active { bottom: 28px; }
+
+    @media (max-width: 900px) {
+        .product-grid { grid-template-columns: 1fr; }
+        .p-title { font-size: 32px; }
+        .p-price { font-size: 40px; }
+        .stage { height: 340px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="wrapper">
-    <div class="top-nav">
-        <a href="{% url 'index' %}" class="back-link"><i class="fas fa-arrow-left"></i> Return to Shopping</a>
-    </div>
+
+    <a href="{% url 'products' %}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Products</a>
 
     <div class="product-grid">
+
+        {# ── IMAGE STAGE ── #}
         <div class="gallery">
-            <div class="stage" id="stage"><img id="v-img" src="{{ product.images.first.image.url }}"></div>
+            <div class="stage">
+                {% if product.images.first %}
+                    <img id="v-img" src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <img id="v-img" src="{% static 'images/default.png' %}" alt="{{ product.name }}">
+                {% endif %}
+            </div>
         </div>
+
+        {# ── PRODUCT DETAILS ── #}
         <div class="details">
             <div class="badge-row">
-                <span class="soko-badge b-stock"><i class="fas fa-check"></i> 14 Units In Stock</span>
-                <span class="soko-badge b-rating"><i class="fas fa-star"></i> 4.9 Real Rating</span>
+                {% if product.stock > 0 %}
+                    <span class="soko-badge b-stock"><i class="fas fa-check"></i> {{ product.stock }} In Stock</span>
+                {% else %}
+                    <span class="soko-badge" style="background:#fff0f0;color:#e74c3c;">Out of Stock</span>
+                {% endif %}
+                <span class="soko-badge b-rating"><i class="fas fa-star"></i> {{ social_proof.rating }} ({{ social_proof.count }} reviews)</span>
+                {% if product.is_on_sale %}
+                    <span class="soko-badge b-sale"><i class="fas fa-bolt"></i> FLASH SALE</span>
+                {% endif %}
             </div>
+
+            <div class="p-brand">{{ product.brand.name }}</div>
             <h1 class="p-title">{{ product.name }}</h1>
-            <div class="p-price"><span>KES</span>{{ product.discounted_price }}</div>
-            <div style="line-height: 1.7; color: #444; margin-bottom: 40px;">{{ product.specifications|linebreaks }}</div>
-            <button class="btn-cart" onclick="add({{ product.id }})">ADD TO CART <i class="fas fa-shopping-basket"></i></button>
+
+            <div class="p-price-box">
+                {% if product.discount > 0 and product.is_on_sale %}
+                    <div class="p-old-price">KES {{ product.price|floatformat:0 }}</div>
+                {% endif %}
+                <div class="p-price"><span>KES </span>{{ product.discounted_price|floatformat:0 }}</div>
+            </div>
+
+            {# ── DISCOUNT COUNTDOWN ── #}
+            {% if product.is_on_sale and product.discount_expiry %}
+            <div class="timer-banner">
+                <i class="fas fa-clock"></i>
+                <span>Flash sale ends in:</span>
+                <strong>
+                    <span class="countdown-text" data-expiry="{{ product.discount_expiry|date:'Y-m-d H:i:s' }}">
+                        calculating...
+                    </span>
+                </strong>
+            </div>
+            {% endif %}
+
+            <div class="specs-box">{{ product.specifications|linebreaks }}</div>
+
+            <button class="btn-cart" id="cart-btn" onclick="addToCartDetail({{ product.id }})">
+                ADD TO CART <i class="fas fa-shopping-basket"></i>
+            </button>
         </div>
     </div>
 
+    {# ── REVIEWS ── #}
     <div class="rev-section">
-        <h3 style="font-weight: 900; font-size: 22px; margin-bottom: 35px; text-transform: uppercase;">Real Human Vibe</h3>
+        <h3>Real Customer Reviews</h3>
         <div class="rev-grid" id="rev-engine"></div>
     </div>
 
+    {# ── RELATED PRODUCTS ── #}
     <div class="rope-wrap">
-        <h3 style="font-weight: 900; font-size: 22px; margin-bottom: 30px; text-transform: uppercase;">Flash Gear</h3>
+        <h3>You May Also Like</h3>
         <div class="swiper productSwiper">
             <div class="swiper-wrapper">
                 {% for item in recommended_products %}
                 <div class="swiper-slide">
                     <div class="rope-item">
-                        <a href="{% url 'product_detail' item.id %}" style="text-decoration:none; color:inherit;">
-                            <div style="height:140px; display:flex; align-items:center; justify-content:center;">
-                                <img src="{{ item.images.first.image.url }}" style="max-height:100%; max-width:100%;">
+                        <a href="{% url 'product_detail' item.id %}" style="text-decoration:none;color:inherit;">
+                            <div style="height:130px;display:flex;align-items:center;justify-content:center;">
+                                {% if item.images.first %}
+                                    <img src="{{ item.images.first.image.url }}" style="max-height:100%;max-width:100%;object-fit:contain;">
+                                {% else %}
+                                    <img src="{% static 'images/default.png' %}" style="max-height:100%;max-width:100%;object-fit:contain;">
+                                {% endif %}
                             </div>
-                            <span style="font-weight: 800; font-size: 15px; display: block; margin-top: 15px;">{{ item.name|truncatechars:18 }}</span>
-                            <div style="color: var(--soko-orange); font-weight: 900; margin-top: 5px;">KES {{ item.discounted_price }}</div>
+                            <span style="font-weight:800;font-size:14px;display:block;margin-top:12px;">{{ item.name|truncatechars:20 }}</span>
+                            <div style="color:var(--soko-orange);font-weight:900;margin-top:4px;">KES {{ item.discounted_price|floatformat:0 }}</div>
                         </a>
                     </div>
                 </div>
+                {% empty %}
+                <div class="swiper-slide"><p style="color:#aaa;padding:20px;">No related products.</p></div>
                 {% endfor %}
             </div>
         </div>
         <div class="dot-bar" id="dot-bar"></div>
     </div>
-</div>
 
+</div>{# end .wrapper #}
+
+{# ── FLOATING BUTTONS ── #}
 <div class="floating-hub">
     <a href="tel:+254700000000" class="f-btn bg-call"><i class="fas fa-phone"></i></a>
-    <a href="https://wa.me/254700000000?text=hallo%20gadget%20soko,,i%20need%20this%20{{ product.name|urlencode }}" class="f-btn bg-wa" target="_blank"><i class="fab fa-whatsapp"></i></a>
+    <a href="https://wa.me/254700000000?text=Hello%20Gadget%20Soko%2C%20I%20need%20{{ product.name|urlencode }}" class="f-btn bg-wa" target="_blank"><i class="fab fa-whatsapp"></i></a>
 </div>
 
+{# ── LIVE ACTIVITY TOAST ── #}
 <div id="soko-pill">
-    <img src="" id="t-avatar" style="width:55px; height:55px; border-radius:50%; border: 3px solid var(--soko-orange);">
+    <img src="" id="t-avatar" style="width:50px;height:50px;border-radius:50%;border:3px solid var(--soko-orange);">
     <div>
-        <div id="t-user" style="font-weight: 900; font-size: 15px;">User</div>
-        <div id="t-msg" style="font-size: 12px; color: #555;">just secured an item</div>
-        <div id="t-meta" style="font-size: 10px; font-weight: 900; color: var(--soko-orange); text-transform: uppercase; margin-top: 3px;">Kilimani • 4m ago</div>
+        <div id="t-user" style="font-weight:900;font-size:14px;">User</div>
+        <div id="t-msg" style="font-size:12px;color:#555;">just secured an item</div>
+        <div id="t-meta" style="font-size:10px;font-weight:900;color:var(--soko-orange);text-transform:uppercase;margin-top:3px;">Kilimani • 4m ago</div>
     </div>
 </div>
-{% if discount_expiry %}
-<div class="timer-container">
-    {% if product.discount > 0 %}
-        <div class="discount-tag">-{{ product.discount }}%</div>
-        
-        {# Use the property we created in the model #}
-        {% if product.discount_expiry %}
-            <div class="timer-badge" data-expiry="{{ product.discount_expiry|date:'Y-m-d H:i:s' }}">
-                <i class="fas fa-clock"></i>
-                <span class="countdown-text">Calculating...</span>
-            </div>
-        {% endif %}
-    {% endif %}
-</div>
 
-{% if product.is_on_sale %}
-    <div style="color: #ff5a2c; font-weight: 800; background: #fff8f6; padding: 10px; border-radius: 8px;">
-        ⚡ FLASH SALE ENDS IN: <span id="timer"></span>
-    </div>
+{% endblock %}
 
-{% endif %}
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% block extra_js %}
 <script>
-    /* THE 100+ REVIEW DATA ENGINE */
-    const reviews = [
-        "Hii gadget imeweza sana maze. Delivery hapa CBD ilikua fast.",
-        "Original stuff only. Gadget Soko are serious people, no long stories.",
-        "Wueh! Speed ya delivery ilikua scary. Sealed and clean factory packaging.",
-        "Best tech deals in KE. Compared everywhere else and hapa ndio home.",
-        "M-Pesa checkout ilikua seamless. Trusted and verified shop.",
-        "Item arrived in Eldoret next morning. Very reliable team.",
-        "Mwangi was very helpful on WhatsApp kusetup kila kitu. 10/10 service.",
-        "Genuine product, factory sealed. I'll definitely order again.",
-        "Prices are unmatchable for the quality you get here.",
-        "My go-to for all electronics. Fast, genuine, and reliable.",
-        "Soko legit! I've bought three items now and zero issues.",
-        "Hapa ndio kwa ukweli. Item iko sealed kabisa.",
-        "Finally a shop that actually stocks what they show on the site.",
-        "Top-tier customer support. They respond so fast on WhatsApp.",
-        "Hii shop haina mchezo. Legit deals always.",
-        "Just received my laptop, condition is 100% clean. Safi sana.",
-        "Highly recommended for anyone looking for authentic tech hapa KE."
-    ];
-    const buyers = ["Kamau", "Shiko", "Otieno", "Achieng", "Brayo", "Fatuma", "Moraa", "Kip", "Njeri", "Juma", "Zawadi", "Mutua", "Wanjiku", "Ondiek", "Stacy"];
-
-    function loadDynamicReviews() {
-        let pool = [...reviews];
-        let picked = [];
-        for(let i=0; i<4; i++) {
-            let idx = Math.floor(Math.random() * pool.length);
-            picked.push({
-                u: buyers[Math.floor(Math.random() * buyers.length)] + (Math.random() > 0.5 ? " M." : " W."),
-                m: pool.splice(idx, 1)[0]
-            });
+// ── ADD TO CART (detail page — uses POST via base engine) ──────────────────
+function addToCartDetail(productId) {
+    const btn = document.getElementById('cart-btn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+    btn.disabled = true;
+    addToCart(productId, btn);   // calls the global function defined in base_site.html
+    // Re-enable after 2s regardless
+    setTimeout(() => {
+        if (btn.disabled) {
+            btn.innerHTML = 'ADD TO CART <i class="fas fa-shopping-basket"></i>';
+            btn.disabled = false;
         }
-        let html = '';
-        picked.forEach(r => html += `<div class="rev-item"><p>"${r.m}"</p><div class="rev-user">${r.u} • Verified Client</div></div>`);
-        $('#rev-engine').html(html);
-    }
-    function updateTimers() {
-    $('.timer-badge').each(function() {
-        const expiryStr = $(this).data('expiry');
-        if (!expiryStr) return;
-
-        // Create date object (Replacing space with 'T' for better cross-browser compatibility)
-        const expiry = new Date(expiryStr.replace(' ', 'T')).getTime();
-        const now = new Date().getTime();
-        const diff = expiry - now;
-
-        const $card = $(this).closest('.product-card');
-
-        if (diff <= 0) {
-            $(this).html("<i class='fas fa-clock'></i> Offer Ended");
-            $(this).css('background', '#888');
-            // Optional: Hide the old price/discount tag if you want to show the sale is over
-            $card.find('.old-price').hide();
-            return;
-        }
-
-        // Calculate hours, minutes, seconds
-        const h = Math.floor(diff / (1000 * 60 * 60)); // Total hours (can be > 24)
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-        // Display leading zeros for better UI (05h 09m 02s)
-        const displayH = h.toString().padStart(2, '0');
-        const displayM = m.toString().padStart(2, '0');
-        const displayS = s.toString().padStart(2, '0');
-
-        $(this).find('.countdown-text').text(`${displayH}h ${displayM}m ${displayS}s`);
-    });
+    }, 2500);
 }
 
-    /* THE 1000+ COMBINATION ACTIVITY ENGINE */
-    const locations = ["Kilimani", "CBD", "Eldoret", "Mombasa Road", "Kisumu", "Thika", "Nakuru", "Kitengela", "Rongai", "Westlands", "Kasarani", "Syokimau", "Lavington", "Lodwar", "Embu", "Garrisa", "Nanyuki"];
-    const products = ["iPhone 15 Pro", "Samsung S24", "JBL Flip 6", "MacBook Air M3", "Sony XM5", "HP Victus", "Logitech Mouse", "PS5", "Apple Watch", "Gaming Monitor"];
+// ── REVIEWS ───────────────────────────────────────────────────────────────
+const reviews = [
+    "Hii gadget imeweza sana maze. Delivery hapa CBD ilikua fast.",
+    "Original stuff only. Gadget Soko are serious people, no long stories.",
+    "Wueh! Speed ya delivery ilikua scary. Sealed and clean factory packaging.",
+    "Best tech deals in KE. Compared everywhere else and hapa ndio home.",
+    "M-Pesa checkout ilikua seamless. Trusted and verified shop.",
+    "Item arrived in Eldoret next morning. Very reliable team.",
+    "Mwangi was very helpful on WhatsApp kusetup kila kitu. 10/10 service.",
+    "Genuine product, factory sealed. I'll definitely order again.",
+    "Prices are unmatchable for the quality you get here.",
+    "My go-to for all electronics. Fast, genuine, and reliable.",
+    "Soko legit! I've bought three items now and zero issues.",
+    "Hapa ndio kwa ukweli. Item iko sealed kabisa.",
+    "Finally a shop that actually stocks what they show on the site.",
+    "Top-tier customer support. They respond so fast on WhatsApp.",
+    "Hii shop haina mchezo. Legit deals always.",
+    "Just received my laptop, condition is 100% clean. Safi sana."
+];
+const buyers = ["Kamau","Shiko","Otieno","Achieng","Brayo","Fatuma","Moraa","Kip","Njeri","Juma","Zawadi","Mutua","Wanjiku","Ondiek","Stacy"];
 
-    function triggerToast() {
-        const u = buyers[Math.floor(Math.random()*buyers.length)];
-        const loc = locations[Math.floor(Math.random()*locations.length)];
-        const item = products[Math.floor(Math.random()*products.length)];
-        const time = Math.floor(Math.random()*59) + 1;
-
-        $('#t-user').text(u);
-        $('#t-msg').text(`just secured ${item}`);
-        $('#t-meta').text(`${loc} • ${time}m ago`);
-        $('#t-avatar').attr('src', `https://ui-avatars.com/api/?name=${u}&background=ee4d2d&color=fff`);
-        
-        $('#soko-pill').addClass('active');
-        setTimeout(() => $('#soko-pill').removeClass('active'), 5000);
-    }
-
-    /* THE NITRO ENGINE (ROPE + CYCLES) */
-    $(document).ready(function() {
-        loadDynamicReviews();
-
-        const swiper = new Swiper(".productSwiper", {
-            slidesPerView: 2.2, spaceBetween: 20, speed: 600,
-            breakpoints: { 1024: { slidesPerView: 5 } },
-            on: {
-                init: function() {
-                    let dotCount = Math.ceil(this.slides.length / this.params.slidesPerView);
-                    let dots = '';
-                    for(let i=0; i<dotCount; i++) dots += `<div class="dot ${i===0?'active':''}"></div>`;
-                    $('#dot-bar').html(dots);
-                },
-                slideChange: function() {
-                    let cur = Math.floor(this.activeIndex / this.params.slidesPerView);
-                    $('.dot').removeClass('active').eq(cur).addClass('active');
-                    if(this.isEnd) setTimeout(() => this.slideTo(0, 450), 1200);
-                }
-            }
+function loadDynamicReviews() {
+    let pool = [...reviews];
+    let picked = [];
+    for (let i = 0; i < 4; i++) {
+        const idx = Math.floor(Math.random() * pool.length);
+        picked.push({
+            u: buyers[Math.floor(Math.random() * buyers.length)] + (Math.random() > 0.5 ? " M." : " W."),
+            m: pool.splice(idx, 1)[0]
         });
+    }
+    document.getElementById('rev-engine').innerHTML = picked.map(r => `
+        <div class="rev-item">
+            <p>"${r.m}"</p>
+            <div class="rev-user">${r.u} • Verified Client</div>
+        </div>`).join('');
+}
 
-        // FORCE MOVE EVERY 1.5 SECONDS
-        setInterval(() => { if(!swiper.isEnd) swiper.slideNext(); }, 1500);
+// ── ACTIVITY TOAST ────────────────────────────────────────────────────────
+const locations = ["Kilimani","CBD","Eldoret","Mombasa Road","Kisumu","Thika","Nakuru","Kitengela","Rongai","Westlands","Kasarani","Syokimau","Lavington","Nanyuki"];
+const gadgets   = ["iPhone 15 Pro","Samsung S24","JBL Flip 6","MacBook Air M3","Sony XM5","HP Victus","Logitech Mouse","PS5","Apple Watch","Gaming Monitor"];
 
-        // ACTIVITY TOAST CYCLES
-        setTimeout(triggerToast, 3500);
-        setInterval(triggerToast, 28000);
+function triggerToast() {
+    const u    = buyers[Math.floor(Math.random() * buyers.length)];
+    const loc  = locations[Math.floor(Math.random() * locations.length)];
+    const item = gadgets[Math.floor(Math.random() * gadgets.length)];
+    const mins = Math.floor(Math.random() * 59) + 1;
+    document.getElementById('t-user').textContent  = u;
+    document.getElementById('t-msg').textContent   = `just secured ${item}`;
+    document.getElementById('t-meta').textContent  = `${loc} • ${mins}m ago`;
+    document.getElementById('t-avatar').src        = `https://ui-avatars.com/api/?name=${u}&background=ee4d2d&color=fff`;
+    document.getElementById('soko-pill').classList.add('active');
+    setTimeout(() => document.getElementById('soko-pill').classList.remove('active'), 5000);
+}
+
+// ── SWIPER ────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    loadDynamicReviews();
+
+    const swiper = new Swiper('.productSwiper', {
+        slidesPerView: 2.2, spaceBetween: 18, speed: 600,
+        breakpoints: { 1024: { slidesPerView: 4.5 } },
+        on: {
+            init: function() {
+                const count = Math.ceil(this.slides.length / this.params.slidesPerView);
+                document.getElementById('dot-bar').innerHTML =
+                    Array.from({length: count}, (_, i) =>
+                        `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('');
+            },
+            slideChange: function() {
+                const cur = Math.floor(this.activeIndex / this.params.slidesPerView);
+                document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+                if (this.isEnd) setTimeout(() => this.slideTo(0, 450), 1200);
+            }
+        }
     });
 
-    function add(id) {
-        $('.btn-cart').html('<i class="fas fa-spinner fa-spin"></i> SECURING...').css('background', '#000');
-        $.get(`/add-to-cart/${id}/`, function() {
-            setTimeout(() => {
-                $('.btn-cart').html('<i class="fas fa-check"></i> IN BASKET').css('background', 'var(--soko-green)');
-                setTimeout(() => $('.btn-cart').html('ADD TO CART <i class="fas fa-shopping-basket"></i>').css('background', 'var(--soko-orange)'), 3000);
-            }, 800);
-        });
-    }
+    setInterval(() => { if (!swiper.isEnd) swiper.slideNext(); }, 1800);
+
+    setTimeout(triggerToast, 3500);
+    setInterval(triggerToast, 28000);
+});
 </script>
-</body>
-</html>
+{% endblock %}
