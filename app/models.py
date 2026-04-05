@@ -41,6 +41,15 @@ class Product(models.Model):
     views = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+   
+    # ... your existing fields (name, price, etc.) ...
+    short_description = models.TextField(
+        max_length=300, 
+        blank=True, 
+        null=True, 
+        help_text="A brief catchy description (max 300 characters)."
+    )
+    
 
     discount_duration_hours = models.PositiveIntegerField(default=0)
     discount_start_time = models.DateTimeField(null=True, blank=True)

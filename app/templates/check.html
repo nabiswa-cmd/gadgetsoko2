@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +11,7 @@
             --primary: #ff5a2c; 
             --secondary: #111;
             --mpesa: #00a650; 
+            --equity: #a32a29;
             --bg: #f4f6f9; 
             --border: #e1e1e1;
         }
@@ -19,17 +19,11 @@
         body { background: var(--bg); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; color: #333; }
         
         .checkout-wrapper { 
-            width: 95%; 
-            max-width: 1100px; 
-            margin: 20px auto; 
-            display: grid; 
-            grid-template-columns: 1.5fr 1fr; 
-            gap: 20px; 
+            width: 95%; max-width: 1100px; margin: 20px auto; 
+            display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; 
         }
 
-        @media (max-width: 900px) {
-            .checkout-wrapper { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 900px) { .checkout-wrapper { grid-template-columns: 1fr; } }
 
         .card { 
             background: white; padding: 30px; border-radius: 16px; 
@@ -38,10 +32,8 @@
         
         h2, h3 { margin-top: 0; color: var(--secondary); font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
 
-        /* Location Selector */
         .location-picker { 
-            display: flex; gap: 10px; margin: 15px 0 25px; 
-            background: #eee; padding: 5px; border-radius: 12px; 
+            display: flex; gap: 10px; margin: 15px 0 25px; background: #eee; padding: 5px; border-radius: 12px; 
         }
         .loc-btn { 
             flex: 1; padding: 12px; border: none; border-radius: 10px; 
@@ -54,49 +46,47 @@
         label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #555; }
         input, select, textarea { 
             width: 100%; padding: 12px; border: 1.5px solid var(--border); 
-            border-radius: 8px; font-size: 15px; box-sizing: border-box;
-            background: white;
+            border-radius: 8px; font-size: 15px; box-sizing: border-box; background: white;
         }
-        select { cursor: pointer; }
-        select:disabled { background: #f5f5f5; color: #aaa; cursor: not-allowed; }
 
         /* Payment Options */
-        .payment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
+        .payment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
         .pay-opt { 
             border: 2px solid #f0f0f0; border-radius: 12px; padding: 10px; 
             text-align: center; cursor: pointer; transition: 0.3s;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 90px; background: #fafafa;
+            min-height: 100px; background: #fafafa; position: relative;
         }
-        .pay-opt input { display: none; }
+        .pay-opt input { position: absolute; opacity: 0; }
         .pay-opt img { max-height: 25px; margin-bottom: 8px; }
-        .pay-opt i { font-size: 24px; margin-bottom: 8px; color: var(--primary); }
+        .pay-opt i { font-size: 24px; margin-bottom: 8px; }
         .pay-opt.selected { border-color: var(--primary); background: #fff5f2; }
 
-        /* Agreement Section */
-        .agreement-section { margin-top: 25px; padding-top: 20px; border-top: 1.5px solid #eee; }
-        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; cursor: pointer; }
-        .checkbox-group input { width: 18px; height: 18px; cursor: pointer; }
-        .checkbox-group span { font-size: 13px; color: #444; line-height: 1.4; }
+        /* Manual Instructions */
+        .manual-box {
+            margin-top: 15px; padding: 15px; border-radius: 10px;
+            background: #fdf8e6; border: 1px dashed #e6b800; font-size: 13px; display: none;
+        }
 
-        /* Summary */
-        .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
+        /* Summary Styling */
+        .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f9f9f9; align-items: center; }
+        .item-detail { display: flex; flex-direction: column; }
+        .item-name { font-weight: 600; font-size: 14px; }
+        .item-qty-price { font-size: 12px; color: #777; }
         .total-price { 
             font-size: 20px; font-weight: 800; border-top: 2px solid #eee;
             margin-top: 15px; padding-top: 15px; color: var(--primary);
         }
 
         .btn-submit { 
-            background: #ccc; color: white; border: none; 
-            width: 100%; padding: 18px; border-radius: 12px; 
-            font-size: 16px; font-weight: bold; cursor: not-allowed; margin-top: 20px;
-            transition: 0.3s;
+            background: #ccc; color: white; border: none; width: 100%; padding: 18px; border-radius: 12px; 
+            font-size: 16px; font-weight: bold; cursor: not-allowed; margin-top: 20px; transition: 0.3s;
         }
         .btn-submit.ready { background: var(--primary); cursor: pointer; box-shadow: 0 4px 12px rgba(255, 90, 44, 0.3); }
         .hidden { display: none; }
-
-        /* Nairobi area selector */
-        .area-hint { font-size: 11px; color: #999; margin-top: 4px; }
+        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; cursor: pointer; }
+        .checkbox-group input { width: 18px; height: 18px; margin-top: 2px; }
+        .checkbox-group span { font-size: 13px; color: #444; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -131,7 +121,6 @@
                 </div>
             </div>
 
-            <!-- NAIROBI FIELDS -->
             <div id="nairobi-fields">
                 <div class="form-group">
                     <label>Nearest Estate / Area</label>
@@ -153,7 +142,6 @@
                 </div>
             </div>
 
-            <!-- UPCOUNTRY FIELDS: County + Town cascading dropdowns -->
             <div id="outside-fields" class="hidden">
                 <div class="form-row">
                     <div class="form-group">
@@ -169,26 +157,39 @@
                         </select>
                     </div>
                 </div>
-                <p class="area-hint"><i class="fa fa-info-circle"></i> Your parcel will be sent via courier to the nearest pickup agent in your town.</p>
             </div>
 
             <div class="form-group">
                 <label>Detailed Address / Instructions</label>
-                <textarea name="address" rows="2" placeholder="Building name, Floor, Room number, Landmark..." required></textarea>
+                <textarea name="address" rows="2" placeholder="Building name, Floor, Landmark..." required></textarea>
             </div>
 
             <h3><i class="fa fa-credit-card"></i> Payment Method</h3>
             <div class="payment-grid">
                 <label class="pay-opt selected" onclick="selectPay(this, 'mpesa')">
                     <input type="radio" name="payment_method" value="mpesa" checked>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="Mpesa" width="80">
-                    <span>M-Pesa Prompt</span>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="Mpesa">
+                    <span>M-Pesa</span>
+                </label>
+                <label class="pay-opt" onclick="selectPay(this, 'equity')">
+                    <input type="radio" name="payment_method" value="equity">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Equity_Bank_Logo.png/1200px-Equity_Bank_Logo.png" alt="Equity" style="max-height: 20px;">
+                    <span>Equity Bank</span>
                 </label>
                 <label class="pay-opt" id="pod-option" onclick="selectPay(this, 'pod')">
                     <input type="radio" name="payment_method" value="pod">
-                    <i class="fa fa-truck-fast"></i>
+                    <i class="fa fa-truck-fast" style="color:var(--primary)"></i>
                     <span>Pay on Delivery</span>
                 </label>
+            </div>
+
+            <div id="manual-mpesa" class="manual-box">
+                <p><strong><i class="fa fa-info-circle"></i> Manual M-Pesa:</strong> If STK prompt fails, use:<br>
+                Paybill: <strong>400200</strong> | Acc: <strong>0712 345 678</strong></p>
+            </div>
+            <div id="manual-equity" class="manual-box">
+                <p><strong><i class="fa fa-university"></i> Equity Bank:</strong> Transfer to:<br>
+                Acc Name: <strong>Gadget Soko</strong> | Acc: <strong>123456789</strong></p>
             </div>
 
             <div class="agreement-section">
@@ -198,7 +199,7 @@
                 </label>
                 <label class="checkbox-group">
                     <input type="checkbox" id="check-shipping" onchange="validateAgreements()">
-                    <span>I confirm that the final shipping fee will be calculated based on my <strong>delivery location</strong> and <strong>item weight</strong>.</span>
+                    <span>I confirm that the <strong>shipping fee</strong> is calculated based on location & weight.</span>
                 </label>
             </div>
 
@@ -212,8 +213,11 @@
         <h3><i class="fa fa-list-check"></i> Order Summary</h3>
         {% for item in cart_items %}
         <div class="summary-row">
-            <span>{{ item.product.name }} (x{{ item.quantity }})</span>
-            <strong>KES {{ item.get_total }}</strong>
+            <div class="item-detail">
+                <span class="item-name">{{ item.product.name }}</span>
+                <span class="item-qty-price">Qty: {{ item.quantity }} × KES {{ item.product.price|floatformat:0 }}</span>
+            </div>
+            <strong>KES {{ item.get_total|floatformat:0 }}</strong>
         </div>
         {% endfor %}
 
@@ -232,185 +236,65 @@ const subtotal = parseFloat("{{ subtotal|default:0 }}");
 const shippingNairobi = parseFloat("{{ shipping_nairobi|default:0 }}");
 const shippingOutside = parseFloat("{{ max_shipping|default:0 }}");
 
-// ─── ALL 47 KENYA COUNTIES + THEIR MAIN TOWNS ───────────────────────────────
+// Exhaustive Kenya 47 Counties Data
 const kenyaData = {
-    "Baringo":       ["Kabarnet","Eldama Ravine","Mogotio","Marigat","Eldoret Road","Kabartonjo","Tenges"],
-    "Bomet":         ["Bomet","Sotik","Longisa","Chepalungu","Konoin"],
-    "Bungoma":       ["Bungoma","Webuye","Kimilili","Chwele","Tongaren","Sirisia","Bumula"],
-    "Busia":         ["Busia","Malaba","Nambale","Butula","Funyula","Matayos","Port Victoria"],
-    "Elgeyo-Marakwet":["Iten","Eldoret (EMK)","Tambach","Kapsowar","Chepterwai","Lelan"],
-    "Embu":          ["Embu","Runyenjes","Mbeere","Siakago","Ishiara","Ena"],
-    "Garissa":       ["Garissa","Dadaab","Fafi","Hulugho","Ijara","Lagdera"],
-    "Homa Bay":      ["Homa Bay","Mbita","Ndhiwa","Rangwe","Suba","Karachuonyo","Kasipul"],
-    "Isiolo":        ["Isiolo","Merti","Garbatulla","Kinna","Modogashe"],
-    "Kajiado":       ["Kajiado","Ngong","Ongata Rongai","Kitengela","Loitoktok","Namanga","Magadi"],
-    "Kakamega":      ["Kakamega","Mumias","Butere","Khwisero","Matungu","Lugari","Likuyani","Shinyalu"],
-    "Kericho":       ["Kericho","Litein","Londiani","Kipkelion","Bureti","Belgut"],
-    "Kiambu":        ["Thika","Kiambu","Ruiru","Limuru","Githunguri","Lari","Kikuyu","Kabete"],
-    "Kilifi":        ["Kilifi","Malindi","Mtwapa","Kaloleni","Rabai","Ganze","Magarini","Watamu"],
-    "Kirinyaga":     ["Kerugoya","Kutus","Mwea","Gichugu","Ndia","Kirinyaga Central"],
-    "Kisii":         ["Kisii","Ogembo","Suneka","Ekerenyo","Nyamache","Masimba","Gucha"],
-    "Kisumu":        ["Kisumu","Ahero","Muhoroni","Nyando","Nyakach","Seme","Winam"],
-    "Kitui":         ["Kitui","Mwingi","Mutomo","Migwani","Zombe","Ikutha","Tseikuru"],
-    "Kwale":         ["Kwale","Msambweni","Ukunda","Diani","Lungalunga","Kinango"],
-    "Laikipia":      ["Nanyuki","Nyahururu","Rumuruti","Ol Kalou","Laikipia West"],
-    "Lamu":          ["Lamu","Mpeketoni","Mokowe","Witu","Faza","Kiunga","Hindi"],
-    "Machakos":      ["Machakos","Athi River","Mavoko","Kangundo","Matungulu","Yatta","Masinga"],
-    "Makueni":       ["Wote","Makindu","Sultan Hamud","Mtito Andei","Kibwezi","Nunguni"],
-    "Mandera":       ["Mandera","Elwak","Rhamu","Banisa","Lafey","Takaba","Kotulo"],
-    "Marsabit":      ["Marsabit","Moyale","Sololo","Laisamis","North Horr","Saku"],
-    "Meru":          ["Meru","Nkubu","Maua","Timau","Mikinduri","Githongo","Laare","Buuri"],
-    "Migori":        ["Migori","Rongo","Awendo","Uriri","Suna East","Suna West","Nyatike","Kuria"],
-    "Mombasa":       ["Mombasa CBD","Nyali","Bamburi","Likoni","Kisauni","Changamwe","Jomvu"],
-    "Murang'a":      ["Murang'a","Kangema","Mathioya","Kiharu","Kigumo","Maragua","Kandara","Gatanga"],
-    "Nairobi":       ["CBD","Westlands","Kasarani","Embakasi","Langata","Dagoretti","Kibra","Ruaraka","Makadara","Starehe","Mathare","Pumwani"],
-    "Nakuru":        ["Nakuru","Naivasha","Gilgil","Molo","Njoro","Rongai","Subukia","Bahati"],
-    "Nandi":         ["Kapsabet","Nandi Hills","Mosoriot","Chesumei","Mosop","Emgwen","Aldai","Tinderet"],
-    "Narok":         ["Narok","Kilgoris","Mara","Emurua Dikirr","Narok North","Transmara"],
-    "Nyamira":       ["Nyamira","Keroka","Nyansiongo","Manga","North Mugirango"],
-    "Nyandarua":     ["Ol Kalou","Engineer","Ndaragua","Kinangop","Kipipiri"],
-    "Nyeri":         ["Nyeri","Karatina","Othaya","Mukurwe-ini","Tetu","Mathira","Kieni"],
-    "Samburu":       ["Maralal","Baragoi","Archer's Post","South Hor","Wamba"],
-    "Siaya":         ["Siaya","Bondo","Yala","Ugenya","Ugunja","Gem","Rarieda"],
-    "Taita-Taveta":  ["Voi","Wundanyi","Mwatate","Taveta","Kasigau"],
-    "Tana River":    ["Hola","Garsen","Bura","Madogo","Galole"],
-    "Tharaka-Nithi": ["Chuka","Marimanti","Kathwana","Igamba-Ng'ombe","Tharaka"],
-    "Trans-Nzoia":   ["Kitale","Kiminini","Endebess","Saboti","Kwanza"],
-    "Turkana":       ["Lodwar","Kakuma","Lokichar","Kalokol","Loima","Kibish"],
-    "Uasin Gishu":   ["Eldoret","Turbo","Moiben","Soy","Ainabkoi","Kapseret","Kesses"],
-    "Vihiga":        ["Vihiga","Mbale","Hamisi","Emuhaya","Luanda"],
-    "Wajir":         ["Wajir","Habaswein","Bute","Eldas","Tarbaj","Kutulo","Griftu"],
-    "West Pokot":    ["Kapenguria","Makutano","Alale","Kacheliba","Sigor","Chesegon"]
+    "Baringo": ["Kabarnet","Eldama Ravine","Marigat"], "Bomet": ["Bomet","Sotik"], "Bungoma": ["Bungoma","Webuye","Kimilili"], "Busia": ["Busia","Malaba"], "Elgeyo-Marakwet":["Iten","Kapsowar"], "Embu": ["Embu","Runyenjes"], "Garissa": ["Garissa"], "Homa Bay": ["Homa Bay","Mbita"], "Isiolo": ["Isiolo"], "Kajiado": ["Ngong","Kitengela","Kajiado"], "Kakamega": ["Kakamega","Mumias"], "Kericho": ["Kericho","Litein"], "Kiambu": ["Thika","Kiambu","Ruiru","Limuru","Githunguri"], "Kilifi": ["Kilifi","Malindi","Mtwapa"], "Kirinyaga": ["Kerugoya","Mwea"], "Kisii": ["Kisii Town"], "Kisumu": ["Kisumu City","Ahero"], "Kitui": ["Kitui","Mwingi"], "Kwale": ["Ukunda","Kwale"], "Laikipia": ["Nanyuki","Nyahururu"], "Lamu": ["Lamu Town"], "Machakos": ["Machakos Town","Athi River","Kangundo"], "Makueni": ["Wote","Makindu"], "Mandera": ["Mandera"], "Marsabit": ["Marsabit"], "Meru": ["Meru Town","Maua"], "Migori": ["Migori Town","Rongo"], "Mombasa": ["Mombasa CBD","Nyali","Likoni","Bamburi"], "Murang'a": ["Murang'a Town","Kenol"], "Nairobi": ["CBD","Westlands","Eastlands"], "Nakuru": ["Nakuru City","Naivasha","Gilgil","Molo"], "Nandi": ["Kapsabet"], "Narok": ["Narok Town"], "Nyamira": ["Nyamira Town"], "Nyandarua": ["Ol Kalou"], "Nyeri": ["Nyeri Town","Karatina"], "Samburu": ["Maralal"], "Siaya": ["Siaya Town","Bondo"], "Taita-Taveta": ["Voi","Taveta"], "Tana River": ["Hola"], "Tharaka-Nithi": ["Chuka"], "Trans-Nzoia": ["Kitale"], "Turkana": ["Lodwar","Kakuma"], "Uasin Gishu": ["Eldoret"], "Vihiga": ["Mbale"], "Wajir": ["Wajir Town"], "West Pokot": ["Kapenguria"]
 };
 
-// Populate county dropdown on load
 function initCounties() {
     const countySelect = document.getElementById('county-select');
-    const counties = Object.keys(kenyaData).sort();
-    counties.forEach(county => {
-        const opt = document.createElement('option');
-        opt.value = county;
-        opt.textContent = county;
-        countySelect.appendChild(opt);
-    });
+    Object.keys(kenyaData).sort().forEach(c => countySelect.add(new Option(c, c)));
 }
 
 function populateTowns() {
     const county = document.getElementById('county-select').value;
     const townSelect = document.getElementById('town-select');
-    townSelect.innerHTML = '';
-    
-    if (!county) {
-        townSelect.innerHTML = '<option value="">-- Select County First --</option>';
-        townSelect.disabled = true;
-        return;
-    }
-
-    townSelect.disabled = false;
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = '-- Select Town --';
-    townSelect.appendChild(placeholder);
-
-    const towns = kenyaData[county] || [];
-    towns.forEach(town => {
-        const opt = document.createElement('option');
-        opt.value = town;
-        opt.textContent = town;
-        townSelect.appendChild(opt);
-    });
+    townSelect.innerHTML = '<option value="">-- Select Town --</option>';
+    townSelect.disabled = !county;
+    if(county) kenyaData[county].forEach(t => townSelect.add(new Option(t, t)));
 }
 
 function updateLocation(loc) {
-    const btnNairobi = document.getElementById('btn-nairobi');
-    const btnOutside = document.getElementById('btn-outside');
-    const nairobiFields = document.getElementById('nairobi-fields');
-    const outsideFields = document.getElementById('outside-fields');
-    const podOption = document.getElementById('pod-option');
-    const regionInput = document.getElementById('region-input');
-
-    btnNairobi.classList.toggle('active', loc === 'nairobi');
-    btnOutside.classList.toggle('active', loc === 'outside');
-
-    if (loc === 'nairobi') {
-        nairobiFields.classList.remove('hidden');
-        outsideFields.classList.add('hidden');
-        regionInput.value = "nairobi";
-        if (podOption) podOption.style.display = 'flex';
-        updateTotals(shippingNairobi);
-    } else {
-        nairobiFields.classList.add('hidden');
-        outsideFields.classList.remove('hidden');
-        regionInput.value = "outside";
-        if (podOption) podOption.style.display = 'none';
-        
-        // Force switch payment if POD was selected
-        const currentPay = document.querySelector('input[name="payment_method"]:checked');
-        if (currentPay && currentPay.value === 'pod') {
-            selectPay(document.querySelector('.pay-opt'), 'mpesa');
-        }
-        updateTotals(shippingOutside);
+    document.getElementById('btn-nairobi').classList.toggle('active', loc === 'nairobi');
+    document.getElementById('btn-outside').classList.toggle('active', loc === 'outside');
+    document.getElementById('nairobi-fields').classList.toggle('hidden', loc !== 'nairobi');
+    document.getElementById('outside-fields').classList.toggle('hidden', loc !== 'outside');
+    document.getElementById('region-input').value = loc;
+    document.getElementById('pod-option').style.display = (loc === 'nairobi' ? 'flex' : 'none');
+    
+    // Switch to mpesa if POD was selected and user switched to upcountry
+    if(loc === 'outside' && document.querySelector('input[name="payment_method"]:checked').value === 'pod') {
+        selectPay(document.querySelectorAll('.pay-opt')[0], 'mpesa');
     }
+    updateTotals(loc === 'nairobi' ? shippingNairobi : shippingOutside);
 }
 
-function updateTotals(shipping) {
-    const total = subtotal + shipping;
-    const formatted = total.toLocaleString();
-    document.getElementById('grand-total-val').innerText = "KES " + formatted;
-    document.getElementById('btn-total-val').innerText = formatted;
+function updateTotals(ship) {
+    const total = subtotal + ship;
+    document.getElementById('grand-total-val').innerText = "KES " + total.toLocaleString();
+    document.getElementById('btn-total-val').innerText = total.toLocaleString();
 }
 
 function selectPay(el, method) {
     document.querySelectorAll('.pay-opt').forEach(opt => opt.classList.remove('selected'));
     el.classList.add('selected');
-    const radio = el.querySelector('input[type="radio"]');
-    if (radio) radio.checked = true;
+    el.querySelector('input').checked = true;
+    document.getElementById('manual-mpesa').style.display = (method === 'mpesa') ? 'block' : 'none';
+    document.getElementById('manual-equity').style.display = (method === 'equity') ? 'block' : 'none';
 }
 
 function validateAgreements() {
     const terms = document.getElementById('check-terms').checked;
-    const shipping = document.getElementById('check-shipping').checked;
+    const ship = document.getElementById('check-shipping').checked;
     const btn = document.getElementById('submit-btn');
-
-    if (terms && shipping) {
-        btn.disabled = false;
-        btn.classList.add('ready');
-    } else {
-        btn.disabled = true;
-        btn.classList.remove('ready');
-    }
+    btn.disabled = !(terms && ship);
+    btn.classList.toggle('ready', (terms && ship));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initCounties();
-    updateLocation('nairobi');
-    
-    document.getElementById('checkout-form').onsubmit = function(e) {
-        const phone = document.getElementById('phone-input').value.trim();
-        const phoneRegex = /^(07|01|254|\+254)\d{8}$/;
-        
-        if (!phoneRegex.test(phone)) {
-            alert("Invalid M-Pesa number. Use 07... or 01...");
-            e.preventDefault();
-            return false;
-        }
-
-        // Validate county + town for upcountry
-        const region = document.getElementById('region-input').value;
-        if (region === 'outside') {
-            const county = document.getElementById('county-select').value;
-            const town = document.getElementById('town-select').value;
-            if (!county || !town) {
-                alert("Please select your County and Town.");
-                e.preventDefault();
-                return false;
-            }
-        }
-
-        this.querySelector('.btn-submit').innerText = "Processing...";
-    };
+document.addEventListener('DOMContentLoaded', () => { 
+    initCounties(); 
+    updateLocation('nairobi'); 
 });
 </script>
-
 </body>
 </html>

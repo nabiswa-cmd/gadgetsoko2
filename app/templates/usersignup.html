@@ -66,7 +66,7 @@
   <div class="auth-card">
 
     <div class="auth-logo">
-      <a href="{% url 'index' %}"><img src="{% static 'images/logo.png' %}" alt="Logo"></a>
+      <a href="{% url 'index' %}"><img src="{% static 'images/final.png' %}" alt="Logo"></a>
     </div>
 
     <h2>Welcome Back</h2>
@@ -108,10 +108,35 @@
     </form>
 
     <div class="divider">or</div>
-    <a href="{% url 'socialaccount_signup' %}" style="display:flex;align-items:center;justify-content:center;gap:10px;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px;font-size:14px;font-weight:700;color:#333;text-decoration:none;transition:.25s;" onmouseover="this.style.borderColor='#ee4d2d'" onmouseout="this.style.borderColor='#e2e8f0'">
-      <img src="https://www.svgrepo.com/show/475656/google-color.svg" style="width:20px;">
-      Continue with Google
-    </a>
+    {% load socialaccount %}
+
+<form method="post" action="{% provider_login_url 'google' %}">
+  {% csrf_token %}
+  <button type="submit" class="google-btn">
+    <i class="fab fa-google"></i> Continue with Google
+  </button>
+</form>
+
+<style>
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    background: white;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    color: #3c4043;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .google-btn:hover {
+    background: #f8f9fa;
+  }
+</style>
 
     <p class="auth-link">Don't have an account? <a href="{% url 'signup' %}">Create one</a></p>
   </div>

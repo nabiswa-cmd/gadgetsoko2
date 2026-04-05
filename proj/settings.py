@@ -125,7 +125,8 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOGIN_REDIRECT_URL = '/index/'
-
+LOGIN_URL = 'userlog'
+LOGOUT_REDIRECT_URL = 'index'
 # ---------------------------------------------------------------------------
 # INTERNATIONALISATION
 # ---------------------------------------------------------------------------
@@ -166,14 +167,21 @@ SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'https://your-app-name.onrender.com')
 
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+# Force the login to happen immediately on the GET/POST request
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
+# Skip the "Are you sure you want to log in with Google?" page
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+# Ensure users go straight to the account picker
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+            'prompt': 'select_account',  # This forces the "Choose an Account" screen
+        }
     }
 }
-SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # ---------------------------------------------------------------------------
 # EMAIL

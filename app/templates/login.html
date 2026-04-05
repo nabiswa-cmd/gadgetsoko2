@@ -112,7 +112,7 @@
 
         <div class="logo">
             <a href="{% url 'secretkey' %}">
-                <img src="{% static 'images/logo.png' %}" alt="Logo">
+                <img src="{% static 'images/final.png' %}" alt="Logo">
             </a>
         </div>
 
@@ -124,8 +124,8 @@
 
             <label>Select Login Type</label>
             <select name="role">
-                <option value="client">Client</option>
-                <option value="admin">Admin</option>
+               
+                <option value="admin"><strong>Admin</strong></option>
             </select>
 
             <label>Username</label>
@@ -137,10 +137,6 @@
             <button type="submit">Login</button>
         </form>
 
-        <p class="register-link">
-            Don't have an account?
-            <a href="{% url 'signup' %}">Register</a>
-        </p>
 
     </div>
 

@@ -4,706 +4,371 @@
 {% block title %}Gadget Soko Kenya | Home{% endblock %}
 
 {% block content %}
-    <style>
-        /* --- ROBOT CHATBOT STYLES --- */
-        #bot-launcher {
-            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
-            background: #00a650; color: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 3000; transition: 0.3s;
-        }
-        #bot-launcher:hover { transform: scale(1.1); }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-        #chat-window {
-            position: fixed; bottom: 100px; right: 30px; width: 320px; height: 450px;
-            background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            display: none; flex-direction: column; z-index: 3000; overflow: hidden;
-            border: 1px solid #ddd; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .chat-header { background: #00a650; color: white; padding: 15px; display: flex; align-items: center; gap: 10px; }
-        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
-        .chat-footer { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
-        .chat-footer input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
-        .chat-footer button { background: #00a650; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
-
-        .msg { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 14px; line-height: 1.4; position: relative; }
-        .bot-msg { background: #e8e8e8; align-self: flex-start; color: #333; border-bottom-left-radius: 2px; }
-        .user-msg { background: #00a650; align-self: flex-end; color: white; border-bottom-right-radius: 2px; }
-
-        /* --- CART SIDEBAR STYLES --- */
-        .cart-sidebar {
-    position: fixed;
-    top: 0;
-    right: -380px;
-    width: 380px;
-    height: 100%;
-    background: #fff;
-    z-index: 2000;
-    transition: 0.4s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.cart-sidebar.active {
-    right: 0;
-}
-
-/* ✅ MOBILE FIX */
-@media (max-width: 768px) {
-    .cart-sidebar {
-        width: 85%;
-        right: -85%;
-    }
-}
-        
-         
-        .cart-sidebar.active { right: 0; }
-        .cart-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; z-index: 1999;
-        }
-        .cart-overlay.active { display: block; }
-        .cart-header { padding: 20px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-        .cart-items-container { flex: 1; overflow-y: auto; padding: 15px; }
-        .cart-footer { padding: 20px; border-top: 1px solid #eee; background: #fff; }
-        .checkout-btn { display: block; width: 100%; background: #ee4d2d; color: white !important; text-align: center; padding: 12px; border-radius: 5px; text-decoration: none; font-weight: bold; }
-        .cart-item-row { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #f1f1f1; padding-bottom: 10px; }
-        .cart-item-row img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
-        
-        .search-dropdown { position: absolute; top: 100%; left: 0; width: 100%; background: white; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: none; }
-
-        /* --- TIMER STYLES --- */
-        .timer-container {
-            position: absolute; top: 10px; left: 10px; z-index: 10;
-            display: flex; flex-direction: column; gap: 5px;
-        }
-        .timer-badge {
-            background: #00a650; color: white; padding: 4px 8px; border-radius: 4px;
-            font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .sale-badge {
-            background: #ee4d2d; color: white; padding: 4px 8px; border-radius: 4px;
-            font-size: 12px; font-weight: bold; text-align: center;
-        }
-        .product { position: relative; }
-
-        /* --- HUMANIZED ACTIVITY BOX --- */
-        #live-activity-box {
-            position: fixed; bottom: 25px; left: -450px; width: 300px; 
-            background: #ffffff; border-radius: 8px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
-            display: flex; align-items: center; padding: 12px; 
-            z-index: 5000; transition: 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            border: 1px solid #eee;
-            /* --- MOBILE HORIZONTAL NAVBAR --- */
-@media (max-width: 768px) {
-    /* 1. Force the navbar to stay in a single row */
-    .navbar {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important; /* Prevents items from dropping to next line */
-        align-items: center;
-        justify-content: space-between;
-        padding: 8px 10px !important;
-        gap: 8px !important;
-    }
-
-    /* 2. Ensure all items are visible */
-    .nav-links, .nav-actions, .search-form {
-        display: flex !important; 
-        flex-direction: row !important;
-        align-items: center;
-    }
-
-    /* 3. Make Search bar flexible but prioritized */
-    .search-form {
-        flex: 1; /* Allows search to take up remaining space */
-        min-width: 80px; /* Ensures it doesn't vanish entirely */
-    }
-
-    .search-form input {
-        width: 100%;
-        padding: 6px;
-        font-size: 13px;
-    }
-
-    /* 4. Keep Cart and Admin Login small and side-by-side */
-    .nav-actions {
-        gap: 10px;
-        flex-shrink: 0; /* Prevents them from getting squashed */
-    }
-
-    .nav-actions a {
-        font-size: 18px; /* Bigger icons for easier tapping */
-    }
-
-    /* 5. Hide labels if they are too long, show icons only to save space */
-    .nav-actions span, .nav-links span {
-        display: none; 
-    }
-
-    /* 6. Logo sizing for mobile */
-    .nav-logo {
-        font-size: 14px;
-        white-space: nowrap;
-        flex-shrink: 0;
-    }
-    .banner img,
-.slider img {
-    width: 100%;
-    height: 320px;
-    object-fit: cover;
-}
-
-@media (max-width: 600px) {
-    .banner img,
-    .slider img {
-        height: 180px;
-        object-fit: contain; /* no cropping on phone */
-        background: #000; /* optional for nice look */
-    }
-}
-}
-       
-}
-/* Styling the Icons specifically */
-.service i {
-    font-size: 32px;
-    color: var(--navy);
-    margin-bottom: 15px;
-    transition: var(--transition);
-}
-
-/* Hover effect for the icon when the card is hovered */
-.service:hover i {
-    color: var(--primary);
-    transform: scale(1.1);
-}
-
-/* Ensure the text looks good below the icon */
-.service p {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-/* Grid adjustments for centering */
-.services {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 25px;
-    margin-top: 20px;
-}
-
-.service {
-    background: var(--white);
-    padding: 40px 20px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
-}
-
-.service:hover {
-    transform: translateY(-8px);
-    border-color: var(--primary);
-    box-shadow: var(--shadow-md);
-}
-/* Remove the bottom shadow and margin from the Navbar */
-.gs-navbar {
-    margin-bottom: 0 !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional: Soften the shadow */
-    border-bottom: none;
-}
-.gs-main {
-    flex: 1;
-    padding-top: 0 !important; /* This is usually the main culprit */
-    padding-left: 8%;
-    padding-right: 8%;
-    padding-bottom: 25px;
-}
-
-
-
-/* Remove any top margin from the banner/slider itself */
-.banner, .slider {
-    margin-top: 0 !important;
-    margin-bottom: 20px;
-}
-
-/* Mobile specific: further tighten the gap on small screens */
-@media (max-width: 767.98px) {
-    .gs-main {
-        padding: 5px 3% 15px;
-    }
-}
-/* 1. Remove the bottom margin from the navbar */
-.gs-navbar {
-    margin-bottom: 0 !important;
-    border-bottom: none; /* Optional: removes the bottom line for a seamless look */
-}
-
-/* 2. Target the main content wrapper and kill the top padding */
-.gs-main {
-    flex: 1;
-    padding-top: 0 !important; /* This is usually the main culprit */
-    padding-left: 8%;
-    padding-right: 8%;
-    padding-bottom: 25px;
-}
-
-/* 3. Ensure the banner section and its image have no margins */
-.banner {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    line-height: 0; /* Prevents tiny desk-space under images */
-}
-
-#bannerImage {
-    margin-top: 0 !important;
-    vertical-align: middle;
-}
-
-/* 4. Mobile specific: ensure the gap stays closed on phones */
-@media (max-width: 768px) {
-    .gs-main {
-        padding-top: 0 !important;
-        padding-left: 0; /* Optional: makes banner full-width on mobile */
-        padding-right: 0;
-    }
-}
-.product-card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 12px;
-    border: 1px solid #eee;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-}
-
-.product-card .img-container {
-    width: 100%;
-    height: 180px;
-    border-radius: 12px;
-    background: #f7f7f7;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    margin-bottom: 10px;
-}
-
-.product-card .img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-    </style>
-
-
-    <div id="live-activity-box">
-        <div style="width: 45px; height: 45px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; border: 1px solid #efefef;">
-            <i class="fas fa-box-open" style="color: #444; font-size: 18px;"></i>
-        </div>
-        <div style="flex: 1;">
-            <p id="activity-msg" style="margin: 0; font-size: 12.5px; color: #333; line-height: 1.4; font-family: 'Segoe UI', sans-serif;"></p>
-            <div style="display: flex; align-items: center; gap: 5px; margin-top: 4px;">
-                <span style="background: #e1f5fe; color: #0288d1; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Verified Order</span>
-                <small id="activity-time" style="color: #999; font-size: 10.5px;"></small>
-            </div>
-        </div>
-        <span onclick="dismissActivity()" style="cursor: pointer; font-size: 18px; color: #ddd; margin-left: 8px;">&times;</span>
-    </div>
-
-    <div id="bot-launcher" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
-    <div id="chat-window">
-        <div class="chat-header">
-            <i class="fas fa-robot"></i>
-            <div><strong>SokoBot</strong><br><small>Online | Assistant</small></div>
-            <span onclick="toggleChat()" style="margin-left:auto; cursor:pointer; font-size: 20px;">&times;</span>
-        </div>
-        <div class="chat-body" id="chatBody">
-            <div class="msg bot-msg">Hello! I am SokoBot. Need help with delivery, payments, or product advice?</div>
-        </div>
-        <div class="chat-footer">
-            <input type="text" id="chatInput" placeholder="Type a message...">
-            <button onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
-        </div>
-    </div>
-<section class="banner">
-    <img id="bannerImage" src="{% static 'images/photo1.png' %}" alt="Banner" style="width:100%; height:auto; display:block; transition: opacity 0.4s ease-in-out;">
-</section>
-<section class="section">
-    <h2 style="font-weight: 900; letter-spacing: -1px; padding-left: 20px; font-size: 1.2rem;">PREMIUM BRANDS</h2>
-    
-    <div class="brands-wrapper">
-        {% for brand in brands %}
-        <a href="{% url 'products_by_brand' brand.id %}" class="brand-item">
-            <div class="brand-logo-container">
-                {% if brand.logo %}
-                    <img src="{{ brand.logo.url }}" alt="{{ brand.name }}">
-                {% else %}
-                    <div class="brand-fallback">
-                        <span class="brand-letter">{{ brand.name|slice:":1" }}</span>
-                        <span class="brand-name-fallback">{{ brand.name }}</span>
-                    </div>
-                {% endif %}
-            </div>
-        </a>
-        {% endfor %}
-    </div>
-</section>
 <style>
-.brands-wrapper {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 12px; /* Tighter gap */
-    padding: 10px 20px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
+    :root {
+        --gs-orange: #ee4d2d;
+        --gs-navy: #0b3a63;
+        --gs-green: #00a650;
+        --bg-body: #f4f7f9;
+    }
 
+    body { background-color: var(--bg-body); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
-.brands-wrapper::-webkit-scrollbar {
-    display: none;
-}
+    /* ── MOBILE SEARCH BAR FIX ── */
+    #mobile-search-bar {
+        display: none; 
+        background: white;
+        padding: 15px 5%;
+        border-bottom: 2px solid var(--gs-orange);
+        position: absolute;
+        width: 100%;
+        left: 0;
+        top: 0; /* Adjusted for standard header height */
+        z-index: 99999; /* Ensure it stays above everything */
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+    
+    /* ── BANNER ── */
+    .banner-wrapper { margin-bottom: 30px; position: relative; overflow: hidden; height: 400px; background: #000; }
+    #bannerImage { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.6s ease-in-out; }
+    
+    @media (max-width: 768px) {
+        .banner-wrapper { height: 180px; }
+        .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+    }
 
-.brand-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    flex-shrink: 0; /* Ensures ovals don't squish */
-}
+    /* ── PRODUCT CARDS ── */
+    .gs-main { padding: 0 5% 50px; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
 
-/* Shrunken Oval Rectangle */
-.brand-logo-container {
-    width: 100px;           /* Reduced from 130px */
-    height: 55px;           /* Reduced from 70px */
-    background: #ffffff;
-    border-radius: 50px;    /* Keeps the oval shape */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06); /* Very subtle shadow */
-    transition: transform 0.2s ease;
-}
+    .product-card {
+        background: white; border-radius: 12px; border: 1px solid #eee; 
+        position: relative; overflow: hidden; transition: 0.3s;
+        display: flex; flex-direction: column;
+    }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
 
-.brand-logo-container:hover {
-    transform: scale(1.05);
-}
+    .img-container { height: 180px; display: flex; align-items: center; justify-content: center; padding: 15px; background: #fff; }
+    .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-.brand-logo-container img {
-    max-width: 85%;
-    max-height: 85%;
-    object-fit: contain;
-}
+    .product-info { padding: 12px; flex-grow: 1; }
+    .product-info h3 { font-size: 14px; height: 36px; overflow: hidden; margin: 5px 0; color: #333; line-height: 1.3; }
+    
+    /* ── PRICING ── */
+    .price-box { display: flex; align-items: baseline; gap: 10px; margin-top: 5px; }
+    .current-price { color: var(--gs-orange); font-weight: 800; font-size: 1.1rem; }
+    .old-price { color: #888; text-decoration: line-through; font-size: 0.85rem; font-weight: 400; }
 
-/* Fallback Styling (Only shows when logo is missing) */
-.brand-fallback {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    line-height: 1;
-}
+    /* ── BUTTONS ── */
+    .product-actions { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #f9f9f9; }
+    .btn-view {
+        flex: 1; background: #fff; color: var(--gs-navy); border: 1px solid var(--gs-navy);
+        padding: 8px; font-size: 11px; border-radius: 6px; text-align: center; text-decoration: none; transition: 0.3s; font-weight: bold;
+    }
+    .btn-view:hover { background: var(--gs-navy); color: #fff; }
 
-.brand-letter {
-    font-size: 18px;
-    font-weight: 800;
-    color: #333;
-}
+    .btn-add {
+        flex: 1.4; background: var(--gs-orange); color: #fff; border: none;
+        padding: 8px; font-size: 11px; border-radius: 6px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.3s; font-weight: bold;
+    }
+    .btn-add.loading { background: #ccc !important; }
+    .btn-add.success { background: var(--gs-green) !important; }
 
-.brand-name-fallback {
-    font-size: 10px;
-    font-weight: 600;
-    color: #888;
+    /* ── BADGES & TIMERS ── */
+    .badge-wrap { position: absolute; top: 8px; left: 8px; z-index: 5; display: flex; flex-direction: column; gap: 4px; }
+    .header-badge { background: var(--gs-navy); color: gold; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 900; margin-left: 10px; border: 1px solid gold; }
+    .sale-tag { background: var(--gs-orange); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+    .timer-badge { background: var(--gs-green); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+
+    /* ── BRAND OVALS ── */
+    .brand-oval-link { text-decoration: none; display: block; perspective: 1000px; }
+    .brand-oval {
+        width: 100%; max-width: 100px; height: 60px; background: #ffffff; border: 1.5px solid #e0e0e0;
+        border-radius: 100px; display: flex; align-items: center; justify-content: center; padding: 8px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .brand-oval img { max-width: 85%; max-height: 85%; object-fit: contain; filter: grayscale(100%); opacity: 0.6; transition: 0.3s; }
+    .brand-oval-link:hover .brand-oval { transform: translateY(-8px) scale(1.05); border-color: var(--gs-orange); box-shadow: 0 12px 24px rgba(255, 140, 0, 0.2); }
+    .brand-oval-link:hover img { filter: grayscale(0%); opacity: 1; }
+
+    /* ── AI CHATBOT ── */
+    #ai-chat-launcher { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--gs-navy); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; cursor: pointer; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    #chat-window { position: fixed; bottom: 100px; right: 30px; width: 330px; height: 480px; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); display: none; flex-direction: column; z-index: 10000; overflow: hidden; border: 1px solid #ddd; }
+    .chat-header { background: var(--gs-navy); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #fdfdfd; display: flex; flex-direction: column; gap: 10px; }
+    .chat-input-area { padding: 12px; border-top: 1px solid #eee; display: flex; gap: 8px; }
+    .msg { max-width: 80%; padding: 10px; border-radius: 12px; font-size: 13px; line-height: 1.4; }
+    .bot-msg { background: #f0f0f0; align-self: flex-start; color: #333; border-bottom-left-radius: 2px; }
+    .user-msg { background: var(--gs-navy); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+    /* ── LIVE TOAST ── */
+    #live-toast { 
+        position: fixed; bottom: 20px; left: 20px; background: rgba(255, 255, 255, 0.98); 
+        backdrop-filter: blur(10px); padding: 12px 18px; border-radius: 12px; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.12); z-index: 10000; display: none; 
+        align-items: center; gap: 12px; border-left: 5px solid var(--gs-orange); border: 1px solid rgba(0,0,0,0.05); max-width: 320px; 
+    }
+    .brand-text {
+    font-size: 11px;
+    font-weight: 800; /* Extra bold as requested */
+    color: var(--gs-navy); /* Using your navy color for a professional look */
     text-transform: uppercase;
-    margin-top: 2px;
+    margin-top: 4px;
+    margin-bottom: 2px;
+    letter-spacing: 0.3px;
 }
+
+/* Adjusting the title height slightly if needed to keep things aligned */
 .product-info h3 {
-    font-size: 14px;
-    height: 40px; /* Adjust based on your font size */
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Shows only 2 lines of text */
-    -webkit-box-orient: vertical;
-    margin-bottom: 8px;
+    height: auto; 
+    margin-bottom: 5px;
 }
+    .toast-icon { width: 40px; height: 40px; background: #fff5f2; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--gs-orange); font-size: 18px; }
+    .toast-content { font-size: 12px; color: #444; line-height: 1.4; }
+    .toast-meta { display: block; font-size: 10px; color: #999; margin-top: 2px; text-transform: uppercase; }
 </style>
 
-
-   <section class="products">
-    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-        <h2>Featured Products</h2>
-        <span style="font-size: 11px; background: #fff5f5; color: #d9534f; padding: 4px 10px; border-radius: 20px; font-weight: bold; border: 1px solid #ffebeb;">
-            <i class="fa fa-eye"></i> <span id="featured-viewers">21</span> currently looking
-        </span>
-    </div>
-    <div class="product-grid">
-        {% for product in featured_products %}
-        <div class="product-card">
-            <div class="img-container">
-                {% if product.images.exists %}
-                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
-                {% else %}
-                    <img src="{% static 'images/default.png' %}" alt="Default Image">
-                {% endif %}
-            </div>
-            <h3>{{ product.name }}</h3>
-            <div class="price-box">
-    {% if product.discount > 0 %}
-        <span class="old-price" style="text-decoration: line-through; color: #999; font-size: 12px; margin-right: 5px;">
-            KES {{ product.price|floatformat:0 }}
-        </span>
-        
-        <span class="current-price" style="color: var(--primary-orange); font-weight: bold;">
-            KES {{ product.discounted_price|floatformat:0 }}
-        </span>
-    {% else %}
-        <span class="current-price" style="color: var(--navy-blue); font-weight: bold;">
-            KES {{ product.price|floatformat:0 }}
-        </span>
-    {% endif %}
+<div id="mobile-search-bar">
+    <form action="/search/" method="GET" style="display: flex; gap: 8px;">
+        <input type="text" name="q" placeholder="Search for gadgets (e.g iPhone)..." style="flex:1; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; outline: none; font-size: 14px;">
+        <button type="submit" style="background: var(--gs-navy); color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: 800;">GO</button>
+    </form>
 </div>
-            <div class="product-actions">
-                <a href="{% url 'product_detail' product.id %}" class="btn-view"><i class="fa fa-eye"></i> VIEW</a>
-                <button class="btn-add" onclick="addToCart({{ product.id }})"><i class="fa fa-shopping-cart"></i> ADD</button>
-            </div>
+
+<div class="banner-wrapper">
+    <img id="bannerImage" src="{% static 'images/photo1.png' %}" alt="Gadget Soko">
+</div>
+
+<div class="gs-main">
+    <section id="brand-showcase" style="margin-bottom: 40px;">
+        <h2 style="font-weight: 900; font-size: 14px; color: #888; margin-bottom: 15px; letter-spacing: 1px;">OUR OFFICIAL BRANDS</h2>
+        <div style="display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; scrollbar-width: none;">
+            {% for brand in brands %}
+                <a href="{% url 'products' %}?brand={{ brand.id }}" class="brand-oval-link">
+                    <div class="brand-oval">
+                        {% if brand.logo %}
+                            <img src="{{ brand.logo.url }}" alt="{{ brand.name }}">
+                        {% else %}
+                            <span style="font-size: 10px; color: #ccc;">{{ brand.name }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
         </div>
-        {% empty %}
-            <p style="padding-left: 20px;">No featured gadgets found.</p>
-        {% endfor %}
-    </div>
-</section>
+    </section>
+
+    <section>
+        <h2 style="font-weight: 900; margin-bottom: 20px; display: flex; align-items: center;">
+            FEATURED GADGETS <span class="header-badge"><i class="fa fa-star"></i> TOP</span>
+        </h2>
+        <div class="product-grid">
+            {% for product in featured_products %}
+            <div class="product-card">
+                <div class="img-container">
+                    <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
+                </div>
+              <div class="product-info">
+    <h3>{{ product.name|truncatewords:6 }}</h3>
     
-    <section class="products">
-        <h2>🔥 les</h2>
+    {% if product.brand %}
+        <div class="brand-text">{{ product.brand.name }}</div>
+    {% endif %}
+
+    <span class="price-tag">KES {{ product.discounted_price|default:product.price|floatformat:0 }}</span>
+</div>
+                <div class="product-actions">
+                    <a href="{% url 'product_detail' product.id %}" class="btn-view">VIEW</a>
+                    <button class="btn-add" onclick="addToCart({{ product.id }}, this)">
+                        <i class="fa fa-shopping-cart"></i> <span class="btn-text">ADD</span>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section>
+        <h2 style="font-weight: 900; margin-bottom: 20px;"><i class="fa fa-bolt" style="color:var(--gs-orange)"></i> FLASH SALES</h2>
         <div class="product-grid">
             {% for product in quick_sales %}
-            <div class="product">
-                <div class="timer-container">
-                    {% if product.discount > 0 %}
-                        <div class="sale-badge">-{{ product.discount }}%</div>
-                    {% endif %}
+            <div class="product-card">
+                <div class="badge-wrap">
+                    {% if product.discount > 0 %}<div class="sale-tag">-{{ product.discount }}%</div>{% endif %}
                     {% if product.discount_expiry %}
-                        <div class="timer-badge" data-expiry="{{ product.discount_expiry|date:'Y-m-d H:i:s' }}">
-                            <i class="fas fa-clock"></i>
-                            <span class="countdown-text">...</span>
-                        </div>
+                    <div class="timer-badge" data-expiry="{{ product.discount_expiry|date:'Y-m-d H:i:s' }}">
+                        <i class="fa fa-clock"></i> <span class="cd-text">00:00:00</span>
+                    </div>
                     {% endif %}
                 </div>
                 <div class="img-container">
                     <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
                 </div>
-                <h3>{{ product.name }}</h3>
-                <div class="price">
-    <span class="old-price" style="text-decoration: line-through; color: #999;">
-        KES {{ product.price|floatformat:0 }}
-    </span>
-    <strong class="new-price" style="color: #ee4d2d;">
-        KES {{ product.discounted_price|floatformat:0 }}
-    </strong>
-</div>
-                
+                <div class="product-info">
+                    <h3>{{ product.name }}</h3>
+                    <div class="price-box">
+                        <span class="current-price">KES {{ product.discounted_price|floatformat:0 }}</span>
+                        {% if product.price > product.discounted_price %}
+                            <span class="old-price">KES {{ product.price|floatformat:0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
                 <div class="product-actions">
-                    <a href="{% url 'product_detail' product.id %}" class="btn-view"><i class="fa fa-eye"></i> VIEW</a>
-                    <button class="btn-add" onclick="addToCart({{ product.id }})"><i class="fa fa-shopping-cart"></i> ADD</button>
+                    <a href="{% url 'product_detail' product.id %}" class="btn-view">VIEW</a>
+                    <button class="btn-add" onclick="addToCart({{ product.id }}, this)">
+                        <i class="fa fa-shopping-cart"></i> <span class="btn-text">ADD</span>
+                    </button>
                 </div>
             </div>
-            {% empty %}
-                <p style="padding-left: 20px;">No discounts active right now.</p>
             {% endfor %}
         </div>
     </section>
-<section id="services" class="section">
-    <h2>Our Services</h2>
-    <div class="services">
-        <div class="service">
-            <i class="fa-solid fa-truck-fast"></i>
-            <p>Quick Delivery</p>
-        </div>
-        <div class="service">
-            <i class="fa-solid fa-hand-holding-dollar"></i>
-            <>Money Back</p>
-        </div>
-        <div class="service">
-            <i class="fa-solid fa-location-dot"></i>
-            <p>Pay on Delivery (Nairobi)</p>
-        </div>
-        <div class="service">
-            <i class="fa-solid fa-headset"></i>
-            <p>Support 24/7</p>
-        </div>
+</div>
+
+<div id="ai-chat-launcher" onclick="toggleChat()"><i class="fa fa-comments"></i></div>
+<div id="chat-window">
+    <div class="chat-header">
+        <div><strong>SokoBot AI</strong><br><small style="opacity:0.8">Online</small></div>
+        <i class="fa fa-times" onclick="toggleChat()" style="cursor:pointer"></i>
     </div>
-</section>
+    <div class="chat-body" id="chatBody">
+        <div class="msg bot-msg">Habari! Ask me about Paybill, Location, or Delivery.</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Type..." style="flex:1; border:1px solid #ddd; padding:10px; border-radius:8px; outline:none">
+        <button onclick="sendMsg()" style="background:var(--gs-navy); color:white; border:none; padding:10px 15px; border-radius:8px;"><i class="fa fa-paper-plane"></i></button>
+    </div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-    /* --- ORGANIC ACTIVITY LOGIC --- */
-    const names = ["Mama Stacey", "Brian O.", "Kevin Omari", "Sarah W.", "Amina Hussein", "Derrick M.", "Eng. Mike", "Purity K.", "Otieno J.", "Cynthia N. "];
-    const towns = ["Nairobi West", "Mombasa Road", "Eldoret Town", "Kisumu CBD", "Nakuru", "Thika Section 9", "Kitale", "Machakos", "Ruiru", "Syokimau"];
-    const gadgets = ["iPhone 15 Pro", "Samsung S24 Ultra", "HP EliteBook", "Oraimo FreePods", "MacBook Air", "JBL Flip 6", "Tecno Camon 30"];
+<div id="live-toast"></div>
 
-    function triggerActivity() {
-        const person = names[Math.floor(Math.random() * names.length)];
-        const town = towns[Math.floor(Math.random() * tows.length)];
-        const gadget = gadgets[Math.floor(Math.random() * gadgets.length)];
-        const roll = Math.random();
-        let msg = ""; let time = "";
-
-        if (roll > 0.6) {
-            msg = `<strong>${gadget}</strong> package successfully dispatched to <strong>${person}</strong> in ${town}.`;
-            time = `${Math.floor(Math.random() * 3) + 1} hours ago`;
-        } else if (roll > 0.3) {
-            msg = `New order placed by <strong>${person}</strong> (${town}) for 1x <strong>${gadget}</strong>.`;
-            time = `Just now`;
-        } else {
-            msg = `<strong>${person}</strong> from ${town} confirmed receipt of their <strong>${gadget}</strong>.`;
-            time = `Today, ${Math.floor(Math.random() * 10) + 8}:15 AM`;
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // 1. ROBUST SEARCH BAR TOGGLE (FIXED)
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchTrigger = document.getElementById('search-trigger');
+        const searchBar = document.getElementById('mobile-search-bar');
+        
+        if (searchTrigger) {
+            searchTrigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); 
+                $(searchBar).slideToggle(250);
+                
+                // Focus input immediately for user convenience
+                const input = searchBar.querySelector('input');
+                if (input) setTimeout(() => input.focus(), 300);
+            });
         }
 
-        $('#activity-msg').html(msg);
-        $('#activity-time').text(time);
-        $('#live-activity-box').css('left', '20px');
-        setTimeout(dismissActivity, 8000);
-    }
-    data.items.forEach(item => {
-    // Calculate subtotal for this specific item
-    let subtotal = item.price * item.quantity;
-    
-    html += `
-    <div style="display:flex; gap:10px; padding:10px; border-bottom:1px solid #eee; align-items:center;">
-        <img src="${item.image}" style="width:45px; height:45px; border-radius:4px; object-fit:cover;">
-        <div style="flex:1;">
-            <h5 style="margin:0; font-size:12px; text-transform:capitalize;">${item.name}</h5>
-            <small>KES ${Math.round(item.price).toLocaleString()} x ${item.quantity}</small>
-        </div>
-        <div style="font-weight:bold; color:var(--primary-orange); font-size:12px;">
-            KES ${Math.round(subtotal).toLocaleString()}
-        </div>
-    </div>`;
-});
+        // Close when clicking outside
+        document.addEventListener('click', function(e) {
+            if (searchBar && !searchBar.contains(e.target) && !searchTrigger.contains(e.target)) {
+                $(searchBar).slideUp(200);
+            }
+        });
+    });
 
-    function dismissActivity() { $('#live-activity-box').css('left', '-450px'); }
+    // 2. BANNER ROTATION
+    const banners = [
+        "{% static 'images/photo1.png' %}", "{% static 'images/photo2.png' %}", 
+        "{% static 'images/photo3.png' %}", "{% static 'images/f.png' %}", 
+        "{% static 'images/G.png' %}", "{% static 'images/photo4.png' %}", 
+        "{% static 'images/eg.png' %}"
+    ];
+    let bIdx = 0;
+    setInterval(() => {
+        bIdx = (bIdx + 1) % banners.length;
+        $('#bannerImage').animate({opacity: 0}, 400, function() {
+            $(this).attr('src', banners[bIdx]).animate({opacity: 1}, 400);
+        });
+    }, 5000);
 
-    /* --- SOKOBOT LOGIC --- */
-    function toggleChat() { $('#chat-window').fadeToggle(300).css('display', 'flex'); }
-    function sendMsg() {
-        let inputField = $('#chatInput');
-        let text = inputField.val().trim();
-        if (!text) return;
-        $('#chatBody').append(`<div class="msg user-msg">${text}</div>`);
-        inputField.val('');
-        $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
-        setTimeout(() => {
-            let r = "Hello! I'm SokoBot. I can help with delivery and payment info.";
-            if(text.toLowerCase().includes("delivery")) r = "Nairobi delivery is same-day. Upcountry takes 24 hours.";
-            $('#chatBody').append(`<div class="msg bot-msg">${r}</div>`);
-            $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
-        }, 700);
-    }
+    // 3. ADD TO CART
+    function addToCart(pId, btn) {
+        const $btn = $(btn);
+        const $text = $btn.find('.btn-text');
+        $btn.addClass('loading').prop('disabled', true);
+        $text.html('<i class="fa fa-spinner fa-spin"></i> Adding...');
 
-    /* --- CART LOGIC --- */
-    function addToCart(pId) {
         $.get(`/add-to-cart/${pId}/`, function(res) {
-            if (res.error === 'not_logged_in') { window.location.href = "{% url 'usersignup' %}"; return; }
-            $('.cart-count').text(res.cart_count);
+            setTimeout(() => {
+                $btn.removeClass('loading').addClass('success');
+                $text.html('<i class="fa fa-check"></i> Added!');
+                setTimeout(() => {
+                    $btn.removeClass('success').prop('disabled', false);
+                    $text.text('ADD');
+                }, 2000);
+            }, 600);
         });
     }
 
-    /* --- DOCUMENT READY FUNCTIONS --- */
+    // 4. CHATBOT LOGIC
+    function toggleChat() { $('#chat-window').fadeToggle(200).css('display', 'flex'); }
+    function sendMsg() {
+        let input = $('#chatInput').val().trim();
+        if(!input) return;
+        $('#chatBody').append(`<div class="msg user-msg">${input}</div>`);
+        $('#chatInput').val('');
+        let reply = "I'm not sure about that. Ask about Payment or Location!";
+        let low = input.toLowerCase();
+        if(low.includes("paybill") || low.includes("payment")) reply = "Paybill: 400200. Acc: Your Name.";
+        if(low.includes("location")) reply = "We are at Kimathi House, 5th Floor, Nairobi.";
+        if(low.includes("developer")) reply = "Developed by Samuel Omori.";
+        if(low.includes("pochi")) reply = "Send to Pochi: 0722 000 000.";
+        setTimeout(() => {
+            $('#chatBody').append(`<div class="msg bot-msg">${reply}</div>`);
+            $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
+        }, 600);
+    }
+
+    // 5. FLASH SALE TIMERS
+    setInterval(function() {
+        $('.timer-badge').each(function() {
+            const expiry = new Date($(this).data('expiry')).getTime();
+            const now = new Date().getTime();
+            const diff = expiry - now;
+            if (diff <= 0) { $(this).hide(); return; }
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            $(this).find('.cd-text').text(`${h}h ${m}m ${s}s`);
+        });
+    }, 1000);
+
+    // 6. SOCIAL PROOF TOAST
+    const locations = ["Kilimani", "Nairobi CBD", "Eldoret", "Mombasa Road", "Kisumu", "Thika", "Nakuru", "Kitengela", "Syokimau", "Westlands"];
+    const gadgets = ["iPhone 15 Pro", "Samsung S24 Ultra", "JBL Flip 6", "MacBook Air M3", "Sony XM5 Headphones", "HP Victus Gaming", "PS5 Console"];
+    const verbs = ["just ordered", "secured", "purchased", "is waiting for delivery of"];
+
+    function triggerSokoToast() {
+        const loc = locations[Math.floor(Math.random() * locations.length)];
+        const item = gadgets[Math.floor(Math.random() * gadgets.length)];
+        const verb = verbs[Math.floor(Math.random() * verbs.length)];
+        const time = Math.floor(Math.random() * 45) + 2;
+
+        const toastHTML = `
+            <div class="toast-icon"><i class="fa fa-check-circle"></i></div>
+            <div class="toast-content">
+                Someone in <b>${loc}</b> ${verb} <br>
+                <b>${item}</b>
+                <span class="toast-meta">Verified Order • ${time}m ago</span>
+            </div>
+        `;
+        $('#live-toast').html(toastHTML).fadeIn(400).css('display', 'flex');
+        setTimeout(() => { $('#live-toast').fadeOut(500); }, 6000);
+    }
+
+    function scheduleNextToast() {
+        const randomDelay = Math.floor(Math.random() * (45000 - 20000 + 1)) + 20000;
+        setTimeout(() => { triggerSokoToast(); scheduleNextToast(); }, randomDelay);
+    }
+
     $(document).ready(function() {
-        
-        /* --- FIXED BANNER ROTATION --- */
-        const photos = [
-            "{% static 'images/photo1.png' %}", 
-            "{% static 'images/photo2.png' %}",
-            "{% static 'images/photo3.png' %}",
-            "{% static 'images/photo4.png' %}"
-        ];
-
-        let idx = 0;
-        if(photos.length > 1) {
-            setInterval(() => {
-                idx = (idx + 1) % photos.length;
-                // Fade out current image, swap src, then fade back in
-                $('#bannerImage').animate({ opacity: 0 }, 400, function() {
-                    $(this).attr('src', photos[idx]);
-                    $(this).animate({ opacity: 1 }, 400);
-                });
-            }, 4000);
-        }
-
-        /* --- LIVE VIEWERS --- */
-        setInterval(() => {
-            let current = parseInt($('#featured-viewers').text());
-            let change = Math.floor(Math.random() * 3) - 1; 
-            $('#featured-viewers').text(Math.max(12, current + change));
-        }, 4500);
-
-        /* --- ACTIVITY NOTIFICATIONS --- */
-        setTimeout(triggerActivity, 12000); 
-        setInterval(() => {
-            const delay = Math.floor(Math.random() * 20000); 
-            setTimeout(triggerActivity, delay);
-        }, 45000);
-
-        /* --- TIMERS --- */
-        setInterval(function updateTimers() {
-            $('.timer-badge').each(function() {
-                const expiry = new Date($(this).attr('data-expiry')).getTime();
-                const now = new Date().getTime();
-                const diff = expiry - now;
-                if (diff <= 0) { $(this).html("Ended"); return; }
-                const h = Math.floor((diff % 86400000) / 3600000);
-                const m = Math.floor((diff % 3600000) / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-                $(this).find('.countdown-text').text(`${h}h ${m}m ${s}s`);
-            });
-        }, 1000);
-    });
-
-    /* --- LIVE SEARCH LOGIC --- */
-    $('#searchInput').on('keyup', function() {
-        let query = $(this).val();
-        if (query.length > 1) {
-            $.ajax({
-                url: "{% url 'live_search' %}", 
-                data: { 'q': query },
-                success: function(data) {
-                    let dropdown = $('#search-results');
-                    dropdown.empty().show();
-                    
-                    if (data.results.length > 0) {
-                        data.results.forEach(item => {
-                            dropdown.append(`
-                                <a href="/product/${item.id}/" style="display:block; padding:10px; border-bottom:1px solid #eee; color:#333; text-decoration:none;">
-                                    <strong>${item.name}</strong> <small>in ${item.brand}</small>
-                                </a>
-                            `);
-                        });
-                    } else {
-                        dropdown.append('<p style="padding:10px;">No gadgets found.</p>');
-                    }
-                }
-            });
-        } else {
-            $('#search-results').hide();
-        }
-    });
-
-    // Hide dropdown when clicking outside
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('.search-form').length) {
-            $('#search-results').hide();
-        }
+        setTimeout(triggerSokoToast, 5000);
+        scheduleNextToast();
     });
 </script>
 {% endblock %}

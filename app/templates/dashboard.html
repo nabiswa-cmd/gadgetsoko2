@@ -5,194 +5,243 @@
 
 {% block content %}
 <style>
-/* Dashboard Cards */
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
+    /* Navigation & Buttons */
+    .admin-nav-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        border: 1px solid #e0e0e0;
+    }
 
-.card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    text-align: center;
-    transition: transform 0.2s ease;
-}
+    .btn-nav {
+        padding: 0.6rem 1.2rem;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: 0.3s;
+    }
 
-.card:hover {
-    transform: translateY(-5px);
-}
+    .btn-admin { background: #111; color: #fff; }
+    .btn-site { background: #ff5a2c; color: #fff; }
+    .view-all-link { 
+        display: inline-block; 
+        margin-top: 10px; 
+        color: #ff5a2c; 
+        text-decoration: none; 
+        font-weight: bold; 
+        font-size: 0.9rem;
+    }
 
-.card h3 {
-    font-size: 1.1rem;
-    color: #333;
-    margin-bottom: 0.5rem;
-}
+    /* Cards & Layout */
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
 
-.card p {
-    font-size: 1.6rem;
-    font-weight: bold;
-    color: #ff5a2c;
-}
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        text-align: center;
+    }
 
-/* Tables */
-.table-container {
-    overflow-x: auto;
-    margin-bottom: 2rem;
-}
+    .card p { font-size: 1.5rem; font-weight: bold; color: #ff5a2c; margin: 0; }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
+    /* Tables */
+    .table-container { 
+        background: #fff; 
+        padding: 1rem; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
+        margin-bottom: 1rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    thead { background: #111; color: #fff; }
+    th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #eee; }
 
-thead {
-    background: #111;
-    color: #fff;
-}
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
 
-thead th {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    font-weight: 600;
-}
+    .btn-delete {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
 
-tbody td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #eee;
-}
+    /* Charts Grid */
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 2rem;
+    }
+    @media (max-width: 900px) { .charts-container { grid-template-columns: 1fr; } }
 
-tbody tr:hover {
-    background: #f9f9f9;
-}
-
-/* Status Badge */
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    background: #ff5a2c;
-    color: #fff;
-}
-
-/* Section Headings */
-h2 {
-    margin: 2rem 0 1rem;
-    font-size: 1.3rem;
-    color: #222;
-    border-left: 4px solid #ff5a2c;
-    padding-left: 0.5rem;
-}
+    .status-badge {
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        background: #ff5a2c;
+        color: #fff;
+    }
 </style>
+
+<div class="admin-nav-bar">
+    <a href="/admin/" class="btn-nav btn-admin">⚙️ Manage Brands & Categories</a>
+    <a href="{% url 'index' %}" class="btn-nav btn-site">🏠 Back to Site</a>
+</div>
+
 <div class="cards">
+    <div class="card"><h3>Products</h3><p>{{ products_count|default:"0" }}</p></div>
+    <div class="card"><h3>Orders</h3><p>{{ orders_count|default:"0" }}</p></div>
+    <div class="card"><h3>Users</h3><p>{{ users_count|default:"0" }}</p></div>
+    <div class="card"><h3>Revenue</h3><p>KES {{ revenue|default:"0" }}</p></div>
+</div>
+
+<div class="charts-container">
     <div class="card">
-        <h3>Total Products</h3>
-        <p>{{ products_count|default:"0" }}</p>
+        <h3>Revenue Trend</h3>
+        <canvas id="revenueChart"></canvas>
     </div>
     <div class="card">
-        <h3>Total Orders</h3>
-        <p>{{ orders_count|default:"0" }}</p>
-    </div>
-    <div class="card">
-        <h3>Active Users</h3>
-        <p>{{ users_count|default:"0" }}</p>
-    </div>
-    <div class="card">
-        <h3>Total Revenue</h3>
-        <p>KES {{ revenue|default:"0" }}</p>
+        <h3>Top Selling Products</h3>
+        <canvas id="topProductsChart"></canvas>
     </div>
 </div>
 
-<h2>Recent Orders</h2>
+<h2>Recent Orders (Latest 20)</h2>
 <div class="table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th><th>Name</th><th>Phone</th><th>Total</th><th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in recent_orders %}
-            <tr>
-                <td>#{{ order.id }}</td>
-                <td>{{ order.name|default:"N/A" }}</td>
-                <td>{{ order.phone|default:"N/A" }}</td>
-                <td>KES {{ order.total|default:"0" }}</td>
-                <td><span class="status-badge">{{ order.status|default:"Pending" }}</span></td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" style="text-align:center;">No recent orders</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <form action="{% url 'delete_orders' %}" method="POST">
+        {% csrf_token %}
+        <div class="action-bar">
+            <div>
+                <input type="checkbox" id="checkAllOrders"> <small>Select All</small>
+            </div>
+            <button type="submit" class="btn-delete" onclick="return confirm('Delete selected orders?')">🗑️ Delete Selected</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th></th><th>ID</th><th>Customer</th><th>Total</th><th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders|slice:":20" %}
+                <tr>
+                    <td><input type="checkbox" name="selected_ids" value="{{ order.id }}" class="order-check"></td>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.name }}</td>
+                    <td>KES {{ order.total }}</td>
+                    <td><span class="status-badge">{{ order.status }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" style="text-align:center;">No orders found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    {% if orders_count > 20 %}
+        <a href="/admin/app/order/" class="view-all-link">➡️ View all {{ orders_count }} orders in Admin</a>
+    {% endif %}
 </div>
 
-<h2>Customer Activity Logs</h2>
+<h2>Activity Logs (Latest 20)</h2>
 <div class="table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>User</th><th>Action</th><th>Product</th><th>Time</th><th>Last Order Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in customer_activity %}
-            <tr>
-                <td>{{ log.user.username }}</td>
-                <td>{{ log.action }}</td>
-                <td>{{ log.product.name|default:"-" }}</td>
-                <td>{{ log.timestamp|timesince }} ago</td>
-                <td>{{ log.last_order_status }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" style="text-align:center;">No activity logs</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <form action="{% url 'delete_logs' %}" method="POST">
+        {% csrf_token %}
+        <div class="action-bar">
+            <div>
+                <input type="checkbox" id="checkAllLogs"> <small>Select All</small>
+            </div>
+            <button type="submit" class="btn-delete" onclick="return confirm('Clear selected logs?')">🗑️ Delete Selected</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th></th><th>User</th><th>Action</th><th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in customer_activity|slice:":20" %}
+                <tr>
+                    <td><input type="checkbox" name="selected_ids" value="{{ log.id }}" class="log-check"></td>
+                    <td>{{ log.user.username }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ log.timestamp|timesince }} ago</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" style="text-align:center;">No logs recorded.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    {% if customer_activity.count > 20 %}
+        <a href="/admin/app/useractivity/" class="view-all-link">➡️ View full activity history in Admin</a>
+    {% endif %}
 </div>
 
-<h2>Revenue Chart</h2>
-<canvas id="revenueChart"></canvas>
-<h2>Top Products</h2>
-<canvas id="topProductsChart"></canvas>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Logic for Revenue Chart
 new Chart(document.getElementById('revenueChart'), {
     type: 'line',
     data: {
         labels: {{ revenue_labels|safe|default:"[]" }},
         datasets: [{
-            label:'Revenue (KES)',
+            label: 'Revenue (KES)',
             data: {{ revenue_values|safe|default:"[]" }},
-            borderColor:'#ff5a2c',
-            backgroundColor:'rgba(255,90,44,0.1)',
-            fill:true
+            borderColor: '#ff5a2c',
+            backgroundColor: 'rgba(255,90,44,0.1)',
+            fill: true
         }]
     }
 });
 
+// Logic for Top Products Chart
 new Chart(document.getElementById('topProductsChart'), {
     type: 'bar',
     data: {
         labels: {{ top_products_labels|safe|default:"[]" }},
         datasets: [{
-            label:'Units Sold',
+            label: 'Units Sold',
             data: {{ top_products_values|safe|default:"[]" }},
-            backgroundColor:'#111'
+            backgroundColor: '#111'
         }]
     },
-    options: { indexAxis:'y' }
+    options: { indexAxis: 'y' }
 });
+
+// Bulk Selection Script
+function setupSelectAll(masterId, childClass) {
+    const master = document.getElementById(masterId);
+    if (!master) return;
+    master.onclick = function() {
+        const checkboxes = document.getElementsByClassName(childClass);
+        for (let cb of checkboxes) { cb.checked = master.checked; }
+    }
+}
+
+setupSelectAll('checkAllOrders', 'order-check');
+setupSelectAll('checkAllLogs', 'log-check');
 </script>
 {% endblock %}

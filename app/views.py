@@ -73,31 +73,32 @@ def index_view(request):
         'featured_products': featured_products,
         'cart_count': cart_count
     })
-# Make sure category_id is included here!
-def products_view(request, brand_id=None, category_id=None):
-    products = Product.objects.all()
+
+def products_view(request):
+    products = Product.objects.all().order_by('-created_at')
     categories = Category.objects.all()
     brands = Brand.objects.all()
     
-    if brand_id:
-        products = products.filter(brand_id=brand_id)
-    
-    if category_id:
-        products = products.filter(category_id=category_id)
+    brand_id = request.GET.get('brand')
+    category_id = request.GET.get('category')
 
-    # ... rest of your view logic
+    # Convert to int for easier template comparison
+    if brand_id and brand_id.isdigit():
+        products = products.filter(brand_id=brand_id)
+        brand_id = int(brand_id) # Cast to int
+    if category_id and category_id.isdigit():
+        products = products.filter(category_id=category_id)
+        category_id = int(category_id) # Cast to int
+
     context = {
         'products': products,
         'categories': categories,
         'brands': brands,
-        'current_brand_id': brand_id,
-        'current_cat_id': category_id,
+        'selected_brand': brand_id,
+        'selected_category': category_id,
     }
     return render(request, 'products.html', context)
 
-
-
-@login_required
 @login_required
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user).select_related('product')
@@ -325,6 +326,7 @@ def add_product(request):
         new_category = request.POST.get("new_category")
         offer_days = request.POST.get('offer_days')  # <--- Get the days
         specifications = request.POST.get("specifications")
+        short_desc = request.POST.get('short_description')
 
         if not brand_id:
             messages.error(request, "Please select a brand.")
@@ -348,7 +350,9 @@ def add_product(request):
             stock=stock,
             category=category,
             brand=brand,
+            short_description=short_desc,
             specifications=specifications
+
         )
         discount = request.POST.get("discount")
         duration = request.POST.get("discount_duration_hours")
@@ -405,125 +409,162 @@ def remove_cart(request, item_id):
     item.delete()
     return JsonResponse({"success": True})
 
+from decimal import Decimal
+from django.conf import settings
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.core.mail import send_mail
+
 def check(request):
-    # 1. ALWAYS FETCH DATA FIRST
-    config, created = SiteSettings.objects.get_or_create(id=1)
+    # --- FETCH DATA ---
+    config, _ = SiteSettings.objects.get_or_create(id=1)
     cart_items = CartItem.objects.filter(user=request.user)
-    
-    # 2. Redirect if cart is empty
-    if not cart_items:
+
+    # --- EMPTY CART ---
+    if not cart_items.exists():
         messages.warning(request, "Your cart is empty.")
         return redirect('view_cart')
 
-    # ✅ SINGLE SOURCE OF TRUTH
+    # --- CALCULATIONS ---
     subtotal = sum(item.quantity * item.product.final_price for item in cart_items)
 
-    # --- NEW: CALCULATE MAX SHIPPING FEE ---
-    # Find the highest shipping_fee among all products currently in the cart
     product_shipping_fees = [item.product.shipping_fee for item in cart_items]
     max_cart_shipping = max(product_shipping_fees) if product_shipping_fees else Decimal('0.00')
 
-    # 4. Handle Order Submission
+    # --- POST: PROCESS ORDER ---
     if request.method == "POST":
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        phone = request.POST.get("phone")
-        address = request.POST.get("address")
-        region = request.POST.get("region") # 'nairobi' or 'outside'
-        payment_method = request.POST.get("payment_method")
-
-        # --- UPDATED SHIPPING LOGIC ---
-        # If outside Nairobi, use the highest product fee. If Nairobi, use SiteSettings (usually 0).
-        shipping_fee = max_cart_shipping if region == "outside" else config.shipping_fee_nairobi
-        final_total = subtotal + shipping_fee
-
-        # Phone Number Formatting
-        clean_phone = phone.strip().replace("+", "")
-        if clean_phone.startswith("0"):
-            clean_phone = "254" + clean_phone[1:]
-        elif not clean_phone.startswith("254"):
-            clean_phone = "254" + clean_phone
-
-        location_area = request.POST.get("nairobi_area") if region == "nairobi" else request.POST.get("outside_town")
-        full_destination = f"{location_area} - {address}"
-
-        # Create the Order
-        order = Order.objects.create(
-            user=request.user,
-            name=name,
-            email=email,
-            phone=clean_phone,
-            destination=full_destination,
-            total=final_total,
-            shipping_fee=shipping_fee,
-            region=region, # Added to track region in DB
-            status="Pending",
-            payment_status="Awaiting Payment",
-            payment_method=payment_method
-        )
-
-        # Create Order Items & Summary
-        items_summary = ""
-        for item in cart_items:
-            item_price = item.product.final_price
-                        
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item_price
-            )
-            items_summary += f"- {item.product.name} (x{item.quantity}) @ KES {item_price}\n"
-
-        # Generate Receipt URL
-        current_domain = request.get_host() 
-        protocol = 'https' if request.is_secure() else 'http'
-        download_url = f"{protocol}://{current_domain}{reverse('download_receipt', args=[order.id])}"
-
-        # Send Email
         try:
-            subject = f"Order Confirmed - Gadget Soko #{order.id}"
-            email_body = f"Hello {name},\n\nYour order #{order.id} is confirmed.\n\nItems:\n{items_summary}\nShipping: KES {shipping_fee}\nTotal: KES {final_total}\n\nReceipt: {download_url}"
-            send_mail(subject, email_body, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
-        except Exception as e:
-            print(f"Email failed: {e}")
+            name = request.POST.get("name")
+            email = request.POST.get("email")
+            phone = request.POST.get("phone")
+            address = request.POST.get("address")
+            region = request.POST.get("region")
+            payment_method = request.POST.get("payment_method")
 
-        # Handle M-Pesa
-        if payment_method == "mpesa":
-            try:
-                response = lipa_na_mpesa(
-                    phone_number=clean_phone,
-                    amount=int(final_total),
-                    account_ref=f"GSK{order.id}",
-                    transaction_desc="Gadget Purchase"
+            # --- SHIPPING ---
+            shipping_fee = max_cart_shipping if region == "outside" else config.shipping_fee_nairobi
+            final_total = subtotal + shipping_fee
+
+            # --- PHONE FORMAT ---
+            clean_phone = phone.strip().replace("+", "")
+            if clean_phone.startswith("0"):
+                clean_phone = "254" + clean_phone[1:]
+            elif not clean_phone.startswith("254"):
+                clean_phone = "254" + clean_phone
+
+            # --- LOCATION ---
+            location_area = (
+                request.POST.get("nairobi_area")
+                if region == "nairobi"
+                else request.POST.get("outside_town")
+            )
+            full_destination = f"{location_area} - {address}"
+
+            # --- CREATE ORDER ---
+            order = Order.objects.create(
+                user=request.user,
+                name=name,
+                email=email,
+                phone=clean_phone,
+                destination=full_destination,
+                total=final_total,
+                shipping_fee=shipping_fee,
+                region=region,
+                status="Pending",
+                payment_status="Awaiting Payment",
+                payment_method=payment_method
+            )
+
+            # --- CREATE ORDER ITEMS ---
+            items_summary = ""
+            for item in cart_items:
+                item_price = item.product.final_price
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    price=item_price
                 )
-                if response.get('ResponseCode') == '0':
-                    order.checkout_request_id = response.get('CheckoutRequestID')
-                    order.status = 'STK_Sent'
-                    order.save()
-            except:
-                messages.error(request, "M-Pesa Gateway Error.")
 
-        elif payment_method == "pod":
-            order.payment_status = "Pay on Delivery"
-            order.status = "Confirmed"
-            order.save()
+                items_summary += f"- {item.product.name} (x{item.quantity}) @ KES {item_price}\n"
 
-        # Clear Cart
-        cart_items.delete()
-        messages.success(request, f"Order #{order.id} placed successfully!")
-        return redirect('payment_instructions', order_id=order.id)
+            # --- RECEIPT URL ---
+            protocol = 'https' if request.is_secure() else 'http'
+            domain = request.get_host()
+            receipt_url = f"{protocol}://{domain}{reverse('download_receipt', args=[order.id])}"
 
-    # 5. GET Request
+            # --- SEND EMAIL ---
+            subject = f"Order Confirmed - Gadget Soko #{order.id}"
+            message = (
+                f"Hello {name},\n\n"
+                f"Your order #{order.id} has been received.\n\n"
+                f"Items:\n{items_summary}\n"
+                f"Shipping: KES {shipping_fee}\n"
+                f"Total: KES {final_total}\n\n"
+                f"Download Receipt:\n{receipt_url}\n\n"
+                f"Thank you for shopping with us!"
+            )
+
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,  # safer than DEFAULT_FROM_EMAIL
+                    [email],
+                    fail_silently=False
+                )
+                print("email sent succesfully")
+            except Exception as e:
+                print("EMAIL ERROR:", str(e))
+                traceback.print_exc()
+
+            # --- PAYMENT HANDLING ---
+            if payment_method == "mpesa":
+                try:
+                    response = lipa_na_mpesa(
+                        phone_number=clean_phone,
+                        amount=int(final_total),
+                        account_ref=f"GSK{order.id}",
+                        transaction_desc="Gadget Purchase"
+                    )
+
+                    if response.get('ResponseCode') == '0':
+                        order.checkout_request_id = response.get('CheckoutRequestID')
+                        order.status = 'STK_Sent'
+                        order.save()
+                except Exception as e:
+                    print("MPESA ERROR:", str(e))
+                    messages.error(request, "M-Pesa request failed.")
+
+            elif payment_method == "pod":
+                order.payment_status = "Pay on Delivery"
+                order.status = "Confirmed"
+                order.save()
+
+            # --- CLEAR CART ---
+            cart_items.delete()
+
+            messages.success(request, f"Order #{order.id} placed successfully!")
+            return redirect('payment_instructions', order_id=order.id)
+
+        except Exception as e:
+            print("CHECKOUT ERROR:", str(e))
+            messages.error(request, "Something went wrong. Please try again.")
+            return redirect('view_cart')
+
+    # --- GET REQUEST ---
     context = {
-        'subtotal': subtotal, 
-        'cart_items': cart_items, 
+        'subtotal': subtotal,
+        'cart_items': cart_items,
         'config': config,
-        'max_shipping': max_cart_shipping, # Pass the highest fee to the template
+        'max_shipping': max_cart_shipping,
         'shipping_nairobi': config.shipping_fee_nairobi
     }
-    
+
     return render(request, 'check.html', context)
+
 def payment_instructions(request, order_id):
     # Fetch the order and ensure it belongs to the logged-in user
     order = get_object_or_404(Order, id=order_id, user=request.user)
@@ -567,7 +608,7 @@ def userlog_view (request):  # this is log in yaani sign in
             messages.error(request, "Incorrect username or password. Please try again.")
             return render(request, 'usersignup.html')
 
-    return render(request, 'userlog.html')
+    return render(request, 'usersignup.html')
 def usersignup_view (request):  # this is log in yaani sign in 
     if request.user.is_authenticated:
         return redirect('index')
@@ -1265,3 +1306,52 @@ def download_receipt(request, order_id):
     if not pdf.err:
         return HttpResponse(result.getvalue(), content_type='application/pdf')
     return HttpResponse("Error generating PDF", status=400)
+
+from django.shortcuts import render
+from .models import Product, Brand, Category
+
+def shop_view(request):
+    # Start with all products
+    products = Product.objects.all()
+
+    # Capture 'brand' and 'category' IDs from the URL
+    brand_id = request.GET.get('brand')
+    category_id = request.GET.get('category')
+
+    # Apply Brand filter (using the brand ID)
+    if brand_id:
+        products = products.filter(brand_id=brand_id)
+
+    # Apply Category filter (using the category ID)
+    if category_id:
+        products = products.filter(category_id=category_id)
+
+    context = {
+        'products': products,
+        'brands': Brand.objects.all(),
+        'categories': Category.objects.all(),
+        'selected_brand': brand_id,
+        'selected_category': category_id,
+    }
+    return render(request, 'your_template.html', context)
+
+from django.shortcuts import redirect
+from .models import Order, UserActivity # Ensure these imports match your models
+
+def delete_orders(request):
+    if request.method == 'POST':
+        order_ids = request.POST.getlist('selected_ids')
+        Order.objects.filter(id__in=order_ids).delete()
+    return redirect('dashboard') # Change this to your dashboard's URL name
+
+def delete_logs(request):
+    if request.method == 'POST':
+        log_ids = request.POST.getlist('selected_ids')
+        UserActivity.objects.filter(id__in=log_ids).delete()
+    return redirect('dashboard')
+
+def delete_orders(request):
+    if request.method == 'POST':
+        selected_ids = request.POST.getlist('selected_ids')
+        Order.objects.filter(id__in=selected_ids).delete()
+    return redirect('dashboard') # This matches the name in urls.py

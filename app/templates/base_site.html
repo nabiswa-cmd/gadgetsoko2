@@ -6,9 +6,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}GadgetSoko{% endblock %}</title>
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/tab.png' %}">
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/tab.png' %}">
 
-    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-    <link rel="apple-touch-icon" href="{% static 'images/logo.png' %}">
+<link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/tab.png' %}">
+
+<link rel="icon" type="image/png" sizes="192x192" href="{% static 'images/tab.png' %}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -459,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
 <div class="mobile-sidebar" id="mobileSidebar">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <img src="{% static 'images/logo.png' %}" style="height:35px;">
+        <img src="{% static 'images/final.png' %}" style="height:35px;">
         <button class="text-white bg-transparent border-0 fs-2" onclick="toggleMenu()">&times;</button>
     </div>
     <ul class="mobile-links">
@@ -486,13 +489,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="bi bi-list"></i>
             </button>
             <a class="gs-logo navbar-brand p-0" href="{% url 'index' %}">
-                <img src="{% static 'images/logo.png' %}" alt="Logo" style="height:30px;">
+                <img src="{% static 'images/final.png' %}" alt="Logo" style="height:30px;">
             </a>
         </div>
 
         <div class="d-none d-md-flex align-items-center gap-3">
             <a class="gs-logo navbar-brand p-0" href="{% url 'index' %}">
-                <img src="{% static 'images/logo.png' %}" alt="Gadget Soko">
+                <img src="{% static 'images/final.png' %}" alt="Gadget Soko">
             </a>
             <div class="d-flex align-items-center gap-1">
                 <a href="{% url 'index' %}" class="gs-nav-link">Home</a>
@@ -562,7 +565,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <span id="sidebarTotal">KES 0</span>
         </div>
         <a href="{% url 'check' %}" class="checkout-btn">Proceed to Checkout &rarr;</a>
-        <p style="text-align:center;margin:8px 0 0;font-size:11px;color:#bbb;">Free delivery within Nairobi CBD</p>
+        <p style="text-align:center;margin:8px 0 0;font-size:11px;color:#bbb;">Shipping fee varies according to weight of product and place of delivery</p>
     </div>
 </div>
 
