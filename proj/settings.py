@@ -21,13 +21,14 @@ ALLOWED_HOSTS = [
     '.onrender.com',
     'localhost',
     '127.0.0.1',
-    '187.124.210.223'
+    '187.124.210.223',
+    'gadgetsoko.com'
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://gadgetsoko.vercel.app',
+    'https://gadgetsoko.vercel.app','https://gadgetsoko.com','https://gadgetsoko.com'
 ]
 
 # Production security settings (active when DEBUG=False)
@@ -102,22 +103,22 @@ SITE_ID = 1
 # DATABASE
 # ---------------------------------------------------------------------------
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'gadgetsoko_db',
-#         'USER': 'admin',
-#         'PASSWORD': 'admin@123',
-#         'HOST': '187.124.210.223',
-#         'PORT': '5432',
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'gadgetsoko_db',
+        'USER': 'admin',
+        'PASSWORD': 'admin@123',
+        'HOST': '187.124.210.223',
+        'PORT': '5432',
+    }
+}
 # To switch to PostgreSQL in production, set DATABASE_URL in .env and uncomment:
 # import dj_database_url
 # DATABASES = {'default': dj_database_url.config(default=os.getenv('DATABASE_URL'), conn_max_age=600)}
@@ -172,7 +173,7 @@ MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE')
 MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
 MPESA_ENV = os.getenv('MPESA_ENV', 'sandbox')
 MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL')
-SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'https://your-app-name.onrender.com')
+SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'https://gadgetsoko.com')
 
 # ---------------------------------------------------------------------------
 # GOOGLE OAUTH
