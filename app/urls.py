@@ -62,8 +62,10 @@ urlpatterns = [
     # urls.py
     path('receipt/download/<int:order_id>/', views.download_receipt, name='download_receipt'),
     path('dashboard/delete-orders/', views.delete_orders, name='delete_orders'),
-    path('dashboard/delete-logs/', views.delete_logs, name='delete_logs')
+    path('dashboard/delete-logs/', views.delete_logs, name='delete_logs'),
     
+    path('bulk-delete/', views.bulk_delete_products, name='bulk_delete_products'),
+    path('bulk-delete-orders/', views.bulk_delete_orders, name='bulk_delete_orders'),
 
     
 ]

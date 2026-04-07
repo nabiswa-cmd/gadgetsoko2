@@ -5,125 +5,441 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | Gadget Soko Kenya</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <style>
-        :root { 
-            --primary: #ff5a2c; 
+        :root {
+            --primary: #ff5a2c;
+            --primary-light: #fff4f0;
             --secondary: #111;
-            --mpesa: #00a650; 
-            --equity: #a32a29;
-            --bg: #f4f6f9; 
+            --bg: #f4f6f9;
             --border: #e1e1e1;
-        }
-        
-        body { background: var(--bg); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; color: #333; }
-        
-        .checkout-wrapper { 
-            width: 95%; max-width: 1100px; margin: 20px auto; 
-            display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; 
+            --text-muted: #6c757d;
+            --card-shadow: 0 4px 16px rgba(0,0,0,0.07);
         }
 
-        @media (max-width: 900px) { .checkout-wrapper { grid-template-columns: 1fr; } }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .card { 
-            background: white; padding: 30px; border-radius: 16px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05); height: fit-content; margin-bottom: 20px;
-        }
-        
-        h2, h3 { margin-top: 0; color: var(--secondary); font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
-
-        .location-picker { 
-            display: flex; gap: 10px; margin: 15px 0 25px; background: #eee; padding: 5px; border-radius: 12px; 
-        }
-        .loc-btn { 
-            flex: 1; padding: 12px; border: none; border-radius: 10px; 
-            cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 13px; color: #666; background: transparent;
-        }
-        .loc-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-
-        .form-group { margin-bottom: 15px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #555; }
-        input, select, textarea { 
-            width: 100%; padding: 12px; border: 1.5px solid var(--border); 
-            border-radius: 8px; font-size: 15px; box-sizing: border-box; background: white;
+        body {
+            background: var(--bg);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            color: #333;
+            font-size: 15px;
+            line-height: 1.5;
         }
 
-        /* Payment Options */
-        .payment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
-        .pay-opt { 
-            border: 2px solid #f0f0f0; border-radius: 12px; padding: 10px; 
-            text-align: center; cursor: pointer; transition: 0.3s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100px; background: #fafafa; position: relative;
+        /* ── Layout ── */
+        .checkout-wrapper {
+            width: 94%;
+            max-width: 1100px;
+            margin: 24px auto;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+            align-items: start;
         }
-        .pay-opt input { position: absolute; opacity: 0; }
-        .pay-opt img { max-height: 25px; margin-bottom: 8px; }
-        .pay-opt i { font-size: 24px; margin-bottom: 8px; }
-        .pay-opt.selected { border-color: var(--primary); background: #fff5f2; }
 
-        /* Manual Instructions */
+        @media (max-width: 860px) {
+            .checkout-wrapper {
+                grid-template-columns: 1fr;
+                margin: 16px auto;
+                width: 96%;
+            }
+        }
+
+        /* ── Card ── */
+        .card {
+            background: #fff;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        @media (max-width: 576px) {
+            .card { padding: 18px; border-radius: 12px; }
+        }
+
+        /* ── Headings ── */
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 22px;
+        }
+
+        .card-title i { color: var(--primary); font-size: 1.1rem; }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 24px 0 14px;
+        }
+
+        .section-title i { color: var(--primary); }
+
+        /* ── Location Picker ── */
+        .location-picker {
+            display: flex;
+            gap: 8px;
+            background: #eee;
+            padding: 5px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+        }
+
+        .loc-btn {
+            flex: 1;
+            padding: 11px 8px;
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            color: #777;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.25s;
+        }
+
+        .loc-btn.active {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* ── Form Elements ── */
+        .form-group { margin-bottom: 16px; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .form-row { grid-template-columns: 1fr; gap: 0; }
+        }
+
+        label.field-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #333;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255,90,44,0.1);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%23666' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 34px;
+        }
+
+        select:disabled { background-color: #f8f8f8; color: #aaa; cursor: not-allowed; }
+
+        textarea { resize: vertical; min-height: 72px; }
+
+        /* ── Payment Grid ── */
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 400px) {
+            .payment-grid { grid-template-columns: 1fr 1fr; }
+            #pod-option { grid-column: span 2; }
+        }
+
+        .pay-opt {
+            border: 2px solid #ebebeb;
+            border-radius: 12px;
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 95px;
+            background: #fafafa;
+            position: relative;
+            transition: all 0.22s;
+            user-select: none;
+        }
+
+        .pay-opt input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: auto;
+            padding: 0;
+            border: none;
+            box-shadow: none;
+        }
+
+        .pay-opt:hover { border-color: #ddd; background: #f5f5f5; }
+        .pay-opt.selected { border-color: var(--primary); background: var(--primary-light); }
+
+        .pay-opt .pay-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .pay-opt .pay-img {
+            max-height: 26px;
+            max-width: 80px;
+            object-fit: contain;
+        }
+
+        /* Equity inline SVG icon */
+        .equity-svg { width: 38px; height: 38px; }
+
+        /* POD icon */
+        .pay-opt .pod-icon {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        /* ── Manual Payment Box ── */
         .manual-box {
-            margin-top: 15px; padding: 15px; border-radius: 10px;
-            background: #fdf8e6; border: 1px dashed #e6b800; font-size: 13px; display: none;
+            display: none;
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: #fffbeb;
+            border: 1px dashed #f0c040;
+            font-size: 13px;
+            line-height: 1.7;
         }
 
-        /* Summary Styling */
-        .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f9f9f9; align-items: center; }
-        .item-detail { display: flex; flex-direction: column; }
-        .item-name { font-weight: 600; font-size: 14px; }
-        .item-qty-price { font-size: 12px; color: #777; }
-        .total-price { 
-            font-size: 20px; font-weight: 800; border-top: 2px solid #eee;
-            margin-top: 15px; padding-top: 15px; color: var(--primary);
+        .manual-box strong { color: #555; }
+
+        /* ── Agreements ── */
+        .agreements { margin-top: 22px; }
+
+        .check-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
         }
 
-        .btn-submit { 
-            background: #ccc; color: white; border: none; width: 100%; padding: 18px; border-radius: 12px; 
-            font-size: 16px; font-weight: bold; cursor: not-allowed; margin-top: 20px; transition: 0.3s;
+        .check-row input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            padding: 0;
+            border: none;
+            border-radius: 4px;
+            box-shadow: none;
         }
-        .btn-submit.ready { background: var(--primary); cursor: pointer; box-shadow: 0 4px 12px rgba(255, 90, 44, 0.3); }
-        .hidden { display: none; }
-        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; cursor: pointer; }
-        .checkbox-group input { width: 18px; height: 18px; margin-top: 2px; }
-        .checkbox-group span { font-size: 13px; color: #444; line-height: 1.4; }
+
+        .check-row span { font-size: 13px; color: #555; line-height: 1.5; }
+
+        /* ── Submit Button ── */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: not-allowed;
+            margin-top: 6px;
+            background: #ccc;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s;
+        }
+
+        .btn-submit.ready {
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(255,90,44,0.35);
+        }
+
+        .btn-submit.ready:hover { background: #e84e24; }
+
+        /* ── Order Summary ── */
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5f5;
+            gap: 10px;
+        }
+
+        .summary-item:last-of-type { border-bottom: none; }
+
+        .item-info .item-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #222;
+        }
+
+        .item-info .item-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .item-price {
+            font-weight: 700;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .summary-divider { border: none; border-top: 2px solid #f0f0f0; margin: 12px 0; }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+
+        .summary-total .label { font-size: 15px; font-weight: 600; color: #444; }
+
+        .summary-total .amount {
+            font-size: 21px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .shipping-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .secure-note {
+            text-align: center;
+            font-size: 11px;
+            color: #bbb;
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        /* ── Utility ── */
+        .hidden { display: none !important; }
+
+        small.hint {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
 
 <div class="checkout-wrapper">
+
+    <!-- ═══ LEFT COLUMN ═══ -->
     <div class="card">
-        <h2><i class="fa fa-shopping-bag"></i> Checkout</h2>
-        
-        <label>Select Your Location</label>
+        <h2 class="card-title">
+            <i class="bi bi-bag-check-fill"></i> Checkout
+        </h2>
+
+        <!-- Location Toggle -->
+        <label class="field-label">Delivery Location</label>
         <div class="location-picker">
-            <button type="button" class="loc-btn active" id="btn-nairobi" onclick="updateLocation('nairobi')">📍 Nairobi</button>
-            <button type="button" class="loc-btn" id="btn-outside" onclick="updateLocation('outside')">🚚 Upcountry</button>
+            <button type="button" class="loc-btn active" id="btn-nairobi" onclick="updateLocation('nairobi')">
+                <i class="bi bi-geo-alt-fill"></i> Nairobi
+            </button>
+            <button type="button" class="loc-btn" id="btn-outside" onclick="updateLocation('outside')">
+                <i class="bi bi-truck"></i> Upcountry
+            </button>
         </div>
 
         <form method="POST" action="{% url 'check' %}" id="checkout-form">
             {% csrf_token %}
             <input type="hidden" name="region" id="region-input" value="nairobi">
 
+            <!-- Full Name -->
             <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" name="name" placeholder="Name on ID" required>
+                <label class="field-label">
+                    <i class="bi bi-person"></i> Full Name
+                </label>
+                <input type="text" name="name"
+                       value="{{ user.get_full_name|default:user.username }}"
+                       placeholder="Name as on ID" required>
             </div>
 
+            <!-- Phone + Email -->
             <div class="form-row">
                 <div class="form-group">
-                    <label>M-Pesa Number</label>
-                    <input type="tel" name="phone" id="phone-input" placeholder="0712345678" required>
+                    <label class="field-label">
+                        <i class="bi bi-phone"></i> M-Pesa Number
+                    </label>
+                    <input type="tel" name="phone" id="phone-input"
+                           placeholder="254712345678" required>
                 </div>
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" placeholder="example@gmail.com" required>
+                    <label class="field-label">
+                        <i class="bi bi-envelope"></i> Email
+                    </label>
+                    <input type="email" name="email"
+                           value="{{ user.email }}"
+                           placeholder="you@email.com" required>
                 </div>
             </div>
 
+            <!-- Nairobi Area -->
             <div id="nairobi-fields">
                 <div class="form-group">
-                    <label>Nearest Estate / Area</label>
+                    <label class="field-label">
+                        <i class="bi bi-map"></i> Nearest Estate / Area
+                    </label>
                     <select name="nairobi_area">
                         <option value="CBD">CBD / Town</option>
                         <option value="Westlands">Westlands</option>
@@ -142,159 +458,261 @@
                 </div>
             </div>
 
+            <!-- Upcountry County + Town -->
             <div id="outside-fields" class="hidden">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>County</label>
-                        <select name="county" id="county-select" onchange="populateTowns()">
+                        <label class="field-label">
+                            <i class="bi bi-map-fill"></i> County
+                        </label>
+                        <select id="county-select" onchange="populateTowns()">
                             <option value="">-- Select County --</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Town / Sub-County</label>
+                        <label class="field-label">
+                            <i class="bi bi-pin-map"></i> Town / Sub-County
+                        </label>
                         <select name="outside_town" id="town-select" disabled>
                             <option value="">-- Select County First --</option>
                         </select>
+                        <small class="hint">Select the nearest major town for delivery.</small>
                     </div>
                 </div>
             </div>
 
+            <!-- Address -->
             <div class="form-group">
-                <label>Detailed Address / Instructions</label>
-                <textarea name="address" rows="2" placeholder="Building name, Floor, Landmark..." required></textarea>
+                <label class="field-label">
+                    <i class="bi bi-building"></i> Detailed Address / Instructions
+                </label>
+                <textarea name="address" rows="2"
+                          placeholder="Building name, Floor, Landmark..."></textarea>
             </div>
 
-            <h3><i class="fa fa-credit-card"></i> Payment Method</h3>
+            <!-- Payment Methods -->
+            <div class="section-title">
+                <i class="bi bi-credit-card-2-front-fill"></i> Payment Method
+            </div>
+
             <div class="payment-grid">
-                <label class="pay-opt selected" onclick="selectPay(this, 'mpesa')">
+
+                <!-- M-Pesa -->
+                <label class="pay-opt selected" onclick="selectPay(this,'mpesa')">
                     <input type="radio" name="payment_method" value="mpesa" checked>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="Mpesa">
-                    <span>M-Pesa</span>
+                    <img class="pay-img"
+                         src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png"
+                         alt="M-Pesa">
+                    <span class="pay-label">M-Pesa</span>
                 </label>
-                <label class="pay-opt" onclick="selectPay(this, 'equity')">
+
+                <!-- Equity Bank -->
+                <label class="pay-opt" onclick="selectPay(this,'equity')">
                     <input type="radio" name="payment_method" value="equity">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Equity_Bank_Logo.png/1200px-Equity_Bank_Logo.png" alt="Equity" style="max-height: 20px;">
-                    <span>Equity Bank</span>
+                    <svg class="equity-svg" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="60" height="60" rx="9" fill="#a32a29"/>
+                        <rect x="10" y="15" width="40" height="6" rx="2" fill="#ffffff"/>
+                        <rect x="10" y="27" width="26" height="6" rx="2" fill="#ffffff"/>
+                        <rect x="10" y="39" width="40" height="6" rx="2" fill="#ffffff"/>
+                        <circle cx="46" cy="30" r="9" fill="#f5c400"/>
+                        <text x="46" y="34" text-anchor="middle"
+                              font-family="'Segoe UI',sans-serif"
+                              font-size="11" font-weight="700" fill="#a32a29">E</text>
+                    </svg>
+                    <span class="pay-label">Equity Bank</span>
                 </label>
-                <label class="pay-opt" id="pod-option" onclick="selectPay(this, 'pod')">
+
+                <!-- Pay on Delivery -->
+                <label class="pay-opt" id="pod-option" onclick="selectPay(this,'pod')">
                     <input type="radio" name="payment_method" value="pod">
-                    <i class="fa fa-truck-fast" style="color:var(--primary)"></i>
-                    <span>Pay on Delivery</span>
+                    <i class="bi bi-truck pod-icon"></i>
+                    <span class="pay-label">Pay on Delivery</span>
                 </label>
+
             </div>
 
+            <!-- Manual Instructions -->
             <div id="manual-mpesa" class="manual-box">
-                <p><strong><i class="fa fa-info-circle"></i> Manual M-Pesa:</strong> If STK prompt fails, use:<br>
-                Paybill: <strong>400200</strong> | Acc: <strong>0712 345 678</strong></p>
+                <i class="bi bi-info-circle-fill" style="color:#e6b800"></i>
+                <strong>Manual M-Pesa:</strong> If the STK push fails, pay via:<br>
+                Paybill: <strong>400200</strong> &nbsp;&bull;&nbsp; Account: <strong>0712 345 678</strong>
             </div>
             <div id="manual-equity" class="manual-box">
-                <p><strong><i class="fa fa-university"></i> Equity Bank:</strong> Transfer to:<br>
-                Acc Name: <strong>Gadget Soko</strong> | Acc: <strong>123456789</strong></p>
+                <i class="bi bi-bank" style="color:#e6b800"></i>
+                <strong>Equity Bank Transfer:</strong><br>
+                Account Name: <strong>Gadget Soko Kenya</strong><br>
+                Account No: <strong>0350298765920</strong>
             </div>
 
-            <div class="agreement-section">
-                <label class="checkbox-group">
+            <!-- Agreements -->
+            <div class="agreements">
+                <label class="check-row">
                     <input type="checkbox" id="check-terms" onchange="validateAgreements()">
-                    <span>I agree to the <strong>Terms & Conditions</strong> of Gadget Soko Kenya.</span>
+                    <span>I agree to the <strong>Terms &amp; Conditions</strong> of Gadget Soko Kenya.</span>
                 </label>
-                <label class="checkbox-group">
+                <label class="check-row">
                     <input type="checkbox" id="check-shipping" onchange="validateAgreements()">
-                    <span>I confirm that the <strong>shipping fee</strong> is calculated based on location & weight.</span>
+                    <span>I understand that the <strong>shipping fee</strong> is based on location &amp; item weight.</span>
                 </label>
             </div>
 
             <button type="submit" id="submit-btn" class="btn-submit" disabled>
-                Complete Order (KES <span id="btn-total-val">0</span>)
+                <i class="bi bi-lock-fill"></i>
+                Complete Order &mdash; KES <span id="btn-total-val">0</span>
             </button>
+
         </form>
     </div>
 
+    <!-- ═══ RIGHT COLUMN: Order Summary ═══ -->
     <div class="card">
-        <h3><i class="fa fa-list-check"></i> Order Summary</h3>
+        <h3 class="card-title">
+            <i class="bi bi-receipt"></i> Order Summary
+        </h3>
+
         {% for item in cart_items %}
-        <div class="summary-row">
-            <div class="item-detail">
-                <span class="item-name">{{ item.product.name }}</span>
-                <span class="item-qty-price">Qty: {{ item.quantity }} × KES {{ item.product.price|floatformat:0 }}</span>
+        <div class="summary-item">
+            <div class="item-info">
+                <div class="item-name">{{ item.product.name }}</div>
+                <div class="item-meta">Qty: {{ item.quantity }} &times; KES {{ item.product.price|floatformat:0 }}</div>
             </div>
-            <strong>KES {{ item.get_total|floatformat:0 }}</strong>
+            <span class="item-price">KES {{ item.get_total|floatformat:0 }}</span>
         </div>
         {% endfor %}
 
-        <div class="summary-row total-price">
-            <span>Subtotal</span>
-            <span id="grand-total-val">KES {{ subtotal }}</span>
+        <hr class="summary-divider">
+
+        <div class="summary-total">
+            <span class="label">Subtotal</span>
+            <span class="amount" id="grand-total-val">KES {{ subtotal }}</span>
         </div>
-        <p style="font-size:11px; color:#777; margin-top:15px; text-align:center;">
-            <i class="fa fa-lock"></i> Secure Checkout - Gadget Soko
-        </p>
+        <p class="shipping-note" id="shipping-note">+ shipping calculated at checkout</p>
+
+        <div class="secure-note">
+            <i class="bi bi-shield-lock-fill"></i>
+            Secure Checkout &mdash; Gadget Soko Kenya
+        </div>
     </div>
+
 </div>
 
 <script>
-const subtotal = parseFloat("{{ subtotal|default:0 }}");
-const shippingNairobi = parseFloat("{{ shipping_nairobi|default:0 }}");
-const shippingOutside = parseFloat("{{ max_shipping|default:0 }}");
+    const subtotal        = parseFloat("{{ subtotal|default:0 }}");
+    const shippingNairobi = parseFloat("{{ shipping_nairobi|default:200 }}");
+    const shippingOutside = parseFloat("{{ max_shipping|default:500 }}");
 
-// Exhaustive Kenya 47 Counties Data
-const kenyaData = {
-    "Baringo": ["Kabarnet","Eldama Ravine","Marigat"], "Bomet": ["Bomet","Sotik"], "Bungoma": ["Bungoma","Webuye","Kimilili"], "Busia": ["Busia","Malaba"], "Elgeyo-Marakwet":["Iten","Kapsowar"], "Embu": ["Embu","Runyenjes"], "Garissa": ["Garissa"], "Homa Bay": ["Homa Bay","Mbita"], "Isiolo": ["Isiolo"], "Kajiado": ["Ngong","Kitengela","Kajiado"], "Kakamega": ["Kakamega","Mumias"], "Kericho": ["Kericho","Litein"], "Kiambu": ["Thika","Kiambu","Ruiru","Limuru","Githunguri"], "Kilifi": ["Kilifi","Malindi","Mtwapa"], "Kirinyaga": ["Kerugoya","Mwea"], "Kisii": ["Kisii Town"], "Kisumu": ["Kisumu City","Ahero"], "Kitui": ["Kitui","Mwingi"], "Kwale": ["Ukunda","Kwale"], "Laikipia": ["Nanyuki","Nyahururu"], "Lamu": ["Lamu Town"], "Machakos": ["Machakos Town","Athi River","Kangundo"], "Makueni": ["Wote","Makindu"], "Mandera": ["Mandera"], "Marsabit": ["Marsabit"], "Meru": ["Meru Town","Maua"], "Migori": ["Migori Town","Rongo"], "Mombasa": ["Mombasa CBD","Nyali","Likoni","Bamburi"], "Murang'a": ["Murang'a Town","Kenol"], "Nairobi": ["CBD","Westlands","Eastlands"], "Nakuru": ["Nakuru City","Naivasha","Gilgil","Molo"], "Nandi": ["Kapsabet"], "Narok": ["Narok Town"], "Nyamira": ["Nyamira Town"], "Nyandarua": ["Ol Kalou"], "Nyeri": ["Nyeri Town","Karatina"], "Samburu": ["Maralal"], "Siaya": ["Siaya Town","Bondo"], "Taita-Taveta": ["Voi","Taveta"], "Tana River": ["Hola"], "Tharaka-Nithi": ["Chuka"], "Trans-Nzoia": ["Kitale"], "Turkana": ["Lodwar","Kakuma"], "Uasin Gishu": ["Eldoret"], "Vihiga": ["Mbale"], "Wajir": ["Wajir Town"], "West Pokot": ["Kapenguria"]
-};
+    /* ── Kenya Counties & Towns ── */
+    const kenyaData = {
+        "Baringo":          ["Kabarnet","Eldama Ravine","Marigat","Mogotio","Kabartonjo"],
+        "Bomet":            ["Bomet Town","Sotik","Konoin","Chepalungu","Longisa"],
+        "Bungoma":          ["Bungoma Town","Webuye","Kimilili","Chwele","Sirisia","Kapsokwony"],
+        "Busia":            ["Busia Town","Malaba","Nambale","Port Victoria","Butula"],
+        "Elgeyo-Marakwet":  ["Iten","Kapsowar","Chebiemit","Flax"],
+        "Embu":             ["Embu Town","Runyenjes","Chuka","Manyatta","Siakago"],
+        "Garissa":          ["Garissa Town","Dadaab","Masalani","Modogashe"],
+        "Homa Bay":         ["Homa Bay Town","Mbita","Oyugis","Ndhiwa","Kendu Bay"],
+        "Isiolo":           ["Isiolo Town","Garba Tulla","Merti"],
+        "Kajiado":          ["Ngong","Kitengela","Kajiado Town","Namanga","Isinya","Rongai","Kiserian"],
+        "Kakamega":         ["Kakamega Town","Mumias","Butere","Lumakanda","Malava","Khayega"],
+        "Kericho":          ["Kericho Town","Litein","Kipkelion","Londiani"],
+        "Kiambu":           ["Thika","Kiambu Town","Ruiru","Limuru","Githunguri","Kikuyu","Karuri","Juja"],
+        "Kilifi":           ["Kilifi Town","Malindi","Mtwapa","Mariakani","Watamu","Kaloleni"],
+        "Kirinyaga":        ["Kerugoya","Kutus","Mwea","Sagana","Kianyaga"],
+        "Kisii":            ["Kisii Town","Ogembo","Suneka","Nyamache","Tabaka"],
+        "Kisumu":           ["Kisumu City","Ahero","Maseno","Kombewa","Muhoroni"],
+        "Kitui":            ["Kitui Town","Mwingi","Mutomo","Kyuso"],
+        "Kwale":            ["Ukunda (Diani)","Kwale Town","Msambweni","Lunga Lunga","Kinango"],
+        "Laikipia":         ["Nanyuki","Nyahururu","Rumuruti","Dol Dol"],
+        "Lamu":             ["Lamu Town","Mpeketoni","Faza"],
+        "Machakos":         ["Machakos Town","Athi River","Syokimau","Kangundo","Tala","Matuu"],
+        "Makueni":          ["Wote","Makindu","Mtito Andei","Emali","Kibwezi"],
+        "Mandera":          ["Mandera Town","El Wak","Rhamu"],
+        "Marsabit":         ["Marsabit Town","Moyale","Laisamis"],
+        "Meru":             ["Meru Town","Maua","Nkubu","Timau"],
+        "Migori":           ["Migori Town","Rongo","Awendo","Isebania","Kehancha"],
+        "Mombasa":          ["Mombasa Island","Nyali","Likoni","Bamburi","Changamwe","Jomvu","Kisauni"],
+        "Murang'a":         ["Murang'a Town","Kenol","Kangema","Kandara","Maragua"],
+        "Nakuru":           ["Nakuru City","Naivasha","Gilgil","Molo","Bahati","Mai Mahiu","Njoro","Salgaa"],
+        "Nandi":            ["Kapsabet","Nandi Hills","Kapkangani","Kobujoi"],
+        "Narok":            ["Narok Town","Kilgoris","Mulot"],
+        "Nyamira":          ["Nyamira Town","Keroka","Nyansiongo"],
+        "Nyandarua":        ["Ol Kalou","Njabini","Engineer","Miharati"],
+        "Nyeri":            ["Nyeri Town","Karatina","Othaya","Mukurweini","Naro Moru"],
+        "Samburu":          ["Maralal","Baragoi","Wamba"],
+        "Siaya":            ["Siaya Town","Bondo","Ugunja","Yala","Usenge"],
+        "Taita-Taveta":     ["Voi","Taveta","Wundanyi","Mwatate"],
+        "Tana River":       ["Hola","Garsen","Madogo"],
+        "Tharaka-Nithi":    ["Chuka","Marimanti","Chogoria"],
+        "Trans-Nzoia":      ["Kitale","Kiminini","Endebess"],
+        "Turkana":          ["Lodwar","Kakuma","Lokichogio"],
+        "Uasin Gishu":      ["Eldoret City","Burnt Forest","Turbo","Ziwa"],
+        "Vihiga":           ["Mbale","Chavakali","Luanda","Hamisi"],
+        "Wajir":            ["Wajir Town","Habaswein","Buna"],
+        "West Pokot":       ["Kapenguria","Sigor","Makutano"]
+    };
 
-function initCounties() {
-    const countySelect = document.getElementById('county-select');
-    Object.keys(kenyaData).sort().forEach(c => countySelect.add(new Option(c, c)));
-}
-
-function populateTowns() {
-    const county = document.getElementById('county-select').value;
-    const townSelect = document.getElementById('town-select');
-    townSelect.innerHTML = '<option value="">-- Select Town --</option>';
-    townSelect.disabled = !county;
-    if(county) kenyaData[county].forEach(t => townSelect.add(new Option(t, t)));
-}
-
-function updateLocation(loc) {
-    document.getElementById('btn-nairobi').classList.toggle('active', loc === 'nairobi');
-    document.getElementById('btn-outside').classList.toggle('active', loc === 'outside');
-    document.getElementById('nairobi-fields').classList.toggle('hidden', loc !== 'nairobi');
-    document.getElementById('outside-fields').classList.toggle('hidden', loc !== 'outside');
-    document.getElementById('region-input').value = loc;
-    document.getElementById('pod-option').style.display = (loc === 'nairobi' ? 'flex' : 'none');
-    
-    // Switch to mpesa if POD was selected and user switched to upcountry
-    if(loc === 'outside' && document.querySelector('input[name="payment_method"]:checked').value === 'pod') {
-        selectPay(document.querySelectorAll('.pay-opt')[0], 'mpesa');
+    function initCounties() {
+        const s = document.getElementById('county-select');
+        Object.keys(kenyaData).sort().forEach(c => s.add(new Option(c, c)));
     }
-    updateTotals(loc === 'nairobi' ? shippingNairobi : shippingOutside);
-}
 
-function updateTotals(ship) {
-    const total = subtotal + ship;
-    document.getElementById('grand-total-val').innerText = "KES " + total.toLocaleString();
-    document.getElementById('btn-total-val').innerText = total.toLocaleString();
-}
+    function populateTowns() {
+        const county = document.getElementById('county-select').value;
+        const ts = document.getElementById('town-select');
+        ts.innerHTML = '<option value="">-- Select Town --</option>';
+        ts.disabled = !county;
+        if (county) kenyaData[county].forEach(t => ts.add(new Option(t, t)));
+    }
 
-function selectPay(el, method) {
-    document.querySelectorAll('.pay-opt').forEach(opt => opt.classList.remove('selected'));
-    el.classList.add('selected');
-    el.querySelector('input').checked = true;
-    document.getElementById('manual-mpesa').style.display = (method === 'mpesa') ? 'block' : 'none';
-    document.getElementById('manual-equity').style.display = (method === 'equity') ? 'block' : 'none';
-}
+    function updateLocation(loc) {
+        const isNairobi = loc === 'nairobi';
 
-function validateAgreements() {
-    const terms = document.getElementById('check-terms').checked;
-    const ship = document.getElementById('check-shipping').checked;
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = !(terms && ship);
-    btn.classList.toggle('ready', (terms && ship));
-}
+        document.getElementById('btn-nairobi').classList.toggle('active', isNairobi);
+        document.getElementById('btn-outside').classList.toggle('active', !isNairobi);
+        document.getElementById('nairobi-fields').classList.toggle('hidden', !isNairobi);
+        document.getElementById('outside-fields').classList.toggle('hidden', isNairobi);
+        document.getElementById('region-input').value = loc;
 
-document.addEventListener('DOMContentLoaded', () => { 
-    initCounties(); 
-    updateLocation('nairobi'); 
-});
+        const pod = document.getElementById('pod-option');
+        pod.style.display = isNairobi ? 'flex' : 'none';
+
+        // If POD was selected and user switches to upcountry, fall back to M-Pesa
+        const checked = document.querySelector('input[name="payment_method"]:checked');
+        if (!isNairobi && checked && checked.value === 'pod') {
+            selectPay(document.querySelectorAll('.pay-opt')[0], 'mpesa');
+        }
+
+        updateTotals(isNairobi ? shippingNairobi : shippingOutside);
+    }
+
+    function updateTotals(shipping) {
+        const total = subtotal + shipping;
+        document.getElementById('grand-total-val').innerText = 'KES ' + total.toLocaleString();
+        document.getElementById('btn-total-val').innerText = total.toLocaleString();
+        document.getElementById('shipping-note').innerText =
+            '+ Shipping: KES ' + shipping.toLocaleString();
+    }
+
+    function selectPay(el, method) {
+        document.querySelectorAll('.pay-opt').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        el.querySelector('input[type="radio"]').checked = true;
+        document.getElementById('manual-mpesa').style.display  = (method === 'mpesa')   ? 'block' : 'none';
+        document.getElementById('manual-equity').style.display = (method === 'equity')  ? 'block' : 'none';
+    }
+
+    function validateAgreements() {
+        const ok  = document.getElementById('check-terms').checked
+                 && document.getElementById('check-shipping').checked;
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = !ok;
+        btn.classList.toggle('ready', ok);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initCounties();
+        updateLocation('nairobi');
+    });
 </script>
 </body>
 </html>

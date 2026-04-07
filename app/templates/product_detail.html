@@ -64,6 +64,16 @@
     #live-toast.active { bottom: 30px; }
 
     .btn-cart { width: 100%; padding: 20px; border-radius: 15px; background: var(--soko-orange); color: #fff; border: none; font-weight: 900; font-size: 18px; cursor: pointer; transition: 0.3s; }
+    #auth-loader {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.95);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 </style>
 {% endblock %}
 
@@ -152,7 +162,7 @@
 
 {% block extra_js %}
 <script>
-// --- CONFIGURATION FOR 20,000+ COMBINATIONS ---
+// --- 1. CONFIGURATION DATA ---
 const names = ["Kamau", "Otieno", "Njeri", "Moraa", "Kibet", "Hassan", "Achieng", "Fatuma", "Wanjiku", "Ochieng", "Brayo", "Shiko", "Mutua", "Mwangi", "Zawadi", "Kip", "Juma", "Bakari", "Cherono", "Wale"];
 const towns = ["Kilimani", "CBD", "Eldoret", "Mombasa", "Kisumu", "Thika", "Nakuru", "Kitengela", "Westlands", "Rongai", "Syokimau", "Kahawa", "Githurai", "Malindi", "Naivasha"];
 const reviews = [
@@ -168,12 +178,64 @@ const reviews = [
     "I was skeptical but they delivered exactly what I ordered."
 ];
 
-// --- 1. DYNAMIC REVIEW ENGINE (4 Unique per refresh) ---
+// --- 2. CART ENGINE ---
+function addToCartDetail(productId) {
+    const btn = document.getElementById('cart-btn');
+    const originalContent = btn.innerHTML;
+    const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+    
+    if (!isAuthenticated) {
+        window.location.href = "{% url 'userlog' %}?next=" + encodeURIComponent(window.location.pathname);
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> PROCESSING...`;
+
+    fetch(`/add-to-cart/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 'product_id': productId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            btn.style.background = "var(--soko-green)";
+            btn.innerHTML = `<i class="fas fa-check"></i> ADDED!`;
+
+            // Update the cart badge count
+            const badge = document.getElementById('cart-badge');
+            if (badge) badge.innerText = data.cart_count;
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.style.background = "";
+                btn.innerHTML = originalContent;
+            }, 2000);
+        } else {
+            throw new Error('Something went wrong');
+        }
+    })
+    .catch(() => {
+        btn.style.background = "#333";
+        btn.innerHTML = `<i class="fas fa-times"></i> ERROR`;
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.style.background = "";
+            btn.innerHTML = originalContent;
+        }, 2000);
+    });
+}
+    
+
+// --- 3. DYNAMIC ELEMENTS (Reviews & Toast) ---
 function generateReviews() {
     let container = document.getElementById('rev-engine');
+    if (!container) return;
     let html = "";
-    let usedNames = [];
-    
     for(let i=0; i<4; i++) {
         let name = names[Math.floor(Math.random()*names.length)] + " " + String.fromCharCode(65 + Math.floor(Math.random()*26));
         let text = reviews[Math.floor(Math.random()*reviews.length)];
@@ -186,21 +248,25 @@ function generateReviews() {
     container.innerHTML = html;
 }
 
-// --- 2. DYNAMIC LIVE TOAST (Every 25-40 seconds) ---
 function triggerToast() {
     const user = names[Math.floor(Math.random()*names.length)];
     const loc = towns[Math.floor(Math.random()*towns.length)];
     const toast = document.getElementById('live-toast');
-    
+    if (!toast) return;
     document.getElementById('t-user').textContent = user;
     document.getElementById('t-loc').textContent = loc;
     document.getElementById('t-avatar').src = `https://ui-avatars.com/api/?name=${user}&background=ee4d2d&color=fff`;
-    
     toast.classList.add('active');
     setTimeout(() => toast.classList.remove('active'), 6000);
 }
 
-// --- 3. THE ROPE (Fast Interactivity) ---
+function updateMain(url, el) {
+    document.getElementById('main-display').src = url;
+    document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+}
+
+// --- 4. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
     generateReviews();
     setInterval(triggerToast, 30000);
@@ -214,26 +280,20 @@ document.addEventListener('DOMContentLoaded', function() {
         breakpoints: { 1024: { slidesPerView: 5.2 } }
     });
 
-    // --- TIMER ---
     {% if product.is_on_sale %}
     const expiry = new Date("{{ product.discount_expiry|date:'Y-m-d H:i:s' }}").getTime();
     setInterval(function() {
         let now = new Date().getTime();
         let d = expiry - now;
-        if(d>0) {
+        if(d > 0) {
             let h = Math.floor(d/(1000*60*60));
             let m = Math.floor((d%(1000*60*60))/(1000*60));
             let s = Math.floor((d%(1000*60))/1000);
-            document.getElementById('timer-display').innerHTML = h+"h "+m+"m "+s+"s";
+            const timerEl = document.getElementById('timer-display');
+            if(timerEl) timerEl.innerHTML = h+"h "+m+"m "+s+"s";
         }
     }, 1000);
     {% endif %}
 });
-
-function updateMain(url, el) {
-    document.getElementById('main-display').src = url;
-    document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-}
 </script>
 {% endblock %}

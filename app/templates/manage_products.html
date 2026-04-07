@@ -1,66 +1,216 @@
 {% extends "baseadmin.html" %}
+{% load static %}
 
-{% block title %}Manage products | Gadget Soko{% endblock %}
-{% block header %}Manage products{% endblock %}
+{% block title %}Manage Inventory | Gadget Soko{% endblock %}
 
 {% block content %}
-{% load static %}
-    <meta charset="UTF-8">
-    <title>Manage Products</title>
-    <link rel="stylesheet" href="{% static 'css/manage_products.css' %}">
-</head>
-<body>
+<link rel="stylesheet" href="{% static 'css/manage_products.css' %}">
+<style>/* ── GADGET SOKO ADMIN THEME ── */
+:root {
+    --gs-orange: #ee4d2d;
+    --gs-navy: #08243c;
+    --gs-white: #ffffff;
+    --gs-gray: #f8f9fa;
+    --gs-border: #e3e6f0;
+    --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    background: var(--gs-white);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    border: 1px solid var(--gs-border);
+}
+
+h1 {
+    color: var(--gs-navy);
+    font-weight: 800;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── TABLE DESIGN ── */
+.table-responsive { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+thead {
+    background: var(--gs-navy);
+    color: var(--gs-white);
+}
+
+th {
+    padding: 15px;
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid var(--gs-border);
+    vertical-align: middle;
+    font-size: 14px;
+    color: #4e73df;
+}
+
+tr:hover { background-color: #fcfcfc; }
+
+/* ── FORM ELEMENTS ── */
+input[type="number"] {
+    padding: 8px;
+    border: 1px solid var(--gs-border);
+    border-radius: 5px;
+    width: 120px;
+    margin-right: 5px;
+}
+
+.btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s var(--spring);
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-update { background: var(--gs-navy); color: white; }
+.btn-update:hover { background: var(--gs-orange); transform: translateY(-2px); }
+
+.btn-danger { background: #fff1f0; color: #e74a3b; border: 1px solid #ffdada; }
+.btn-danger:hover { background: #e74a3b; color: white; }
+
+.btn-bulk-delete {
+    background: #e74a3b;
+    color: white;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+}
+
+/* ── STATUS BADGES ── */
+.out {
+    color: var(--gs-orange);
+    background: #fff5f2;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+/* Checkbox Styling */
+.check-col { width: 40px; text-align: center; }
+input[type="checkbox"] { transform: scale(1.2); accent-color: var(--gs-orange); }</style>
 
 <div class="container">
-    <h1>Manage Products</h1>
+    <h1><i class="bi bi-box-seam"></i> Inventory Management</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Category</th>
-                <th>Update Price</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+    <form method="POST" action="{% url 'bulk_delete_products' %}" id="bulkDeleteForm">
+        {% csrf_token %}
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button type="submit" class="btn btn-bulk-delete" onclick="return confirm('Are you sure you want to delete selected products? This cannot be undone.')">
+                <i class="bi bi-trash3"></i> Delete Selected Items
+            </button>
+            <p style="color: #666; font-size: 0.9rem;">Currency: <strong>KSh (Kenyan Shilling)</strong></p>
+        </div>
 
-        <tbody>
-            {% for product in products %}
-            <tr>
-                <td>{{ product.name }}</td>
-                <td>${{ product.price }}</td>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="check-col"><input type="checkbox" id="selectAll"></th>
+                        <th>Product Details</th>
+                        <th>Current Price</th>
+                        <th>Stock Status</th>
+                        <th>Category</th>
+                        <th>Price Update</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
 
-                <td>
-                    {% if product.stock > 0 %}
-                        In Stock ({{ product.stock }})
-                    {% else %}
-                        <span class="out">Out of Stock</span>
-                    {% endif %}
-                </td>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td class="check-col">
+                            <input type="checkbox" name="product_ids" value="{{ product.id }}" class="product-checkbox">
+                        </td>
+                        <td>
+                            <strong>{{ product.name }}</strong>
+                        </td>
+                        <td style="font-weight: 800; color: var(--gs-navy);">
+                            KSh {{ product.price|floatformat:2 }}
+                        </td>
 
-                <td>{{ product.category.name }}</td>
+                        <td>
+                            {% if product.stock > 0 %}
+                                <span style="color: #28a745;"><i class="bi bi-check-circle"></i> {{ product.stock }} Units</span>
+                            {% else %}
+                                <span class="out">OUT OF STOCK</span>
+                            {% endif %}
+                        </td>
 
-                <!-- Update Price Form -->
-                <td>
-                    <form method="POST" action="{% url 'update_price' product.id %}">
-                        {% csrf_token %}
-                        <input type="number" step="0.01" name="price" placeholder="New price" required>
-                        <button type="submit" class="btn">Update</button>
-                    </form>
-                </td>
+                        <td>{{ product.category.name }}</td>
 
-                <!-- Actions -->
-                <td>
-                    <form method="POST" action="{% url 'mark_out_of_stock' product.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn danger">Mark Out of Stock</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                        <td>
+                            <div style="display: flex;">
+                                <input type="number" step="0.01" name="price_{{ product.id }}" placeholder="New Price">
+                                <button type="button" class="btn btn-update" onclick="updateSinglePrice('{{ product.id }}')">
+                                    OK
+                                </button>
+                            </div>
+                        </td>
+
+                        <td>
+                            <button type="button" class="btn btn-danger" onclick="location.href='{% url 'mark_out_of_stock' product.id %}'">
+                                <i class="bi bi-x-circle"></i> Off-Stock
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #888;">
+                            No products found in the warehouse.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
 </div>
-{%endblock%}
+
+<script>
+    // Select All Checkboxes logic
+    document.getElementById('selectAll').onclick = function() {
+        var checkboxes = document.querySelectorAll('.product-checkbox');
+        for (var checkbox of checkboxes) {
+            checkbox.checked = this.checked;
+        }
+    }
+    function updateSinglePrice(productId) {
+    let priceInput = document.getElementsByName('price_' + productId)[0];
+    if (priceInput.value === "") {
+        alert("Please enter a new price first.");
+        return;
+    }
+    // This matches the path we just added in urls.py
+    window.location.href = `/update-price/${productId}/?price=${priceInput.value}`;
+}
+
+  
+</script>
+{% endblock %}

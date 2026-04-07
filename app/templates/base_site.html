@@ -832,8 +832,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <ul class="mobile-links">
         <li><a href="{% url 'index' %}" onclick="toggleMenu()"><i class="bi bi-house-door me-2"></i>Home</a></li>
         <li><a href="{% url 'products' %}" onclick="toggleMenu()"><i class="bi bi-laptop me-2"></i>Products</a></li>
-        <li><a href="{% url 'index' %}#categories" onclick="toggleMenu()"><i class="bi bi-grid me-2"></i>Categories</a></li>
-        <li><a href="{% url 'index' %}#services" onclick="toggleMenu()"><i class="bi bi-tools me-2"></i>Services</a></li>
+        <li><a href="{% url 'index' %}#FAQ" onclick="toggleMenu()"><i class="bi bi-headset me-2"></i>FAQs</a></li>
         <li><a href="{% url 'index' %}#contacts" onclick="toggleMenu()"><i class="bi bi-envelope me-2"></i>Contact</a></li>
         <hr class="text-white-50 my-3">
         {% if user.is_authenticated %}
@@ -866,8 +865,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="d-flex align-items-center gap-1">
                 <a href="{% url 'index' %}" class="gs-nav-link">Home</a>
                 <a href="{% url 'products' %}" class="gs-nav-link">Products</a>
-                <a href="{% url 'index' %}#categories" class="gs-nav-link">Categories</a>
-                <a href="{% url 'index' %}#services" class="gs-nav-link">Services</a>
+                <a href="{% url 'index' %}#FAQ" class="gs-nav-link">FAQs</a>
                 <a href="{% url 'index' %}#contacts" class="gs-nav-link">Contacts</a>
             </div>
         </div>
@@ -931,10 +929,10 @@ document.addEventListener('DOMContentLoaded', function() {
             </button>
 
             {# Cart icon #}
-            <div class="gs-cart-icon" onclick="toggleCart()">
-                <i class="fa fa-shopping-cart"></i>
-                <span class="cart-count">{{ cart_count|default:0 }}</span>
-            </div>
+           <div class="gs-cart-icon" onclick="toggleCart()">
+    <i class="fa fa-shopping-cart"></i>
+    <span id="cart-badge" class="cart-count">{{ cart_count|default:0 }}</span>
+</div>
         </div>
     </div>
 </nav>
@@ -1005,111 +1003,164 @@ document.addEventListener('DOMContentLoaded', function() {
 <main class="gs-main">
     {% block content %}{% endblock %}
 </main>
-<footer class="gs-footer" id="footer">
-    <div class="footer-accent-bar"></div>
-
-    <div class="footer-inner">
-        <div class="footer-top-grid">
-
-            {# ── Brand / Contact column ── #}
-            <div class="footer-brand-col">
-                <div class="brand-logo-area">
-                    <img src="{% static 'images/final.png' %}" alt="Gadget Soko">
-                </div>
-                <p>Your go-to destination for the latest gadgets, accessories, and tech in Nairobi. Quality products, fast delivery, unbeatable prices.</p>
-
-                <div class="contact-item">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <span>Nairobi, Kenya &mdash; Mombasa Road / CBD Delivery Available</span>
-                </div>
-                <div class="contact-item">
-                    <i class="fa-solid fa-phone"></i>
-                    <span>+254 7XX XXX XXX</span>
-                </div>
-                <div class="contact-item">
-                    <i class="fa-solid fa-envelope"></i>
-                    <span>support@gadgetsokokenya.com</span>
-                </div>
-                <div class="contact-item">
-                    <i class="fa-brands fa-whatsapp"></i>
-                    <span>WhatsApp: +254 7XX XXX XXX</span>
-                </div>
-
-                <div class="hours-badge">
-                    <span class="dot"></span>
-                    <span>Open: Mon – Sat &nbsp;|&nbsp; 8:00 AM – 7:00 PM</span>
-                </div>
-
-                <div class="footer-social">
-                    <a href="https://www.facebook.com/share/18ZrBkP5AU/?mibextid=wwXIfr"
-                       target="_blank" rel="noopener" class="soc-facebook" title="Facebook">
-                        <i class="fa-brands fa-facebook-f"></i>
-                    </a>
-                    <a href="https://www.instagram.com/gadjet_space?igsh=MWUxMTY4Mm1uMGg4dw%3D%3D&utm_source=qr"
-                       target="_blank" rel="noopener" class="soc-instagram" title="Instagram">
-                        <i class="fa-brands fa-instagram"></i>
-                    </a>
-                    <a href="https://www.tiktok.com/@mikebrowz254?_r=1&_t=ZS-95KTSCTORIz"
-                       target="_blank" rel="noopener" class="soc-tiktok" title="TikTok">
-                        <i class="fa-brands fa-tiktok"></i>
-                    </a>
-                    <a href="https://wa.me/2547XXXXXXXX"
-                       target="_blank" rel="noopener" class="soc-whatsapp" title="WhatsApp">
-                        <i class="fa-brands fa-whatsapp"></i>
-                    </a>
-                </div>
-            </div>
-
-            {# ── Quick Links column ── #}
-            <div class="footer-links-col">
-                <h4>Quick Links</h4>
-                <a href="{% url 'index' %}"><i class="bi bi-chevron-right"></i>Home</a>
-                <a href="{% url 'products' %}"><i class="bi bi-chevron-right"></i>Products</a>
-                <a href="{% url 'index' %}#categories"><i class="bi bi-chevron-right"></i>Brands</a>
-                <a href="{% url 'index' %}#services"><i class="bi bi-chevron-right"></i>Services</a>
-                <a href="{% url 'index' %}#contacts"><i class="bi bi-chevron-right"></i>Contact Us</a>
-                {% if request.user.is_authenticated %}
-                    <a href="{% url 'logout' %}"><i class="bi bi-chevron-right"></i>Logout</a>
-                {% else %}
-                    <a href="{% url 'userlog' %}"><i class="bi bi-chevron-right"></i>Login</a>
-                    <a href="{% url 'usersignup' %}"><i class="bi bi-chevron-right"></i>Sign Up</a>
-                {% endif %}
-            </div>
-
-            {# ── Support / Info column ── #}
-            <div class="footer-links-col">
-                <h4>Support</h4>
-                <a href="{% url 'index' %}#contacts"><i class="bi bi-chevron-right"></i>Help Center</a>
-                <a href="{% url 'check' %}"><i class="bi bi-chevron-right"></i>Track Order</a>
-                <a href="#"><i class="bi bi-chevron-right"></i>Returns Policy</a>
-                <a href="#"><i class="bi bi-chevron-right"></i>Shipping Info</a>
-                <a href="#"><i class="bi bi-chevron-right"></i>Privacy Policy</a>
-                <a href="#"><i class="bi bi-chevron-right"></i>Terms of Service</a>
-            </div>
-
-        </div>{# /footer-top-grid #}
-
-        <div class="footer-bottom-wrap">
-
+<footer class="gs-footer" id="contacts">
+    <div class="footer-container">
         
+        <div class="footer-column">
+            <img src="{% static 'images/final.png' %}" alt="Gadget Soko Logo" style="max-width: 180px; margin-bottom: 15px;">
+            <p style="font-style: italic; color: var(--gs-orange); font-weight: 700; font-size: 15px; letter-spacing: 0.5px;">
+                "Elite market for the Bold. Your Soko, Your Style."
+            </p>
+            <p>
+                <i class="fa-solid fa-location-dot"></i> 
+                <strong>Laxmi Plaza, CBD</strong><br>
+                Biashara Street, Shop No. 5<br>
+                Nairobi, Kenya, Africa
+            </p>
+        </div>
 
-            <div class="footer-copyright">
-                <p>&copy; {{ year|default:"2026" }} <strong>Gadget Soko Kenya</strong>. All Rights Reserved. &nbsp;|&nbsp; Nairobi, Kenya</p>
-            </div>
-    <div class="footer-team-credits">
-                <span style="font-size:12px;color:rgba(255,255,255,0.4);font-style:italic;">Built with ❤️ by</span>
+        <div class="footer-column">
+            <h3>Quick Links</h3>
+            <a href="{% url 'index' %}">Home</a>
+            <a href="{% url 'products' %}">All Products</a>
+            <a href="{% url 'index' %}#FAQ">Shipping & FAQ</a>
+            <a href="#contacts">Location & Contact</a>
+        </div>
 
-                        <strong>Sammy Tings</strong>
-                </a>
-
-                <span class="footer-divider-text">&amp;</span>             
-                        <strong>Nabiswa James</strong>
-                    
-                </a>
+        <div class="footer-column">
+            <h3>Get In Touch</h3>
+            <a href="mailto:mikehave@gmail.com?subject=Enquiry%20from%20Gadget%20Soko&body=Hello%20Team," 
+   style="color: #ee4d2d; font-weight: 700; text-decoration: none;">
+   <i class="fas fa-envelope"></i>info@gadgetsoko.com
+</a><a href="tel:+254759829225"><i class="bi bi-telephone-fill"></i> Call: 0759 829 225</p>
+</a>
+            <a href="https://wa.me/254759829235?text=Hello%20from%20Gadget%20Soko!%20I'm%20interested%20in%20your%20products"><p><i class="fa-brands fa-whatsapp"></i> WhatsApp: 0759 829 225</p></a>
+            
+            <div class="footer-social">
+                <a href="https://www.facebook.com/share/18ZrBkP5AU/?mibextid=wwXIfr"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/gadjet_space?igsh=MWUxMTY4Mm1uMGg4dw%3D%3D&utm_source=qr"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@mikebrowz254?_r=1&_t=ZS-95KTSCTORIz"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="https://wa.me/254759829235?text=Hello%20from%20Gadget%20Soko!%20I'm%20interested%20in%20your%20products."><i class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
-    </div>{# /footer-inner #}
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>All Rights Reserved @2026 | <strong>Built By Hand</strong></p>
+        
+        <div class="dev-credits" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+            <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; opacity: 0.7;">
+                Developed by <span style="color: #fff;">TingsTech Technologies</span>
+            </p>
+            <div style="font-size: 13px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;">
+                
+                <a href="mailto:sammytings2@gmail.com?subject=Enquiry%20from%20Gadget%20Soko&body=Hello%20Developer," 
+   style="color: #ee4d2d; font-weight: 700; text-decoration: none;">
+   <i class="fas fa-envelope"></i> <span><strong>Sammy Tings && Nabiswa James</strong> 0727 698 319</span>
+</a>
+                <span style="opacity: 0.3;">|</span>
+           
+            </div>
+        </div>
+    </div>
 </footer>
+
+<style>
+    .gs-footer {
+        background: #08243c;
+        color: #ffffff;
+        padding: 70px 5% 30px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .footer-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 40px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .footer-column h3 {
+        color: var(--gs-orange, #ee4d2d);
+        font-size: 14px;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 25px;
+        letter-spacing: 1px;
+    }
+
+    .footer-column p {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #e0e0e0;
+        margin-bottom: 12px;
+    }
+
+    .footer-column i {
+        margin-right: 10px;
+        color: var(--gs-orange, #ee4d2d);
+    }
+
+    .footer-column a {
+        display: block;
+        color: #d1d1d1;
+        text-decoration: none;
+        font-size: 14px;
+        margin-bottom: 12px;
+        transition: 0.3s;
+    }
+
+    .footer-column a:hover {
+        color: var(--gs-orange, #ee4d2d);
+        transform: translateX(8px);
+    }
+
+    /* ── ROTATING SOCIAL ICONS ── */
+    .footer-social {
+        margin-top: 20px;
+        display: flex;
+        gap: 15px;
+    }
+
+    .footer-social a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 50%;
+        color: #fff;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .footer-social a:hover {
+        background: #ffffff;
+        color: var(--gs-orange, #ee4d2d);
+        transform: rotate(360deg);
+    }
+
+    /* ── BOTTOM AREA ── */
+    .footer-bottom {
+        border-top: 1px solid rgba(255,255,255,0.1);
+        margin-top: 50px;
+        padding-top: 30px;
+        text-align: center;
+        font-size: 13px;
+        color: #888;
+    }
+
+    .footer-bottom strong { color: #fff; }
+
+    @media (max-width: 768px) {
+        .footer-container { text-align: center; }
+        .footer-social { justify-content: center; }
+        .footer-column img { margin: 0 auto 15px; }
+    }
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

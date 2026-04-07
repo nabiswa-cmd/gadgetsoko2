@@ -84,7 +84,8 @@ td {
 }
 
 tr:hover {
-    background: #f1f8ff;
+    color: #000;
+    background: #f14b4b;
 }
 
 /* ================= FORMS ================= */

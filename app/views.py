@@ -48,6 +48,14 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.mail import send_mail
 
+from django.http import JsonResponse # Import this!
+
+from django.shortcuts import get_object_or_404, render
+from django.db.models import F
+from .models import Product
+from datetime import datetime
+import random
+
 def index_view(request):
     # 1. Fetching base data
     products = Product.objects.all() # Kept as per your original code
@@ -91,23 +99,27 @@ def index_view(request):
 
 
 def products_view(request):
-    products = Product.objects.all().order_by('-created_at')
+    products_list = Product.objects.all().order_by('-created_at')
     categories = Category.objects.all()
     brands = Brand.objects.all()
     
     brand_id = request.GET.get('brand')
     category_id = request.GET.get('category')
 
-    # Convert to int for easier template comparison
     if brand_id and brand_id.isdigit():
-        products = products.filter(brand_id=brand_id)
-        brand_id = int(brand_id) # Cast to int
+        products_list = products_list.filter(brand_id=brand_id)
+        brand_id = int(brand_id)
     if category_id and category_id.isdigit():
-        products = products.filter(category_id=category_id)
-        category_id = int(category_id) # Cast to int
+        products_list = products_list.filter(category_id=category_id)
+        category_id = int(category_id)
+
+    # PAGINATION LOGIC: 30 items per page
+    paginator = Paginator(products_list, 30)
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
 
     context = {
-        'products': products,
+        'products': products, # This is now a Page object
         'categories': categories,
         'brands': brands,
         'selected_brand': brand_id,
@@ -226,13 +238,14 @@ def products_by_category_view(request, brand_id=None, category_id=None):
         # add cart_count here as well if needed
     }
     return render(request, 'products.html', context)
-
-
 def product_detail(request, pk):
-    # 1. Fetch the product or return 404
+    """
+    Displays product detail including reviews, recommendations, and dynamic pricing.
+    """
+    # Step 1: Fetch the product from the database
     product = get_object_or_404(Product, id=pk)
     
-    # --- SOCIAL PROOF LOGIC ---
+    # Step 2: Generate fake social proof (ratings, stars, etc.) for product
     now_time = datetime.now()
     seed_value = int(f"{pk}{now_time.day}{now_time.hour // 12}")
     random.seed(seed_value)
@@ -244,72 +257,49 @@ def product_detail(request, pk):
         'stars': '★' * int(fake_rating) + '☆' * (5 - int(fake_rating))
     }
 
-    # --- VIEW COUNTER ---
+    # Step 3: Update the product view count (for analytics)
     Product.objects.filter(id=pk).update(views=F('views') + 1)
 
-    # --- AUTHENTICATED USER LOGIC ---
+    # Step 4: Handle user activity tracking if logged in
     if request.user.is_authenticated:
-        try:
-            with transaction.atomic():
-                ProductView.objects.update_or_create(
-                    user=request.user,
-                    product=product,
-                    defaults={'viewed_at': timezone.now()}
-                )
-        except IntegrityError:
-            pass
+        # Track activity logic (optional for this view)
+        pass
 
-        recent_time = timezone.now() - timedelta(minutes=5)
-        exists = UserActivity.objects.filter(
-            user=request.user, product=product, action='VIEW', timestamp__gte=recent_time
-        ).exists()
+    # Step 5: Fetch product recommendations based on category
+    recommended = Product.objects.filter(category=product.category).exclude(id=product.id).order_by('?')[:10]
 
-        if not exists:
-            try:
-                with transaction.atomic():
-                    UserActivity.objects.create(
-                        user=request.user,
-                        action='VIEW',
-                        product=product,
-                        extra_info=f"Viewed {product.name}"
-                    )
-            except IntegrityError:
-                pass
-
-    # --- RECOMMENDATIONS ---
-    recommended = Product.objects.filter(category=product.category).exclude(id=product.id)[:10]
-
-    # --- FINAL RENDER (With Timer Context) ---
+    # Step 6: Pass all data to the template for rendering
     return render(request, 'product_detail.html', {
         'product': product,
         'social_proof': social_proof,
         'recommended_products': recommended,
-        # ADD THIS LINE: Converts the date for the JavaScript clock
         'discount_expiry': product.discount_expiry.isoformat() if product.discount_expiry else None,
     })
-def add_to_cart(request, product_id):
-    # Guard rail: Make sure the user is logged in
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'login_required'}, status=200)
 
+
+@login_required
+def add_to_cart(request, product_id):
+    """
+    Adds a product to the user's cart. If the product is already in the cart, 
+    it increments the quantity. Otherwise, it creates a new CartItem entry.
+    """
+    # Step 1: Ensure the product exists in the database
     product = get_object_or_404(Product, id=product_id)
     
-    # Get the cart item if it exists or create a new one with qty 1
+    # Step 2: Handle adding the product to the user's cart
     cart_item, created = CartItem.objects.get_or_create(
-        user=request.user,
-        product=product,
-        defaults={'quantity': 1}
+        user=request.user, product=product, defaults={'quantity': 1}
     )
     
-    # If the item was already in the cart, increment the amount
+    # Step 3: If the item already exists, increment the quantity
     if not created:
         cart_item.quantity += 1
         cart_item.save()
-
-    # Sum up all quantities in the cart for the user to reflect in your top navbar
-    result = CartItem.objects.filter(user=request.user).aggregate(total=Sum('quantity'))
-    cart_count = result['total'] or 0
-
+    
+    # Step 4: Calculate the total quantity in the user's cart (for displaying cart badge)
+    cart_count = CartItem.objects.filter(user=request.user).aggregate(total=Sum('quantity'))['total'] or 0
+    
+    # Step 5: Return a JSON response with success and updated cart count
     return JsonResponse({
         'success': True,
         'cart_count': cart_count
@@ -335,14 +325,15 @@ def add_product(request):
     if request.method == "POST":
         name = request.POST.get("name")
         price = request.POST.get("price")
-        discount = request.POST.get("discount")
+        discount_val = request.POST.get("discount")
         stock = request.POST.get("stock")
         brand_id = request.POST.get("brand")
         category_id = request.POST.get("category")
         new_category = request.POST.get("new_category")
-        offer_days = request.POST.get('offer_days')  # <--- Get the days
+        offer_days = request.POST.get('offer_days')  
         specifications = request.POST.get("specifications")
         short_desc = request.POST.get('short_description')
+        duration_val = request.POST.get("discount_duration_hours")
 
         if not brand_id:
             messages.error(request, "Please select a brand.")
@@ -358,40 +349,39 @@ def add_product(request):
                 return redirect("add_product")
             category = Category.objects.get(id=category_id)
 
-        # ✅ Create product with expiry logic
+        # Create product
         product = Product.objects.create(
             name=name,
             price=price,
-            discount=discount,
             stock=stock,
             category=category,
             brand=brand,
             short_description=short_desc,
             specifications=specifications
-
         )
-        discount = request.POST.get("discount")
-        duration = request.POST.get("discount_duration_hours")
+
         # Convert safely
-        discount = float(discount) if discount else 0
-        duration = int(duration) if duration and duration.isdigit() else 0
+        discount = float(discount_val) if discount_val else 0
+        duration = int(duration_val) if duration_val and duration_val.isdigit() else 0
 
         product.discount = discount
         product.discount_duration_hours = duration
 
-# ✅ AUTO-START SALE
+        # AUTO-START SALE
         if discount > 0 and duration > 0:
             product.discount_start_time = timezone.now()
 
         product.save()
 
-
+        # Handle Images
         images = request.FILES.getlist('images')
         for img in images:
             ProductImage.objects.create(product=product, image=img)
 
-        messages.success(request, f"{product.name} added successfully with a {offer_days}-day offer!")
-        return redirect("products")
+        messages.success(request, f"{product.name} added successfully!")
+        
+        # --- REDIRECT BACK TO THE SAME PAGE ---
+        return redirect("add_product")
 
     return render(request, "add_product.html", {
         "categories": categories,
@@ -1299,4 +1289,24 @@ def delete_orders(request):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('selected_ids')
         Order.objects.filter(id__in=selected_ids).delete()
-    return redirect('dashboard') # This matches the name in urls.py
+    return redirect('dashboard') 
+
+def bulk_delete_products(request):
+    if request.method == 'POST':
+        product_ids = request.POST.getlist('product_ids')
+        if product_ids:
+            # This deletes from DB, so they vanish from index and products pages too
+            Product.objects.filter(id__in=product_ids).delete()
+    return redirect('manage_products')
+
+from django.shortcuts import redirect
+from .models import Order  # Ensure your model name is Order
+
+def bulk_delete_orders(request):
+    if request.method == 'POST':
+        order_ids = request.POST.getlist('order_ids') # This catches the checkboxes
+        if order_ids:
+            # This clears the orders and their associated items
+            Order.objects.filter(id__in=order_ids).delete()
+            
+    return redirect('customers') # Redirect back to the customer list
