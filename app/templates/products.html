@@ -12,71 +12,278 @@
     --gs-white: #ffffff;
     --bg-body: #f4f6f8;
     --border-color: #ebebeb;
+    --filter-nav-height: 56px;
 }
 
-/* ── LAYOUT ── */
-.shop-wrapper { display: flex; gap: 20px; padding: 20px 5%; max-width: 1400px; margin: 0 auto; }
+/* ── STICKY FILTER NAV ── */
 .filter-nav {
-    background: var(--gs-white); padding: 12px 5%; display: flex; align-items: center; 
-    gap: 20px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100;
+    background: var(--gs-white);
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 1px solid var(--border-color);
+    height: var(--filter-nav-height);
+
+    /* sticky behaviour */
+    position: sticky;
+    top: 0;
+    z-index: 200;
+
+    /* shadow appears only after scrolling (toggled by JS) */
+    box-shadow: none;
+    transition: box-shadow 0.25s ease;
 }
+.filter-nav.scrolled {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
 .filter-group select {
-    padding: 8px 12px; border: 1.5px solid var(--border-color); border-radius: 6px;
-    font-size: 13px; color: var(--gs-navy); outline: none; background: #fff;
+    padding: 8px 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--gs-navy);
+    outline: none;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+.filter-group select:focus { border-color: var(--gs-orange); }
+
+/* active-filter indicator pill */
+.filter-group { position: relative; }
+.filter-active-dot {
+    display: none;
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--gs-orange);
+    pointer-events: none;
+}
+.filter-group.has-value .filter-active-dot { display: block; }
+
+/* ── LAYOUT ── */
+.shop-wrapper {
+    display: flex;
+    gap: 20px;
+    padding: 20px 5%;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 /* ── SIDEBAR ── */
-.sidebar { width: 220px; flex-shrink: 0; background: var(--gs-white); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); height: fit-content; }
-.sidebar h4 { font-size: 12px; text-transform: uppercase; color: var(--gs-navy); margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+.sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--gs-white);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    height: fit-content;
+
+    /* sidebar sticks below the filter nav */
+    position: sticky;
+    top: calc(var(--filter-nav-height) + 16px);
+}
+.sidebar h4 {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--gs-navy);
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
 .sidebar ul { list-style: none; padding: 0; margin-bottom: 20px; }
-.sidebar a { text-decoration: none; font-size: 13px; color: #666; display: block; padding: 4px 0; transition: 0.2s; }
-.sidebar a:hover, .sidebar a.active { color: var(--gs-orange); font-weight: 700; padding-left: 5px; }
+.sidebar a {
+    text-decoration: none;
+    font-size: 13px;
+    color: #666;
+    display: block;
+    padding: 4px 0;
+    transition: 0.2s;
+}
+.sidebar a:hover, .sidebar a.active {
+    color: var(--gs-orange);
+    font-weight: 700;
+    padding-left: 5px;
+}
 
 /* ── PRODUCT GRID ── */
 .main-content { flex: 1; min-width: 0; }
-.product-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-    gap: 15px; 
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
 }
 
 /* ── PRODUCT CARD ── */
-.product-card { 
-    background: var(--gs-white); border-radius: 8px; border: 1px solid var(--border-color); 
-    overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; position: relative;
+.product-card {
+    background: var(--gs-white);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: box-shadow 0.3s, transform 0.3s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
     height: 100%;
 }
-.img-container { 
-    width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; 
-    justify-content: center; padding: 15px; background: #fff;
+.product-card:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,0.09);
+    transform: translateY(-3px);
+}
+
+.img-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    background: #fff;
 }
 .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 /* ── INFO & BUTTONS ── */
 .product-info { padding: 12px; flex-grow: 1; }
-.product-info h3 { font-size: 13px; margin: 0; color: #333; height: 34px; overflow: hidden; line-height: 1.3; font-weight: 600; }
-.brand-text { font-size: 11px; font-weight: 800; color: var(--gs-navy); text-transform: uppercase; margin-top: 4px; margin-bottom: 2px; }
-.price-tag { color: var(--gs-orange); font-weight: 800; font-size: 16px; margin-top: 8px; display: block; }
-.old-price { color: #aaa; text-decoration: line-through; font-size: 12px; margin-left: 5px; font-weight: normal; }
+.product-info h3 {
+    font-size: 13px;
+    margin: 0;
+    color: #333;
+    height: 34px;
+    overflow: hidden;
+    line-height: 1.3;
+    font-weight: 600;
+}
+.brand-text {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--gs-navy);
+    text-transform: uppercase;
+    margin-top: 4px;
+    margin-bottom: 2px;
+}
+.price-tag {
+    color: var(--gs-orange);
+    font-weight: 800;
+    font-size: 16px;
+    margin-top: 8px;
+    display: block;
+}
+.old-price {
+    color: #aaa;
+    text-decoration: line-through;
+    font-size: 12px;
+    margin-left: 5px;
+    font-weight: normal;
+}
 
 .card-actions { display: flex; gap: 8px; padding: 0 12px 12px; }
-.btn-view { flex: 1; border: 1.5px solid #ddd; color: #555; text-align: center; text-decoration: none; padding: 10px 5px; border-radius: 6px; font-size: 11px; font-weight: 700; transition: 0.3s; display: flex; align-items: center; justify-content: center;}
-.btn-add { flex: 1.8; background: var(--gs-orange); color: white; border: none; padding: 10px 5px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.btn-view {
+    flex: 1;
+    border: 1.5px solid #ddd;
+    color: #555;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px 5px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-view:hover { border-color: var(--gs-orange); color: var(--gs-orange); }
+.btn-add {
+    flex: 1.8;
+    background: var(--gs-orange);
+    color: white;
+    border: none;
+    padding: 10px 5px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: opacity 0.2s;
+}
+.btn-add:hover { opacity: 0.88; }
 
-/* ── BADGES (Restored) ── */
-.badge-stack { position: absolute; top: 8px; left: 8px; z-index: 10; display: flex; flex-direction: column; gap: 4px; }
-.discount-badge { background: var(--gs-orange); color: white; padding: 3px 7px; font-size: 10px; font-weight: 900; border-radius: 4px; }
-.ended-tag { background: #fdf2f2; color: #c81e1e; padding: 3px 7px; border-radius: 4px; font-size: 9px; font-weight: 800; border: 1px solid #f8b4b4; }
-.timer-badge { background: #000; color: #fff; padding: 3px 7px; border-radius: 4px; font-size: 9px; font-weight: 800; display: flex; align-items: center; gap: 4px; border: 1px solid var(--gs-orange); }
+/* ── BADGES ── */
+.badge-stack {
+    position: absolute;
+    top: 8px; left: 8px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.discount-badge {
+    background: var(--gs-orange);
+    color: white;
+    padding: 3px 7px;
+    font-size: 10px;
+    font-weight: 900;
+    border-radius: 4px;
+}
+.ended-tag {
+    background: #fdf2f2;
+    color: #c81e1e;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 800;
+    border: 1px solid #f8b4b4;
+}
+.timer-badge {
+    background: #000;
+    color: #fff;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--gs-orange);
+}
 
-/* ── PAGINATION STYLING ── */
-.pagination-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 40px 0; }
-.page-btn { min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; text-decoration: none; color: var(--gs-navy); font-weight: 700; transition: 0.3s; }
+/* ── PAGINATION ── */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+.page-btn {
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--gs-navy);
+    font-weight: 700;
+    transition: 0.3s;
+}
 .page-btn:hover { border-color: var(--gs-orange); color: var(--gs-orange); }
 .page-btn.active { background: var(--gs-orange); color: #fff; border-color: var(--gs-orange); }
 
+/* ── RESPONSIVE ── */
 @media (max-width: 768px) {
-    .shop-wrapper { padding: 15px 2%; }
+    .filter-nav { padding: 0 4%; gap: 10px; overflow-x: auto; }
+    .shop-wrapper { padding: 12px 3%; }
     .product-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .sidebar { display: none; }
     .card-actions { flex-direction: row; gap: 4px; padding: 0 8px 10px; }
@@ -84,8 +291,10 @@
 }
 </style>
 
-<div class="filter-nav">
-    <div class="filter-group">
+<!-- ── STICKY FILTER NAV ── -->
+<nav class="filter-nav" id="filterNav">
+    <div class="filter-group" id="brandGroup">
+        <span class="filter-active-dot"></span>
         <select onchange="applyFilters('brand', this.value)">
             <option value="">All Brands</option>
             {% for brand in brands %}
@@ -93,7 +302,8 @@
             {% endfor %}
         </select>
     </div>
-    <div class="filter-group">
+    <div class="filter-group" id="categoryGroup">
+        <span class="filter-active-dot"></span>
         <select onchange="applyFilters('category', this.value)">
             <option value="">All Categories</option>
             {% for cat in categories %}
@@ -101,20 +311,26 @@
             {% endfor %}
         </select>
     </div>
-</div>
+</nav>
 
 <div class="shop-wrapper">
     <aside class="sidebar">
         <h4>Brands</h4>
         <ul>
             {% for brand in brands %}
-            <li><a href="#" onclick="applyFilters('brand', '{{ brand.id }}'); return false;" class="{% if selected_brand == brand.id %}active{% endif %}">{{ brand.name }}</a></li>
+            <li>
+                <a href="#" onclick="applyFilters('brand', '{{ brand.id }}'); return false;"
+                   class="{% if selected_brand == brand.id %}active{% endif %}">{{ brand.name }}</a>
+            </li>
             {% endfor %}
         </ul>
         <h4>Categories</h4>
         <ul>
             {% for cat in categories %}
-            <li><a href="#" onclick="applyFilters('category', '{{ cat.id }}'); return false;" class="{% if selected_category == cat.id %}active{% endif %}">{{ cat.name }}</a></li>
+            <li>
+                <a href="#" onclick="applyFilters('category', '{{ cat.id }}'); return false;"
+                   class="{% if selected_category == cat.id %}active{% endif %}">{{ cat.name }}</a>
+            </li>
             {% endfor %}
         </ul>
     </aside>
@@ -137,7 +353,8 @@
                 </div>
 
                 <div class="img-container">
-                    <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
+                    <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}"
+                         alt="{{ product.name }}" loading="lazy">
                 </div>
 
                 <div class="product-info">
@@ -161,8 +378,8 @@
                 </div>
             </div>
             {% empty %}
-            <div class="no-products-container" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                <video class="no-products-video" autoplay loop muted playsinline style="max-width: 300px;">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                <video autoplay loop muted playsinline style="max-width: 300px;">
                     <source src="{% static 'animations/no-item.mp4' %}" type="video/mp4">
                 </video>
                 <h3 style="color: var(--gs-navy); margin-top: 20px;">No Products Found</h3>
@@ -174,7 +391,9 @@
         {% if products.has_other_pages %}
         <div class="pagination-container">
             {% if products.has_previous %}
-                <a href="?page={{ products.previous_page_number }}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="page-btn"><i class="fa fa-chevron-left"></i></a>
+                <a href="?page={{ products.previous_page_number }}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="page-btn">
+                    <i class="fa fa-chevron-left"></i>
+                </a>
             {% endif %}
 
             {% for num in products.paginator.page_range %}
@@ -186,7 +405,9 @@
             {% endfor %}
 
             {% if products.has_next %}
-                <a href="?page={{ products.next_page_number }}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="page-btn"><i class="fa fa-chevron-right"></i></a>
+                <a href="?page={{ products.next_page_number }}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="page-btn">
+                    <i class="fa fa-chevron-right"></i>
+                </a>
             {% endif %}
         </div>
         {% endif %}
@@ -195,26 +416,36 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-// Filter logic
+// ── STICKY SHADOW ON SCROLL ──
+const filterNav = document.getElementById('filterNav');
+window.addEventListener('scroll', function () {
+    filterNav.classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+
+// ── ACTIVE FILTER DOTS ──
+(function markActiveFilters() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('brand'))    document.getElementById('brandGroup').classList.add('has-value');
+    if (params.get('category')) document.getElementById('categoryGroup').classList.add('has-value');
+})();
+
+// ── FILTER NAVIGATION ──
 function applyFilters(key, value) {
     const urlParams = new URLSearchParams(window.location.search);
     if (value) urlParams.set(key, value); else urlParams.delete(key);
-    urlParams.delete('page'); // Reset to page 1 on new filter
+    urlParams.delete('page');
     window.location.href = window.location.pathname + '?' + urlParams.toString();
 }
 
-// Live Timer Logic for Discounts
-setInterval(function() {
-    $('.timer-badge').each(function() {
+// ── LIVE DISCOUNT TIMERS ──
+setInterval(function () {
+    $('.timer-badge').each(function () {
         const expiry = new Date($(this).data('expiry')).getTime();
-        const now = new Date().getTime();
-        const diff = expiry - now;
-        
+        const diff = expiry - Date.now();
         if (diff <= 0) {
             $(this).parent().html('<div class="ended-tag">ENDED JUST NOW</div>');
             return;
         }
-        
         const h = Math.floor(diff / 3600000);
         const m = Math.floor((diff % 3600000) / 60000);
         const s = Math.floor((diff % 60000) / 1000);
@@ -222,32 +453,31 @@ setInterval(function() {
     });
 }, 1000);
 
-// Cart Interaction
+// ── ADD TO CART ──
 function handleAddToCart(productId, button) {
-    const iconContainer = button.querySelector('.btn-icon');
-    const textContainer = button.querySelector('.btn-text');
-    const originalContent = iconContainer.innerHTML;
-    const originalText = textContainer.innerText;
+    const iconEl = button.querySelector('.btn-icon');
+    const textEl = button.querySelector('.btn-text');
+    const origIcon = iconEl.innerHTML;
+    const origText = textEl.innerText;
 
     button.disabled = true;
-    iconContainer.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-    textContainer.innerText = 'ADDING...';
+    iconEl.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+    textEl.innerText = 'ADDING...';
 
-    // Simulate API call
     setTimeout(() => {
-        iconContainer.innerHTML = '<i class="fa fa-check"></i>';
-        textContainer.innerText = 'ADDED!';
+        iconEl.innerHTML = '<i class="fa fa-check"></i>';
+        textEl.innerText = 'ADDED!';
         button.style.background = '#00a650';
 
         setTimeout(() => {
             button.disabled = false;
-            iconContainer.innerHTML = originalContent;
-            textContainer.innerText = originalText;
+            iconEl.innerHTML = origIcon;
+            textEl.innerText = origText;
             button.style.background = '';
         }, 2000);
     }, 800);
 
-    if (typeof addToCart === "function") { addToCart(productId); }
+    if (typeof addToCart === 'function') addToCart(productId);
 }
 </script>
 {% endblock %}
