@@ -43,8 +43,6 @@ if not DEBUG:
 # APPLICATION
 # ---------------------------------------------------------------------------
 INSTALLED_APPS = [
-    # 1. Cloudinary Storage MUST be above staticfiles
-    'cloudinary_storage',
     
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,10 +54,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'django.contrib.sites',
-
-    # 3. Cloudinary main engine
-    'cloudinary',
-
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -214,10 +208,3 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'Gadget Soko <sammytings2@gmail.com>'
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'djntvpj8k',
-    'API_KEY': '283424493748562',
-    'API_SECRET': 'xRlxq2sC-MdbGWJZybqt_9U1gGU'
-}
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
