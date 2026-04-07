@@ -14,6 +14,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-xmv2^pwsqiljxgn^$9fc3l&jy0
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
+
+
 ALLOWED_HOSTS = [
     '.vercel.app',
     '.onrender.com',
@@ -40,15 +42,23 @@ if not DEBUG:
 # ---------------------------------------------------------------------------
 # APPLICATION
 # ---------------------------------------------------------------------------
-
 INSTALLED_APPS = [
+    # 1. Cloudinary Storage MUST be above staticfiles
+    'cloudinary_storage',
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    
+    # 2. Staticfiles only appears ONCE
     'django.contrib.staticfiles',
+    
     'django.contrib.sites',
+
+    # 3. Cloudinary main engine
+    'cloudinary',
 
     'allauth',
     'allauth.account',
@@ -204,3 +214,11 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'Gadget Soko <sammytings2@gmail.com>'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'djntvpj8k',
+    'API_KEY': '283424493748562',
+    'API_SECRET': 'xRlxq2sC-MdbGWJZybqt_9U1gGU'
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

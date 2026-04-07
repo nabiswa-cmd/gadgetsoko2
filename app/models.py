@@ -79,6 +79,12 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+    def savings(self):
+        if self.price and self.discounted_price:
+            return self.price - self.discounted_price
+        return 0
 
 # 4. PRODUCT IMAGES
 class ProductImage(models.Model):

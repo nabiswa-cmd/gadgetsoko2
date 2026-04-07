@@ -40,24 +40,32 @@ from .models import (
     SiteSettings, Brand, ProductView, UserActivity
 )
 from .forms import SignupForm
+from django.core.paginator import Paginator
 
 def index_view(request):
-    products = Product.objects.all()
+    # 1. Fetching base data
+    products = Product.objects.all() # Kept as per your original code
     brands = Brand.objects.all()
-
     recommended_products = get_recommended_products(request.user)
 
-    # ✅ FIXED: properly inside the function
+    # 2. QUICK SALES (Rectified)
+    # Pulls the top 8 discounted items to show at the top of the homepage
     quick_sales = Product.objects.filter(
         discount__gt=0,
         stock__gt=0,
-        
     ).order_by('-discount')[:8]
 
-    # Latest products
-    featured_products = Product.objects.all().order_by('-id')[:20]
+    # 3. FEATURED PRODUCTS (With Pagination)
+    # Shows the latest products first. 
+    # Change '-id' to '-created_at' if you have a timestamp field.
+    all_featured = Product.objects.all().order_by('-id')
+    
+    # We set this to 10 per page as requested.
+    paginator = Paginator(all_featured, 10) 
+    page_number = request.GET.get('page')
+    featured_products = paginator.get_page(page_number)
 
-    # Cart count
+    # 4. CART COUNT (Kept your exact logic)
     cart_count = 0
     if request.user.is_authenticated:
         result = CartItem.objects.filter(user=request.user).aggregate(
@@ -65,14 +73,16 @@ def index_view(request):
         )
         cart_count = result['total'] or 0
 
+    # 5. Rendering everything to the template
     return render(request, 'index.html', {
         'products': products,
         'brands': brands,
         'recommended_products': recommended_products,
         'quick_sales': quick_sales,
-        'featured_products': featured_products,
+        'featured_products': featured_products, # Now handles 1, 2, 3 pagination
         'cart_count': cart_count
     })
+
 
 def products_view(request):
     products = Product.objects.all().order_by('-created_at')
