@@ -9,15 +9,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('app.urls')),
     path('accounts/', include('allauth.urls')),
-
     # ── FIXED Built-in Django Password Reset ──
-    path('password-reset/',
-         auth_views.PasswordResetView.as_view(
-             template_name='auth/password_reset.html',
-             email_template_name='auth/password_reset_email.html',
-             subject_template_name='auth/password_reset_subject.txt'
-         ),
-         name='password_reset'),
+path('password-reset/',
+     auth_views.PasswordResetView.as_view(
+         template_name='auth/password_reset.html',
+         email_template_name='auth/password_reset_email.html',
+         html_email_template_name='auth/password_reset_email.html', # <── ADD THIS LINE
+         subject_template_name='auth/password_reset_subject.txt'
+     ),
+     name='password_reset'),
 
     path('password-reset/done/',
          auth_views.PasswordResetDoneView.as_view(

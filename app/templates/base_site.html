@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -8,9 +7,7 @@
     <title>{% block title %}GadgetSoko{% endblock %}</title>
 <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/tab.png' %}">
 <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/tab.png' %}">
-
 <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/tab.png' %}">
-
 <link rel="icon" type="image/png" sizes="192x192" href="{% static 'images/tab.png' %}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -79,6 +76,62 @@
             transition: width 0.35s ease;
         }
         .gs-nav-link:hover::after { width: 100%; }
+
+        /* ── USER GREETING BADGE ── */
+        .gs-user-greeting {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255,255,255,0.15);
+            border: 1.5px solid rgba(255,255,255,0.35);
+            border-radius: 50px;
+            padding: 5px 13px 5px 8px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            backdrop-filter: blur(4px);
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .gs-user-greeting:hover {
+            background: rgba(255,255,255,0.28);
+            border-color: rgba(255,255,255,0.6);
+            color: #fff;
+        }
+        .gs-user-greeting .avatar-circle {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px;
+            border: 1.5px solid rgba(255,255,255,0.6);
+            flex-shrink: 0;
+        }
+        .gs-user-greeting .hi-text { line-height: 1; }
+        .gs-user-greeting .hi-text small {
+            display: block;
+            font-size: 10px;
+            font-weight: 400;
+            opacity: 0.8;
+            line-height: 1;
+        }
+        .gs-user-greeting .hi-text strong {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* Logout link style */
+        .gs-logout-link {
+            color: rgba(255,255,255,0.85);
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: var(--transition);
+        }
+        .gs-logout-link:hover { color: #fff; }
 
         /* Search */
         .gs-search {
@@ -160,6 +213,36 @@
         }
         .mobile-links li a:hover { color: gold; padding-left: 10px; }
 
+        /* Mobile user greeting in sidebar */
+        .mobile-user-greeting {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        .mobile-user-greeting .m-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: #fff;
+            border: 2px solid rgba(255,255,255,0.5);
+            flex-shrink: 0;
+        }
+        .mobile-user-greeting .m-info small {
+            display: block;
+            color: rgba(255,255,255,0.75);
+            font-size: 11px;
+        }
+        .mobile-user-greeting .m-info strong {
+            color: #fff;
+            font-size: 14px;
+        }
+
         /* ── CART SIDEBAR ── */
         .cart-sidebar {
             position: fixed; top: 0; right: -420px;
@@ -191,7 +274,6 @@
             font-size: 28px; color: var(--text-muted); line-height: 1;
         }
 
-        /* Cart items list */
         .cart-items-container { flex: 1; overflow-y: auto; padding: 0; }
 
         .cart-item-row {
@@ -216,7 +298,6 @@
             flex-shrink: 0;
         }
 
-        /* Qty controls */
         .qty-controls { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
         .qty-btn {
             width: 24px; height: 24px;
@@ -228,14 +309,12 @@
         .qty-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
         .qty-num { min-width: 22px; text-align: center; font-size: 13px; font-weight: 700; }
 
-        /* Remove btn */
         .remove-btn {
             background: transparent; border: none;
             font-size: 18px; color: #ccc; flex-shrink: 0;
         }
         .remove-btn:hover { color: #e53935; }
 
-        /* Cart empty / loading */
         .cart-empty {
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
@@ -244,7 +323,6 @@
         .cart-empty i { font-size: 48px; margin-bottom: 15px; }
         .cart-empty p { font-size: 14px; }
 
-        /* Cart footer */
         .cart-footer-panel {
             padding: 18px 20px;
             border-top: 1px solid var(--border);
@@ -350,56 +428,324 @@
             .product-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
             .img-container { height: 130px; padding: 8px; }
             .cart-sidebar { width: 88%; max-width: 340px; right: -100%; }
+            .gs-user-greeting .hi-text small { display: none; }
+            .gs-user-greeting { padding: 5px 10px 5px 7px; }
         }
 
-        /* ── FOOTER ── */
         .gs-footer {
-            background: var(--navy); color: rgba(255,255,255,0.85);
-            padding: 60px 8% 20px; margin-top: 60px;
-            border-top: 5px solid var(--primary);
+            background: linear-gradient(135deg, #0a2a4a 0%, #0b3a63 50%, #0d4a7a 100%);
+            color: rgba(255,255,255,0.85);
+            padding: 0;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
         }
-        .footer-container {
-            display: grid; grid-template-columns: 1.2fr 1fr 1fr;
-            gap: 40px; padding-bottom: 35px;
+
+        /* Decorative background shapes */
+        .gs-footer::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(238,77,45,0.12) 0%, transparent 70%);
+            pointer-events: none;
         }
-        .footer-column h3 {
-            font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
-            color: white; margin-bottom: 18px;
-            position: relative; padding-bottom: 10px;
+        .gs-footer::after {
+            content: '';
+            position: absolute;
+            bottom: 60px; left: -60px;
+            width: 240px; height: 240px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+            pointer-events: none;
         }
-        .footer-column h3::after {
-            content: ""; position: absolute; left: 0; bottom: 0;
-            width: 45px; height: 3px;
-            background: var(--primary); border-radius: 10px;
+
+        /* Top accent bar */
+        .footer-accent-bar {
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), #ff8c00, gold, var(--primary));
+            background-size: 200% 100%;
+            animation: shimmerBar 4s linear infinite;
         }
-        .footer-column p { font-size: 13px; margin-bottom: 10px; line-height: 1.8; color: rgba(255,255,255,0.75); }
-        .footer-column i { color: var(--primary); margin-right: 8px; }
-        .footer-column a {
-            display: block; color: rgba(255,255,255,0.75);
-            font-size: 13px; margin-bottom: 9px; transition: 0.25s ease;
+        @keyframes shimmerBar {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
         }
-        .footer-column a:hover { color: white; transform: translateX(6px); }
-        .footer-social { display: flex; gap: 12px; margin-top: 15px; }
+
+        .footer-inner {
+            padding: 55px 8% 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-top-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr;
+            gap: 50px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Brand column */
+        .footer-brand-col .brand-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .footer-brand-col .brand-logo-area img {
+            height: 38px;
+            filter: brightness(0) invert(1);
+            opacity: 0.9;
+        }
+        .footer-brand-col p {
+            font-size: 13px;
+            line-height: 1.9;
+            color: rgba(255,255,255,0.68);
+            margin-bottom: 8px;
+        }
+        .footer-brand-col .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.75);
+        }
+        .footer-brand-col .contact-item i {
+            color: var(--primary);
+            font-size: 14px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        /* Social icons */
+        .footer-social {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
         .footer-social a {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(255,255,255,0.12);
+            width: 40px; height: 40px;
+            border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 15px; transition: 0.35s ease;
+            font-size: 15px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        box-shadow 0.3s ease;
+            color: #fff;
         }
-        .footer-social a:hover { background: var(--primary); transform: rotate(360deg) scale(1.1); }
-        .footer-bottom {
-            border-top: 1px solid rgba(255,255,255,0.12);
-            padding-top: 18px; text-align: center;
-            font-size: 12.5px; color: rgba(255,255,255,0.65); line-height: 1.8;
+        /* Each social has its own brand color bg */
+        .footer-social a.soc-facebook {
+            background: rgba(59,89,152,0.35);
+            border: 1px solid rgba(59,89,152,0.5);
         }
-        .footer-bottom strong { color: var(--primary); }
-        .dev-contact { color: rgba(255,255,255,0.8); font-weight: 700; }
-        .dev-contact:hover { color: white; text-decoration: underline; }
+        .footer-social a.soc-instagram {
+            background: rgba(225,48,108,0.25);
+            border: 1px solid rgba(225,48,108,0.4);
+        }
+        .footer-social a.soc-tiktok {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .footer-social a.soc-whatsapp {
+            background: rgba(37,211,102,0.25);
+            border: 1px solid rgba(37,211,102,0.4);
+        }
+
+        /* Hover: keep brand feel, brighten + lift + spin icon */
+        .footer-social a:hover {
+            transform: translateY(-4px) scale(1.12);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .footer-social a.soc-facebook:hover  { background: #3b5998; border-color: #3b5998; }
+        .footer-social a.soc-instagram:hover  { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); border-color: transparent; }
+        .footer-social a.soc-tiktok:hover     { background: #010101; border-color: #69c9d0; box-shadow: 0 8px 20px rgba(105,201,208,0.3); }
+        .footer-social a.soc-whatsapp:hover   { background: #25d366; border-color: #25d366; }
+
+        /* Icon spin animation on hover */
+        .footer-social a:hover i {
+            animation: socialSpin 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes socialSpin {
+            0%   { transform: rotate(0deg) scale(0.8); }
+            60%  { transform: rotate(380deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* Links columns */
+        .footer-links-col h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 12px;
+        }
+        .footer-links-col h4::after {
+            content: '';
+            position: absolute;
+            left: 0; bottom: 0;
+            width: 30px; height: 2px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        .footer-links-col a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.65);
+            font-size: 13px;
+            margin-bottom: 11px;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+        .footer-links-col a i {
+            font-size: 10px;
+            color: var(--primary);
+            transition: transform 0.25s ease;
+        }
+        .footer-links-col a:hover {
+            color: #fff;
+            transform: translateX(5px);
+        }
+        .footer-links-col a:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Open hours badge */
+        .hours-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,166,80,0.15);
+            border: 1px solid rgba(0,166,80,0.35);
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            margin-top: 10px;
+        }
+        .hours-badge .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #00a650;
+            box-shadow: 0 0 6px #00a650;
+            animation: pulse-dot 2s infinite;
+            flex-shrink: 0;
+        }
+        @keyframes pulse-dot {
+            0%,100% { box-shadow: 0 0 4px #00a650; }
+            50%      { box-shadow: 0 0 10px #00a650; }
+        }
+
+        /* ── FOOTER BOTTOM TEAM AREA ── */
+        .footer-bottom-wrap {
+            padding-top: 28px;
+        }
+
+        .footer-team-credits {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .dev-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 9px 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .dev-card:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(238,77,45,0.5);
+            transform: translateY(-2px);
+        }
+        .dev-card .dev-avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .dev-card.dev-sammy .dev-avatar {
+            background: linear-gradient(135deg, var(--primary), #ff8c00);
+            color: #fff;
+        }
+        .dev-card.dev-nabiswa .dev-avatar {
+            background: linear-gradient(135deg, #0b3a63, #1a6eb5);
+            color: #fff;
+        }
+        .dev-card .dev-info small {
+            display: block;
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+        .dev-card .dev-info strong {
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.85);
+            line-height: 1;
+        }
+        .dev-card .dev-contact-links {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .dev-card .dev-contact-links a {
+            font-size: 10.5px;
+            color: rgba(255,255,255,0.5);
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+        .dev-card .dev-contact-links a:hover { color: var(--primary); }
+
+        .footer-divider-text {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            font-weight: 300;
+        }
+
+        .footer-copyright {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255,255,255,0.45);
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .footer-copyright strong { color: var(--primary); }
+
         @media (max-width: 768px) {
-            .gs-footer { padding: 45px 5% 20px; text-align: center; }
-            .footer-container { grid-template-columns: 1fr; gap: 28px; }
-            .footer-column h3::after { left: 50%; transform: translateX(-50%); }
-            .footer-social { justify-content: center; }
+            .footer-top-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+            .footer-inner { padding: 40px 5% 25px; }
+            .footer-links-col h4::after { left: 50%; transform: translateX(-50%); }
+            .footer-links-col h4 { text-align: center; }
+            .footer-links-col a { justify-content: center; }
+            .footer-links-col a:hover { transform: none; }
+            .footer-social { justify-content: flex-start; }
+            .footer-team-credits { flex-direction: column; gap: 12px; }
+            .dev-card { width: 100%; max-width: 320px; }
         }
 
         /* ── AUTH LOADER ── */
@@ -424,6 +770,11 @@
             display: flex; flex-direction: column;
             transition: transform 0.4s ease-in-out;
         }
+        /* Hide the toast if it's empty or only contains whitespace */
+.gs-toast:empty,
+.gs-toast span:empty {
+    display: none !important;
+}
         .cookie-card.hidden { transform: translateY(150%); }
         .cookie-content { display: flex; align-items: center; gap: 15px; }
         .cookie-icon i { font-size: 30px; color: var(--primary); }
@@ -438,22 +789,23 @@
 </head>
 <body>
 
-{# ── CSRF token for JS ── #}
 <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
 
-{# ── GLOBAL TOAST CONTAINER ── #}
 <div id="toast-container"></div>
 
-{# ── Render Django messages as toasts ── #}
 {% if messages %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const msgs = [
+  var msgs = [
     {% for msg in messages %}
-    { text: "{{ msg|escapejs }}", type: "{{ msg.tags }}" },
+    { text: "{{ msg|escapejs }}", type: "{{ msg.tags|escapejs }}" },
     {% endfor %}
   ];
-  msgs.forEach(m => showToast(m.text, m.type || 'info'));
+  msgs.forEach(function(m) {
+    // Skip empty messages entirely
+    if (!m.text || m.text.trim() === '') return;
+    showToast(m.text, m.type || 'info');
+  });
 });
 </script>
 {% endif %}
@@ -461,10 +813,22 @@ document.addEventListener('DOMContentLoaded', function() {
 {# ── MOBILE SIDEBAR ── #}
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
 <div class="mobile-sidebar" id="mobileSidebar">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <img src="{% static 'images/final.png' %}" style="height:35px;">
         <button class="text-white bg-transparent border-0 fs-2" onclick="toggleMenu()">&times;</button>
     </div>
+
+    {# Mobile user greeting #}
+    {% if user.is_authenticated %}
+    <div class="mobile-user-greeting">
+        <div class="m-avatar"><i class="bi bi-person-fill"></i></div>
+        <div class="m-info">
+            <small>Welcome back</small>
+            <strong>{{ user.username }}</strong>
+        </div>
+    </div>
+    {% endif %}
+
     <ul class="mobile-links">
         <li><a href="{% url 'index' %}" onclick="toggleMenu()"><i class="bi bi-house-door me-2"></i>Home</a></li>
         <li><a href="{% url 'products' %}" onclick="toggleMenu()"><i class="bi bi-laptop me-2"></i>Products</a></li>
@@ -473,7 +837,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <li><a href="{% url 'index' %}#contacts" onclick="toggleMenu()"><i class="bi bi-envelope me-2"></i>Contact</a></li>
         <hr class="text-white-50 my-3">
         {% if user.is_authenticated %}
-            <li><a href="{% url 'logout' %}" onclick="toggleMenu()"><i class="bi bi-box-arrow-right me-2"></i>Logout ({{ user.username }})</a></li>
+            <li><a href="{% url 'logout' %}" onclick="toggleMenu()"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
         {% else %}
             <li><a href="{% url 'userlog' %}" onclick="toggleMenu()"><i class="bi bi-person-check me-2"></i>Login</a></li>
         {% endif %}
@@ -484,6 +848,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <nav class="gs-navbar navbar navbar-expand-md">
     <div class="container-fluid" style="padding-left:8% !important; padding-right:8% !important;">
 
+        {# Mobile: hamburger + logo on left #}
         <div class="d-flex align-items-center d-md-none">
             <button class="bg-transparent border-0 text-white fs-2 me-2" onclick="toggleMenu()">
                 <i class="bi bi-list"></i>
@@ -493,6 +858,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </a>
         </div>
 
+        {# Desktop: logo + links #}
         <div class="d-none d-md-flex align-items-center gap-3">
             <a class="gs-logo navbar-brand p-0" href="{% url 'index' %}">
                 <img src="{% static 'images/final.png' %}" alt="Gadget Soko">
@@ -506,23 +872,65 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
 
+        {# Search bar - desktop #}
         <form action="{% url 'search' %}" method="GET" class="gs-search d-none d-md-flex mx-auto" style="width:35%;max-width:450px;">
             <input type="text" name="q" id="searchInput" placeholder="Search gadgets..." autocomplete="off">
             <button type="submit" class="gs-search-btn"><i class="bi bi-search"></i></button>
             <div id="search-results" class="search-dropdown"></div>
         </form>
 
-        <div class="d-flex align-items-center gap-3">
-            <div class="d-none d-md-block">
+        {# Right side: user greeting + cart #}
+        <div class="d-flex align-items-center gap-2">
+
+            {# Desktop user greeting or login link #}
+            <div class="d-none d-md-flex align-items-center gap-2">
                 {% if request.user.is_authenticated %}
-                    <a href="{% url 'logout' %}" class="text-white fw-bold small"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    <div class="d-flex flex-column align-items-end gap-1">
+                        <a href="#" class="gs-user-greeting">
+                            <div class="avatar-circle">
+                                <i class="bi bi-person-fill" style="font-size:12px;"></i>
+                            </div>
+                            <div class="hi-text">
+                                <small>Hi there 👋</small>
+                                <strong>{{ request.user.username }}</strong>
+                            </div>
+                        </a>
+                        <a href="{% url 'logout' %}" class="gs-logout-link">
+                            <i class="bi bi-box-arrow-right" style="font-size:11px;"></i>
+                            <span style="font-size:11px;">Logout</span>
+                        </a>
+                    </div>
                 {% else %}
-                    <a href="{% url 'usersignup' %}" class="text-white fw-bold small"><i class="bi bi-person-circle"></i> Login</a>
+                    <a href="{% url 'userlog' %}" class="gs-user-greeting">
+                        <div class="avatar-circle">
+                            <i class="bi bi-person" style="font-size:12px;"></i>
+                        </div>
+                        <div class="hi-text">
+                            <small>Welcome</small>
+                            <strong>Login</strong>
+                        </div>
+                    </a>
                 {% endif %}
             </div>
+
+            {# Mobile user greeting (compact) #}
+            <div class="d-md-none d-flex align-items-center">
+                {% if request.user.is_authenticated %}
+                    <a href="#" class="gs-user-greeting" style="padding:4px 9px 4px 6px;">
+                        <div class="avatar-circle" style="width:22px;height:22px;font-size:11px;">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <strong style="font-size:12px;color:#fff;">{{ request.user.username }}</strong>
+                    </a>
+                {% endif %}
+            </div>
+
+            {# Mobile search toggle #}
             <button class="d-md-none border-0 bg-transparent text-white fs-4" data-bs-toggle="collapse" data-bs-target="#mobileSearchCollapse">
                 <i class="bi bi-search"></i>
             </button>
+
+            {# Cart icon #}
             <div class="gs-cart-icon" onclick="toggleCart()">
                 <i class="fa fa-shopping-cart"></i>
                 <span class="cart-count">{{ cart_count|default:0 }}</span>
@@ -531,7 +939,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </nav>
 
-{# Mobile search #}
+{# Mobile search bar #}
 <div class="collapse d-md-none w-100" id="mobileSearchCollapse">
     <div class="px-3 pb-3 pt-1" style="background:var(--primary);">
         <form action="{% url 'search' %}" method="GET" class="gs-search w-100">
@@ -569,7 +977,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-{# ── AUTH LOADER ── #}
+
 <div id="auth-loader">
     <div class="cart-flipper" style="font-size:50px;color:var(--primary);margin-bottom:20px;">
         <i class="fa fa-shopping-cart"></i>
@@ -597,52 +1005,116 @@ document.addEventListener('DOMContentLoaded', function() {
 <main class="gs-main">
     {% block content %}{% endblock %}
 </main>
-
-{# ── FOOTER ── #}
 <footer class="gs-footer" id="footer">
-    <div class="footer-container">
-        <div class="footer-column">
-            <h3>Our Location</h3>
-            <p><i class="fa-solid fa-location-dot"></i>Nairobi, Kenya<br>Along Mombasa Road / CBD Delivery Available</p>
-            <p style="margin-top:12px;"><i class="fa-solid fa-clock"></i>Open: Mon - Sat (8:00AM - 7:00PM)</p>
-        </div>
-        <div class="footer-column">
-            <h3>Quick Links</h3>
-            <a href="{% url 'index' %}">Home</a>
-            <a href="{% url 'products' %}">Products</a>
-            <a href="{% url 'index' %}#categories">Brands</a>
-            <a href="{% url 'index' %}#services">Services</a>
-            <a href="{% url 'index' %}#contacts">Contact</a>
-        </div>
-        <div class="footer-column">
-            <h3>Contacts</h3>
-            <p><i class="fa-solid fa-phone"></i>+254 7XX XXX XXX</p>
-            <p><i class="fa-solid fa-envelope"></i>support@gadgetsokokenya.com</p>
-            <p><i class="fa-brands fa-whatsapp"></i>WhatsApp: +254 7XX XXX XXX</p>
-            <div class="footer-social">
-                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
-                <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
+    <div class="footer-accent-bar"></div>
+
+    <div class="footer-inner">
+        <div class="footer-top-grid">
+
+            {# ── Brand / Contact column ── #}
+            <div class="footer-brand-col">
+                <div class="brand-logo-area">
+                    <img src="{% static 'images/final.png' %}" alt="Gadget Soko">
+                </div>
+                <p>Your go-to destination for the latest gadgets, accessories, and tech in Nairobi. Quality products, fast delivery, unbeatable prices.</p>
+
+                <div class="contact-item">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>Nairobi, Kenya &mdash; Mombasa Road / CBD Delivery Available</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>+254 7XX XXX XXX</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>support@gadgetsokokenya.com</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>WhatsApp: +254 7XX XXX XXX</span>
+                </div>
+
+                <div class="hours-badge">
+                    <span class="dot"></span>
+                    <span>Open: Mon – Sat &nbsp;|&nbsp; 8:00 AM – 7:00 PM</span>
+                </div>
+
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/share/18ZrBkP5AU/?mibextid=wwXIfr"
+                       target="_blank" rel="noopener" class="soc-facebook" title="Facebook">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+                    <a href="https://www.instagram.com/gadjet_space?igsh=MWUxMTY4Mm1uMGg4dw%3D%3D&utm_source=qr"
+                       target="_blank" rel="noopener" class="soc-instagram" title="Instagram">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="https://www.tiktok.com/@mikebrowz254?_r=1&_t=ZS-95KTSCTORIz"
+                       target="_blank" rel="noopener" class="soc-tiktok" title="TikTok">
+                        <i class="fa-brands fa-tiktok"></i>
+                    </a>
+                    <a href="https://wa.me/2547XXXXXXXX"
+                       target="_blank" rel="noopener" class="soc-whatsapp" title="WhatsApp">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+                </div>
+            </div>
+
+            {# ── Quick Links column ── #}
+            <div class="footer-links-col">
+                <h4>Quick Links</h4>
+                <a href="{% url 'index' %}"><i class="bi bi-chevron-right"></i>Home</a>
+                <a href="{% url 'products' %}"><i class="bi bi-chevron-right"></i>Products</a>
+                <a href="{% url 'index' %}#categories"><i class="bi bi-chevron-right"></i>Brands</a>
+                <a href="{% url 'index' %}#services"><i class="bi bi-chevron-right"></i>Services</a>
+                <a href="{% url 'index' %}#contacts"><i class="bi bi-chevron-right"></i>Contact Us</a>
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'logout' %}"><i class="bi bi-chevron-right"></i>Logout</a>
+                {% else %}
+                    <a href="{% url 'userlog' %}"><i class="bi bi-chevron-right"></i>Login</a>
+                    <a href="{% url 'usersignup' %}"><i class="bi bi-chevron-right"></i>Sign Up</a>
+                {% endif %}
+            </div>
+
+            {# ── Support / Info column ── #}
+            <div class="footer-links-col">
+                <h4>Support</h4>
+                <a href="{% url 'index' %}#contacts"><i class="bi bi-chevron-right"></i>Help Center</a>
+                <a href="{% url 'check' %}"><i class="bi bi-chevron-right"></i>Track Order</a>
+                <a href="#"><i class="bi bi-chevron-right"></i>Returns Policy</a>
+                <a href="#"><i class="bi bi-chevron-right"></i>Shipping Info</a>
+                <a href="#"><i class="bi bi-chevron-right"></i>Privacy Policy</a>
+                <a href="#"><i class="bi bi-chevron-right"></i>Terms of Service</a>
+            </div>
+
+        </div>{# /footer-top-grid #}
+
+        <div class="footer-bottom-wrap">
+
+        
+
+            <div class="footer-copyright">
+                <p>&copy; {{ year|default:"2026" }} <strong>Gadget Soko Kenya</strong>. All Rights Reserved. &nbsp;|&nbsp; Nairobi, Kenya</p>
+            </div>
+    <div class="footer-team-credits">
+                <span style="font-size:12px;color:rgba(255,255,255,0.4);font-style:italic;">Built with ❤️ by</span>
+
+                        <strong>Sammy Tings</strong>
+                </a>
+
+                <span class="footer-divider-text">&amp;</span>             
+                        <strong>Nabiswa James</strong>
+                    
+                </a>
             </div>
         </div>
-    </div>
-    <div class="footer-bottom">
-        <p>© {{ year|default:"2026" }} Gadget Soko Kenya. All Rights Reserved.</p>
-        <p>Developed by <strong>Sammy Tings</strong> |
-           <a href="tel:+2547XXXXXXXX" class="dev-contact">+254 7XX XXX XXX</a> |
-           <a href="mailto:sammytings@email.com" class="dev-contact">sammytings@email.com</a>
-        </p>
-    </div>
+    </div>{# /footer-inner #}
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-//  SINGLE GLOBAL CART ENGINE  —  used by every page
-// ═══════════════════════════════════════════════════════════
 
 const csrfToken = document.getElementById('csrf-token').value;
 const isLoggedIn = "{{ request.user.is_authenticated }}" === "True";
@@ -675,7 +1147,6 @@ function loadCartItems() {
         type: 'GET',
         data: { ajax: '1', t: Date.now() },
         success: function(data) {
-            // If Django redirected and we got back HTML, handle gracefully
             if (typeof data !== 'object' || !data.items) {
                 showCartLoginPrompt();
                 return;
@@ -701,7 +1172,6 @@ function renderCartItems(data) {
     const items = data.items || [];
     const totalQty = items.reduce((s, i) => s + i.quantity, 0);
 
-    // Update counters
     $('#cartItemCount').text(totalQty + (totalQty === 1 ? ' item' : ' items'));
     $('#sidebarTotal').text('KES ' + Math.round(data.total || 0).toLocaleString());
     $('.cart-count').text(totalQty > 0 ? totalQty : '0');
@@ -747,7 +1217,6 @@ function renderCartItems(data) {
 
 /* ── 4. CHANGE QUANTITY (+ / -) ── */
 function changeQty(itemId, delta) {
-    // Optimistic UI update immediately
     const $qty    = $('#qty-' + itemId);
     const current = parseInt($qty.text()) || 1;
     const newQty  = current + delta;
@@ -757,19 +1226,17 @@ function changeQty(itemId, delta) {
         return;
     }
 
-    // Instantly update the number and recalculate subtotal shown
     $qty.text(newQty);
     const priceText = $('#sub-' + itemId).closest('.cart-item-row').find('small').text();
     const unitPrice = parseInt(priceText.replace(/[^0-9]/g, '')) || 0;
     $('#sub-' + itemId).text('KES ' + (unitPrice * newQty).toLocaleString());
 
-    // Hit the correct Django URL
     const url = delta > 0 ? '/increase-cart/' + itemId + '/' : '/decrease-cart/' + itemId + '/';
     $.ajax({
         url: url,
         type: 'POST',
         data: { csrfmiddlewaretoken: csrfToken },
-        success: function() { loadCartItems(); },   // re-fetch for accurate total
+        success: function() { loadCartItems(); },
         error: function()   { loadCartItems(); }
     });
 }
@@ -827,26 +1294,62 @@ function addToCart(productId, btn) {
         }
     });
 }
-
 /* ── TOAST NOTIFICATION SYSTEM ── */
 function showToast(message, type) {
-    type = type || 'info';
-    // normalise Django message tags
-    if (type.includes('error'))   type = 'error';
-    else if (type.includes('success')) type = 'success';
-    else if (type.includes('warning')) type = 'warning';
-    else type = 'info';
+    // 1. Initial Guard: Ignore null/empty/None strings
+    if (!message || message.trim() === '' || message === 'None' || message === 'undefined') {
+        return;
+    }
 
-    const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle', warning:'fa-exclamation-triangle' };
+    // 2. Normalise type
+    let toastType = 'info';
+    if (type) {
+        if (type.includes('error') || type.includes('danger')) toastType = 'error';
+        else if (type.includes('success')) toastType = 'success';
+        else if (type.includes('warning')) toastType = 'warning';
+    }
+
+    const icons = {
+        success: 'fa-check-circle',
+        error:   'fa-exclamation-circle',
+        info:    'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+
+    // 3. Create the element
     const toast = document.createElement('div');
-    toast.className = `gs-toast toast-${type}`;
-    toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span><span class="toast-close">&times;</span>`;
-    toast.onclick = () => toast.remove();
-    document.getElementById('toast-container').appendChild(toast);
-    // Auto-dismiss after 4s
-    setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .5s'; setTimeout(()=>toast.remove(), 500); }, 4000);
-}
+    toast.className = `gs-toast toast-${toastType}`;
+    
+    // Using a template literal for the structure
+    toast.innerHTML = `
+        <i class="fas ${icons[toastType]}"></i>
+        <span class="toast-text">${message}</span>
+        <span class="toast-close">&times;</span>
+    `;
 
+    // 4. CRITICAL FIX: Content Check
+    // If for any reason the text didn't render, don't show the red box
+    const textSpan = toast.querySelector('.toast-text');
+    if (!textSpan || textSpan.textContent.trim() === '') {
+        return; 
+    }
+
+    // 5. Append and Show
+    const container = document.getElementById('toast-container');
+    if (container) {
+        container.appendChild(toast);
+        
+        // Manual Click Close
+        toast.onclick = () => toast.remove();
+
+        // Auto-hide
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity .5s';
+            setTimeout(() => { if(toast.parentNode) toast.remove(); }, 500);
+        }, 4000);
+    }
+}
 /* ── LIVE SEARCH ── */
 $(document).ready(function() {
     function doSearch(val, $drop) {

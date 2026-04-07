@@ -41,6 +41,12 @@ from .models import (
 )
 from .forms import SignupForm
 from django.core.paginator import Paginator
+from decimal import Decimal
+from django.conf import settings
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.core.mail import send_mail
 
 def index_view(request):
     # 1. Fetching base data
@@ -419,12 +425,7 @@ def remove_cart(request, item_id):
     item.delete()
     return JsonResponse({"success": True})
 
-from decimal import Decimal
-from django.conf import settings
-from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.urls import reverse
-from django.core.mail import send_mail
+
 
 def check(request):
     # --- FETCH DATA ---
@@ -583,98 +584,6 @@ def payment_instructions(request, order_id):
         'order': order,
         'method': order.payment_status # Or order.payment_method depending on your model
     })
-def userlog_view (request):  # this is log in yaani sign in 
-    if request.user.is_authenticated:
-        return redirect('index')
-
-    if request.method == "POST":
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '').strip()
-
-        if not username or not password:
-            messages.error(request, "Please enter both username and password.")
-            return render(request, 'login.html')
-
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
-            next_url = request.GET.get('next', 'index')
-            return redirect(next_url)
-        else:
-            # Try authenticating by email in case user typed email
-            from django.contrib.auth.models import User as AuthUser
-            try:
-                u = AuthUser.objects.get(email=username)
-                user = authenticate(request, username=u.username, password=password)
-                if user:
-                    login(request, user)
-                    messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
-                    next_url = request.GET.get('next', 'index')
-                    return redirect(next_url)
-            except AuthUser.DoesNotExist:
-                pass
-            messages.error(request, "Incorrect username or password. Please try again.")
-            return render(request, 'usersignup.html')
-
-    return render(request, 'usersignup.html')
-def usersignup_view (request):  # this is log in yaani sign in 
-    if request.user.is_authenticated:
-        return redirect('index')
-
-    if request.method == "POST":
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '').strip()
-
-        if not username or not password:
-            messages.error(request, "Please enter both username and password.")
-            return render(request, 'login.html')
-
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
-            next_url = request.GET.get('next', 'index')
-            return redirect(next_url)
-        else:
-            # Try authenticating by email in case user typed email
-            from django.contrib.auth.models import User as AuthUser
-            try:
-                u = AuthUser.objects.get(email=username)
-                user = authenticate(request, username=u.username, password=password)
-                if user:
-                    login(request, user)
-                    messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
-                    next_url = request.GET.get('next', 'index')
-                    return redirect(next_url)
-            except AuthUser.DoesNotExist:
-                pass
-            messages.error(request, "Incorrect username or password. Please try again.")
-            return render(request, 'usersignup.html')
-
-    return render(request, 'usersignup.html')
-
-def signup_view(request):
-    if request.method == "POST":
-        form = SignupForm(request.POST)
-
-        if form.is_valid():
-            email = form.cleaned_data["email"]
-            password = form.cleaned_data["password1"]
-
-            # username will be email
-            user = User.objects.create_user(username=email, email=email, password=password)
-
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect("index")  # redirect after signup
-
-    else:
-        form = SignupForm()
-
-    return render(request, "signup.html", {"form": form})
-
 
 def get_mpesa_access_token():
     url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
@@ -692,16 +601,18 @@ def get_mpesa_access_token():
     except ValueError:
         print("Token response error:", response.text)  # log raw response for debugging
         return None
+# --- 1. USER SIGNUP (Create Account) ---
 def usersignup_view(request):
     if request.user.is_authenticated:
         return redirect('index')
 
     if request.method == "POST":
         username = request.POST.get('username', '').strip()
-        email    = request.POST.get('email', '').strip()
+        email = request.POST.get('email', '').strip()
         password1 = request.POST.get('password1', '')
         password2 = request.POST.get('password2', '')
 
+        # Validations
         if not username or not email or not password1:
             messages.error(request, "All fields are required.")
         elif password1 != password2:
@@ -713,39 +624,72 @@ def usersignup_view(request):
         elif User.objects.filter(email=email).exists():
             messages.error(request, "An account with that email already exists.")
         else:
+            # ✅ create_user handles password hashing and saving automatically
             user = User.objects.create_user(username=username, email=email, password=password1)
+            # Specify the backend to avoid ambiguity
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, f"Account created! Welcome to Gadget Soko, {username}! 🎉")
             return redirect('index')
 
-    return render(request, 'usersignup.html')
+    return render(request, 'signup.html')
+# --- 2. USER LOGIN (Sign In) ---
+def userlog_view(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+
+    if request.method == "POST":
+        username_or_email = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        if not username_or_email or not password:
+            messages.error(request, "Please enter both username and password.")
+            return render(request, 'login.html')
+
+        # First, try authenticating with the username
+        user = authenticate(request, username=username_or_email, password=password)
+
+        # If username fails, try authenticating with email
+        if user is None:
+            try:
+                user_obj = User.objects.get(email=username_or_email)
+                user = authenticate(request, username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                user = None
+
+        if user is not None:
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.first_name or user.username}! 👋")
+            return redirect(request.GET.get('next', 'index'))
+        else:
+            messages.error(request, "Incorrect username/email or password.")
+    
+    return render(request, 'login.html')
 
 
+# --- 3. ADMIN SECRET LOGIN ---
 def secretkey_view(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
 
-        if not username or not password:
-            messages.error(request, "Please enter both username and password.")
-            return redirect('userlog')
-
         user = authenticate(request, username=username, password=password)
 
         if user:
-            if user.is_staff:  # ✅ Only staff/admin can access dashboard
+            if user.is_staff: # ✅ Checks if user has admin access
                 login(request, user)
-                messages.success(request, f"Welcome {user.username}! You are logged in as admin.")
+                messages.success(request, f"Access Granted. Welcome, Admin {user.username}.")
                 return redirect('dashboard')
             else:
-                # ❌ Non-staff trying to access admin
-                messages.error(request, "You are not authorized to access the admin dashboard.")
-                return redirect('index')  # Redirect normal users
+                messages.error(request, "Unauthorized access. Staff only.")
+                return redirect('index')
         else:
-            messages.error(request, "Invalid username or password.")
-            return redirect('userlog')
+            messages.error(request, "Invalid admin credentials.")
+            return redirect('secretkey')
 
-    return render(request, 'login.html')
+    return render(request, 'admin_login_template.html') # Use a specific admin template
+    
+  
+
     
 
 
@@ -767,15 +711,6 @@ def search_view(request):
 def logout_view(request):
     logout(request)
     return redirect('index')
-
-
-
-
-
-
-
-
-
 
 @staff_member_required
 def dashboard_view(request):

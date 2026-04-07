@@ -1,11 +1,10 @@
-
 {% extends 'base_site.html' %}
 {% load static %}
 {% block title %}Create Account | Gadget Soko{% endblock %}
 
 {% block content %}
-
 <style>
+/* ── AUTH STYLING ONLY (Toasts are now handled by base_site.html) ── */
 .auth-wrap {
     min-height: 80vh; display: flex; align-items: center;
     justify-content: center; padding: 30px 16px;
@@ -39,21 +38,6 @@
 .auth-link a { color: #ee4d2d; font-weight: 700; text-decoration: none; }
 .auth-link a:hover { text-decoration: underline; }
 
-/* Toast messages */
-.toast-wrap { margin-bottom: 14px; }
-.toast-msg {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px; border-radius: 8px; font-size: 13px;
-    font-weight: 600; margin-bottom: 6px; animation: slideIn .4s ease;
-}
-@keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
-.toast-success { background: #e6fff0; color: #00a650; border: 1px solid #b2f2cc; }
-.toast-error   { background: #fff0ed; color: #ee4d2d; border: 1px solid #ffd0c5; }
-.toast-info    { background: #e8f4ff; color: #0b3a63; border: 1px solid #bfdbfe; }
-
-.divider { display:flex; align-items:center; gap:10px; margin: 16px 0; color:#ccc; font-size:12px; }
-.divider::before, .divider::after { content:''; flex:1; height:1px; background:#eee; }
-
 .pw-toggle { position:relative; }
 .pw-toggle input { padding-right: 40px; }
 .pw-toggle .eye-btn {
@@ -64,26 +48,14 @@
 
 <div class="auth-wrap">
   <div class="auth-card">
-
     <div class="auth-logo">
       <a href="{% url 'index' %}"><img src="{% static 'images/final.png' %}" alt="Logo"></a>
     </div>
 
     <h2>Create Account</h2>
     <p class="sub">Join thousands of happy shoppers</p>
-
-    {% if messages %}
-    <div class="toast-wrap">
-      {% for msg in messages %}
-        <div class="toast-msg {% if msg.tags == 'error' %}toast-error{% elif msg.tags == 'success' %}toast-success{% else %}toast-info{% endif %}">
-          <i class="fas {% if msg.tags == 'error' %}fa-exclamation-circle{% elif msg.tags == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %}"></i>
-          {{ msg }}
-        </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    <form method="POST" action="{% url 'signup' %}">
+    
+    <form method="POST" action="{% url 'usersignup' %}">
       {% csrf_token %}
 
       <div class="auth-field">
@@ -115,7 +87,7 @@
       <button type="submit" class="auth-btn">Create Account</button>
     </form>
 
-    <p class="auth-link">Already have an account? <a href="{% url 'usersignup' %}">Sign in</a></p>
+    <p class="auth-link">Already have an account? <a href="{% url 'userlog' %}">Sign in</a></p>
   </div>
 </div>
 
@@ -126,6 +98,5 @@ function togglePw(id, btn) {
   inp.type = isText ? 'password' : 'text';
   btn.innerHTML = isText ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
 }
-setTimeout(() => document.querySelectorAll('.toast-msg').forEach(t => t.style.opacity='0'), 4000);
 </script>
 {% endblock %}

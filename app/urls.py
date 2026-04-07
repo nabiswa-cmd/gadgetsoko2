@@ -24,7 +24,7 @@ urlpatterns = [
     # Auth routes
     path('userlog/', views.userlog_view, name='userlog'),
     path('usersignup/', views.usersignup_view, name='usersignup'),
-    path('signup/', views.signup_view, name='signup'),
+    path('signup/', views.usersignup_view, name='signup'),
     path('secretkey/', views.secretkey_view, name='secretkey'),
     path('logout/', views.logout_view, name='logout'),
     path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),

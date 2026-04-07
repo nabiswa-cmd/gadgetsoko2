@@ -1,147 +1,116 @@
 {% extends 'base_site.html' %}
 {% load static %}
-
-{% block title %}Login | Gadget Soko Kenya{% endblock %}
+{% block title %}Login | Gadget Soko{% endblock %}
 
 {% block content %}
-
-<link rel="stylesheet" href="{% static 'css/login.css' %}">
-
 <style>
-    .login-wrapper {
-        background: linear-gradient(135deg, #0b3a63, #ee4d2d);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
+/* ── AUTH STYLING ONLY ── */
+.auth-wrap {
+    min-height: 80vh; display: flex; align-items: center;
+    justify-content: center; padding: 30px 16px;
+    background: linear-gradient(135deg, #0b3a63 0%, #ee4d2d 100%);
+}
+.auth-card {
+    width: 100%; max-width: 400px; background: #fff;
+    border-radius: 16px; padding: 36px 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+    animation: fadeUp .5s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.auth-logo { text-align:center; margin-bottom: 20px; }
+.auth-logo img { height: 52px; }
+.auth-card h2 { font-size: 22px; font-weight: 800; color: #0b3a63; margin-bottom: 4px; text-align:center; }
+.auth-card .sub { font-size: 13px; color: #888; text-align: center; margin-bottom: 22px; }
+.auth-field { margin-bottom: 14px; }
+.auth-field label { display:block; font-size: 12px; font-weight: 700; color: #555; margin-bottom: 5px; text-transform:uppercase; letter-spacing:.5px; }
+.auth-field input {
+    width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; outline: none; font-size: 14px; transition: .25s;
+}
+.auth-field input:focus { border-color: #ee4d2d; box-shadow: 0 0 0 3px rgba(238,77,45,.12); }
+.auth-btn {
+    width: 100%; padding: 13px; border: none; border-radius: 10px;
+    background: #ee4d2d; color: #fff; font-weight: 800;
+    font-size: 15px; cursor: pointer; margin-top: 8px; transition: .25s;
+}
+.auth-btn:hover { background: #d73d1f; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(238,77,45,.3); }
+.auth-link { text-align: center; font-size: 13px; color: #777; margin-top: 16px; }
+.auth-link a { color: #ee4d2d; font-weight: 700; text-decoration: none; }
+.auth-link a:hover { text-decoration: underline; }
 
-    .login-container {
-        width: 100%;
-        max-width: 380px;
-        background: #fff;
-        padding: 30px 25px;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        text-align: center;
-        animation: fadeIn 0.6s ease-in-out;
-    }
+.divider { display:flex; align-items:center; gap:10px; margin: 16px 0; color:#ccc; font-size:12px; }
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:#eee; }
 
-    @keyframes fadeIn {
-        from {opacity: 0; transform: translateY(20px);}
-        to {opacity: 1; transform: translateY(0);}
-    }
+.pw-toggle { position:relative; }
+.pw-toggle input { padding-right: 40px; }
+.pw-toggle .eye-btn {
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    background:none; border:none; color:#aaa; cursor:pointer; font-size:15px;
+}
 
-    .login-container .logo img {
-        width: 70px;
-        margin-bottom: 10px;
-    }
-
-    .login-container .subtitle {
-        font-size: 14px;
-        color: #777;
-        margin-bottom: 20px;
-    }
-
-    .login-container form {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        text-align: left;
-    }
-
-    .login-container label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #333;
-    }
-
-    .login-container input,
-    .login-container select {
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        outline: none;
-        font-size: 13px;
-        transition: 0.3s;
-    }
-
-    .login-container input:focus,
-    .login-container select:focus {
-        border-color: #ee4d2d;
-        box-shadow: 0 0 0 2px rgba(238,77,45,0.15);
-    }
-
-    .login-container button {
-        margin-top: 10px;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        background: #ee4d2d;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    .login-container button:hover {
-        background: #d84324;
-    }
-
-    .login-container .register-link {
-        margin-top: 15px;
-        font-size: 13px;
-        color: #555;
-    }
-
-    .login-container .register-link a {
-        color: #0b3a63;
-        font-weight: bold;
-        text-decoration: none;
-    }
-
-    .login-container .register-link a:hover {
-        text-decoration: underline;
-    }
+.google-btn {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; width: 100%; padding: 12px;
+    background: white; border: 1px solid #dadce0;
+    border-radius: 8px; color: #3c4043; font-weight: 600;
+    cursor: pointer; transition: background 0.2s;
+}
+.google-btn:hover { background: #f8f9fa; }
 </style>
 
-<div class="login-wrapper">
-
-    <div class="login-container">
-
-        <div class="logo">
-            <a href="{% url 'secretkey' %}">
-                <img src="{% static 'images/final.png' %}" alt="Logo">
-            </a>
-        </div>
-
-        <h2>Welcome Back</h2>
-        <p class="subtitle">Login to your account</p>
-
-        <form method="POST">
-            {% csrf_token %}
-
-            <label>Select Login Type</label>
-            <select name="role">
-               
-                <option value="admin"><strong>Admin</strong></option>
-            </select>
-
-            <label>Username</label>
-            <input type="text" name="username" placeholder="Enter username" required>
-
-            <label>Password</label>
-            <input type="password" name="password" placeholder="Enter password" required>
-
-            <button type="submit">Login</button>
-        </form>
-
-
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <a href="{% url 'index' %}"><img src="{% static 'images/final.png' %}" alt="Logo"></a>
     </div>
 
+    <h2>Welcome Back</h2>
+    <p class="sub">Sign in to continue shopping</p>
+
+    {# ── TOASTS REMOVED FROM HERE: They are now handled by base_site.html ── #}
+
+    <form method="POST" action="{% url 'userlog' %}">
+      {% csrf_token %}
+      <div class="auth-field">
+        <label>Username or Email</label>
+        <input type="text" name="username" placeholder="Enter username or email" required autocomplete="username">
+      </div>
+
+      <div class="auth-field">
+        <label>Password</label>
+        <div class="pw-toggle">
+          <input type="password" name="password" id="pw" placeholder="Enter password" required autocomplete="current-password">
+          <button type="button" class="eye-btn" onclick="togglePw('pw',this)"><i class="fas fa-eye"></i></button>
+        </div>
+      </div>
+
+      <div style="text-align:right; margin-top:-6px; margin-bottom:10px;">
+        <a href="{% url 'password_reset' %}" style="font-size:12px; color:#ee4d2d; font-weight:600;">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="auth-btn">Sign In</button>
+    </form>
+
+    <div class="divider">or</div>
+
+    {% load socialaccount %}
+    <form method="post" action="{% provider_login_url 'google' %}">
+      {% csrf_token %}
+      <button type="submit" class="google-btn">
+        <i class="fab fa-google"></i> Continue with Google
+      </button>
+    </form>
+
+    <p class="auth-link">Don't have an account? <a href="{% url 'usersignup' %}">Create one</a></p>
+  </div>
 </div>
 
-<script src="{% static 'js/login.js' %}"></script>
-
+<script>
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  const isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  btn.innerHTML = isText ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+}
+</script>
 {% endblock %}

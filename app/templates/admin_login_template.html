@@ -1,0 +1,332 @@
+{% extends 'base_site.html' %}
+{% load static %}
+
+{% block title %}Admin Login | Gadget Soko Kenya{% endblock %}
+
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+    :root {
+        --bg-deep:    #09090f;
+        --bg-card:    #111118;
+        --border:     rgba(255,255,255,0.07);
+        --accent:     #ee4d2d;
+        --accent-dim: rgba(238,77,45,0.15);
+        --gold:       #c9933a;
+        --text:       #e8e8f0;
+        --muted:      #6b6b80;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .admin-wrap {
+        min-height: 100vh;
+        background: var(--bg-deep);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        font-family: 'DM Sans', sans-serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Ambient background orbs */
+    .admin-wrap::before,
+    .admin-wrap::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .admin-wrap::before {
+        width: 420px; height: 420px;
+        background: radial-gradient(circle, rgba(238,77,45,0.18), transparent 70%);
+        top: -80px; left: -100px;
+        animation: drift1 8s ease-in-out infinite alternate;
+    }
+    .admin-wrap::after {
+        width: 350px; height: 350px;
+        background: radial-gradient(circle, rgba(11,58,99,0.35), transparent 70%);
+        bottom: -60px; right: -80px;
+        animation: drift2 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 { to { transform: translate(30px, 40px); } }
+    @keyframes drift2 { to { transform: translate(-20px, -30px); } }
+
+    /* Card */
+    .admin-card {
+        position: relative; z-index: 1;
+        width: 100%; max-width: 400px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 42px 36px 36px;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+        animation: slideUp 0.55s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(32px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Logo */
+    .admin-logo {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 28px;
+    }
+    .admin-logo a {
+        display: inline-block;
+        padding: 10px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border);
+        transition: border-color 0.3s;
+    }
+    .admin-logo a:hover { border-color: rgba(238,77,45,0.4); }
+    .admin-logo img {
+        width: 54px;
+        height: 54px;
+        object-fit: contain;
+        display: block;
+    }
+
+    /* Admin badge */
+    .admin-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(201,147,58,0.12), rgba(201,147,58,0.06));
+        border: 1px solid rgba(201,147,58,0.25);
+        border-radius: 8px;
+        padding: 8px 14px;
+        margin-bottom: 22px;
+        width: fit-content;
+    }
+    .admin-badge i {
+        color: var(--gold);
+        font-size: 13px;
+    }
+    .admin-badge span {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--gold);
+    }
+
+    /* Hidden field — passes 'admin' role silently */
+    .role-hidden { display: none; }
+
+    /* Heading */
+    .admin-heading {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
+        color: var(--text);
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+    .admin-sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 28px;
+    }
+
+    /* Divider */
+    .divider {
+        height: 1px;
+        background: var(--border);
+        margin-bottom: 28px;
+    }
+
+    /* Form */
+    .admin-form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .field-group label {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+        text-transform: uppercase;
+    }
+
+    .input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .input-wrap i {
+        position: absolute;
+        left: 14px;
+        color: var(--muted);
+        font-size: 14px;
+        pointer-events: none;
+        transition: color 0.3s;
+    }
+    .input-wrap input {
+        width: 100%;
+        padding: 12px 14px 12px 40px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 14px;
+        font-family: 'DM Sans', sans-serif;
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+    }
+    .input-wrap input::placeholder { color: #3d3d50; }
+    .input-wrap input:focus {
+        border-color: rgba(238,77,45,0.5);
+        background: rgba(238,77,45,0.04);
+        box-shadow: 0 0 0 3px rgba(238,77,45,0.08);
+    }
+    .input-wrap input:focus + i,
+    .input-wrap:focus-within i { color: var(--accent); }
+
+    /* Move icon before input in DOM but visually same */
+    .input-wrap input:focus ~ i { color: var(--accent); }
+
+    /* Toggle password */
+    .toggle-pw {
+        position: absolute;
+        right: 14px;
+        background: none;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 14px;
+        padding: 0;
+        transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: var(--text); }
+
+    /* Submit */
+    .admin-btn {
+        margin-top: 6px;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #ee4d2d, #c93a1e);
+        color: white;
+        font-size: 15px;
+        font-weight: 700;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        letter-spacing: 0.3px;
+        transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+        box-shadow: 0 4px 20px rgba(238,77,45,0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .admin-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 28px rgba(238,77,45,0.45);
+        filter: brightness(1.05);
+    }
+    .admin-btn:active { transform: translateY(0); }
+
+    /* Footer */
+    .admin-footer {
+        margin-top: 22px;
+        text-align: center;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.3px;
+    }
+    .admin-footer i { margin-right: 4px; }
+
+    @media (max-width: 440px) {
+        .admin-card { padding: 32px 22px 28px; }
+    }
+</style>
+
+<div class="admin-wrap">
+    <div class="admin-card">
+
+        <div class="admin-logo">
+            <a href="{% url 'secretkey' %}">
+                <img src="{% static 'images/final.png' %}" alt="Gadget Soko Logo">
+            </a>
+        </div>
+
+        <!-- Admin label replaces dropdown -->
+        <div class="admin-badge">
+            <i class="fa fa-shield-halved"></i>
+            <span>Admin Portal</span>
+        </div>
+
+        <h2 class="admin-heading">Welcome Back</h2>
+        <p class="admin-sub">Sign in to manage Gadget Soko</p>
+
+        <div class="divider"></div>
+
+        <form method="POST" class="admin-form">
+            {% csrf_token %}
+
+            <!-- Hidden role field — no dropdown needed -->
+            <input type="hidden" name="role" value="admin" class="role-hidden">
+
+            <div class="field-group">
+                <label>Username</label>
+                <div class="input-wrap">
+                    <i class="fa fa-user"></i>
+                    <input type="text" name="username" placeholder="Enter admin username" required autocomplete="username">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Password</label>
+                <div class="input-wrap">
+                    <i class="fa fa-lock"></i>
+                    <input type="password" name="password" id="pw-input" placeholder="Enter password" required autocomplete="current-password">
+                    <button type="button" class="toggle-pw" onclick="togglePw()" title="Show/hide password">
+                        <i class="fa fa-eye" id="pw-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="admin-btn">
+                <i class="fa fa-arrow-right-to-bracket"></i>
+                Sign In
+            </button>
+        </form>
+
+        <p class="admin-footer">
+            <i class="fa fa-lock"></i>
+            Restricted access &mdash; Gadget Soko Kenya
+        </p>
+
+    </div>
+</div>
+
+<script>
+function togglePw() {
+    const input = document.getElementById('pw-input');
+    const icon  = document.getElementById('pw-icon');
+    const show  = input.type === 'password';
+    input.type  = show ? 'text' : 'password';
+    icon.classList.toggle('fa-eye',      !show);
+    icon.classList.toggle('fa-eye-slash', show);
+}
+</script>
+
+<script src="{% static 'js/login.js' %}"></script>
+
+{% endblock %}
