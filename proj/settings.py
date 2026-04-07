@@ -22,13 +22,14 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '187.124.210.223',
-    'gadgetsoko.com'
+    'gadgetsoko.com',
+    'www.gadgetsoko.com'
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://gadgetsoko.vercel.app','https://gadgetsoko.com','https://gadgetsoko.com'
+    'https://gadgetsoko.vercel.app','https://gadgetsoko.com','https://gadgetsoko.com','https://www.gadgetsoko.com'
 ]
 
 # Production security settings (active when DEBUG=False)
