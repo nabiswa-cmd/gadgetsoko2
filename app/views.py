@@ -416,7 +416,7 @@ def remove_cart(request, item_id):
     return JsonResponse({"success": True})
 
 
-
+import traceback
 def check(request):
     # --- FETCH DATA ---
     config, _ = SiteSettings.objects.get_or_create(id=1)
