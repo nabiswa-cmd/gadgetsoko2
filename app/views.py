@@ -1228,7 +1228,7 @@ def auto_assign_brand_logo(sender, instance, **kwargs):
 
 
 
-
+@login_required 
 def download_receipt(request, order_id):
     order = Order.objects.get(id=order_id, user=request.user)
     template = get_template('payment_instructions.html') # Create this simple HTML file

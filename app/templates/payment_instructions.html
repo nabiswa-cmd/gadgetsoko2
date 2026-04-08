@@ -154,8 +154,8 @@
         {% if order.payment_method == 'mpesa' %}
             <div class="instr-title">M-Pesa Express (STK)</div>
             <div class="pay-details">
-                <span class="pay-value">Paybill: 400200</span>
-                <span class="pay-ref">Acc: {{ order.id }}</span>
+                <span class="pay-value">ORDER</span>
+                <span class="pay-ref">OrderID: {{ order.id }}</span>
             </div>
         {% else %}
             <div class="instr-title">Cash on Delivery</div>

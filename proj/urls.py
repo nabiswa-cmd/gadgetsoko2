@@ -4,11 +4,19 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.contrib.sitemaps.views import sitemap
+from .sitemaps import ProductSitemap
 
+
+
+sitemaps = {
+    'products': ProductSitemap,
+}
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('app.urls')),
     path('accounts/', include('allauth.urls')),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     # ── FIXED Built-in Django Password Reset ──
 path('password-reset/',
      auth_views.PasswordResetView.as_view(
@@ -41,3 +49,8 @@ path('password-reset/',
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+
+
+
