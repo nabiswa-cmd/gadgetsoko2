@@ -100,60 +100,23 @@
 .price-now { color: var(--gs-orange); font-weight: 800; font-size: 18px; }
 .price-old { color: #aaa; text-decoration: line-through; font-size: 13px; margin-left: 8px; }
 
-.card-btns { display: flex; gap: 10px; padding: 0 15px 15px; }
-.btn-v { flex: 1; border: 1.5px solid #ddd; color: #555; text-align: center; padding: 10px 0; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; }
-.btn-a { flex: 1.5; background: var(--gs-orange); color: #fff; border: none; padding: 10px 0; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.card-btns { display: flex; gap: 8px; padding: 0 15px 15px; margin-top: auto; }
+.btn-v, .btn-a {
+    flex: 1; height: 40px; display: flex; align-items: center; justify-content: center; 
+    gap: 8px; border-radius: 6px; font-size: 11px; font-weight: 800; text-decoration: none; transition: 0.3s;
+}
+.btn-v { border: 1.5px solid #ddd; color: var(--gs-navy); background: #fff; }
+.btn-v:hover { background: #f8f9fa; }
+.btn-a { background: var(--gs-orange); color: #fff; border: none; cursor: pointer; }
 
-/* ── NO PRODUCTS VIEW (ANIMATION LARGER) ── */
-.no-products-container {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 60px 20px;
-}
-.no-products-container video {
-    width: 320px; /* Made Animation Larger */
-    max-width: 90%;
-    margin-bottom: 25px;
-}
-.clear-filters-btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 12px 30px;
-    background: var(--gs-orange);
-    color: #fff;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 14px;
-    transition: 0.3s;
-}
-.clear-filters-btn:hover {
-    background: var(--gs-navy);
-    transform: scale(1.05);
-}
+/* ── NO PRODUCTS VIEW ── */
+.no-products-container { grid-column: 1 / -1; text-align: center; padding: 60px 20px; }
+.no-products-container video { width: 320px; max-width: 90%; margin-bottom: 25px; }
+.clear-filters-btn { display: inline-block; margin-top: 20px; padding: 12px 30px; background: var(--gs-orange); color: #fff; border-radius: 8px; font-weight: 800; transition: 0.3s; text-decoration: none;}
 
 /* ── PAGINATION ── */
-.pagination-wrapper {
-    margin-top: 40px;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    padding-bottom: 40px;
-}
-.page-link {
-    min-width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border-color);
-    background: #fff;
-    color: var(--gs-navy);
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: 700;
-    font-size: 14px;
-}
+.pagination-wrapper { margin-top: 40px; display: flex; justify-content: center; gap: 8px; padding-bottom: 40px; }
+.page-link { min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); background: #fff; color: var(--gs-navy); text-decoration: none; border-radius: 6px; font-weight: 700; }
 .page-link.active { background: var(--gs-orange); color: #fff; border-color: var(--gs-orange); }
 
 @media (max-width: 768px) {
@@ -162,7 +125,7 @@
 }
 </style>
 
-<nav class="filter-nav">
+<nav class="filter-nav d-md-none">
     <div class="custom-dropdown" id="brand-drop">
         <div class="dropdown-trigger"><span>Brands</span> <i class="fa fa-chevron-down"></i></div>
         <ul class="dropdown-menu">
@@ -179,6 +142,8 @@
     </div>
 </nav>
 
+<input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+
 <div class="shop-wrapper">
     <aside class="sidebar">
         <div class="sidebar-sticky">
@@ -186,7 +151,7 @@
                 <h4>All Brands</h4>
                 <ul>
                     {% for b in brands %}
-                    <li><a href="?brand={{ b.id }}" class="{% if selected_brand|add:'0' == b.id %}active{% endif %}">{{ b.name }}</a></li>
+                    <li><a href="?brand={{ b.id }}" class="{% if selected_brand == b.id|stringformat:'s' %}active{% endif %}">{{ b.name }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -194,7 +159,7 @@
                 <h4>Categories</h4>
                 <ul>
                     {% for c in categories %}
-                    <li><a href="?category={{ c.id }}" class="{% if selected_category|add:'0' == c.id %}active{% endif %}">{{ c.name }}</a></li>
+                    <li><a href="?category={{ c.id }}" class="{% if selected_category == c.id|stringformat:'s' %}active{% endif %}">{{ c.name }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -202,7 +167,7 @@
     </aside>
 
     <main class="main-content">
-        <div class="product-grid">
+        <div class="product-grid" id="product-list">
             {% for p in products %}
             <div class="product-card">
                 <div class="badge-stack">
@@ -213,20 +178,29 @@
                     </div>
                     {% endif %}
                 </div>
+
                 <div class="img-container">
                     <img src="{% if p.images.first %}{{ p.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ p.name }}">
                 </div>
+
                 <div class="product-info">
-                    <span style="font-size:10px; font-weight:800; color:var(--gs-navy);">{{ p.brand.name }}</span>
+                    <span style="font-size:10px; font-weight:800; color:var(--gs-navy); text-transform:uppercase;">{{ p.brand.name }}</span>
                     <h3>{{ p.name }}</h3>
                     <div style="margin-top: 10px;">
                         <span class="price-now">KES {{ p.discounted_price|default:p.price|floatformat:0 }}</span>
-                        {% if p.discount > 0 %}<span class="price-old">KES {{ p.price|floatformat:0 }}</span>{% endif %}
+                        {% if p.discount > 0 %}
+                        <span class="price-old">KES {{ p.price|floatformat:0 }}</span>
+                        {% endif %}
                     </div>
                 </div>
+
                 <div class="card-btns">
-                    <a href="{% url 'product_detail' p.id %}" class="btn-v">VIEW</a>
-                    <button class="btn-a" onclick="addToCartUI({{ p.id }}, this)">ADD</button>
+                    <a href="{% url 'product_detail' p.id %}" class="btn-v">
+                        <i class="fa fa-eye"></i> VIEW
+                    </a>
+                    <button class="btn-a" onclick="addToCartUI('{{ p.id }}', this)">
+                        <i class="fa fa-shopping-cart"></i> ADD
+                    </button>
                 </div>
             </div>
             {% empty %}
@@ -265,6 +239,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+/* ── DROPDOWN LOGIC ── */
 $('.dropdown-trigger').on('click', function(e) {
     e.stopPropagation();
     const parent = $(this).parent();
@@ -272,16 +247,98 @@ $('.dropdown-trigger').on('click', function(e) {
     $('.custom-dropdown').removeClass('active');
     if (!active) parent.addClass('active');
 });
-
 $(window).on('click', () => $('.custom-dropdown').removeClass('active'));
 
+/* ── FILTER ACTION ── */
 function filterAction(key, val) {
     const url = new URL(window.location.href);
     if (val) url.searchParams.set(key, val); else url.searchParams.delete(key);
     url.searchParams.delete('page');
     window.location.href = url.href;
 }
+function addToCartUI(productId, btn) {
+    // 1. Check if user is authenticated using Django template variable
+    const isAuthenticated = "{{ request.user.is_authenticated|yesno:'true,false' }}" === "true";
 
+    if (!isAuthenticated) {
+        // Show the auth-loader
+        const loader = document.getElementById('auth-loader');
+        if (loader) {
+            loader.style.display = 'flex';
+        }
+
+        // Redirect to login after a short delay (to let them see the loader)
+        setTimeout(() => {
+            window.location.href = "{% url 'userlog' %}?next=" + window.location.pathname;
+        }, 800);
+        return; 
+    }
+
+    // 2. If authenticated, proceed with the normal Add to Cart logic
+    const csrfToken = document.getElementById("csrf_token").value;
+    const origHTML = btn.innerHTML;
+
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    fetch(`/add-to-cart/${productId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrfToken,
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json"
+        }
+    })
+    .then(res => {
+        // Fallback: If server returns 401 Unauthorized
+        if (res.status === 401) {
+            document.getElementById('auth-loader').style.display = 'flex';
+            window.location.href = "{% url 'userlog' %}";
+            return;
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data && data.success) {
+            btn.innerHTML = '<i class="fa fa-check"></i> DONE';
+            btn.style.backgroundColor = "#00a650";
+
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                badge.textContent = data.cart_count;
+                badge.style.display = 'flex';
+                badge.style.transform = 'scale(1.4)';
+                setTimeout(() => { badge.style.transform = 'scale(1)'; }, 200);
+            }
+        } else {
+            btn.innerHTML = '<i class="fa fa-times"></i> ERROR';
+            btn.style.backgroundColor = "#dc3545";
+        }
+
+        setTimeout(() => {
+            btn.innerHTML = origHTML;
+            btn.style.backgroundColor = "";
+            btn.disabled = false;
+        }, 1500);
+    })
+    .catch(err => {
+        console.error("Cart Error:", err);
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+    });
+}
+
+        // Reset button after 1.5s
+        setTimeout(() => {
+            btn.innerHTML = origHTML;
+            btn.style.backgroundColor = "";
+            btn.disabled = false;
+        }, 1500);
+    
+ 
+
+
+/* ── DISCOUNT TIMERS ── */
 function updateTimers() {
     $('.timer-tag').each(function() {
         const exp = $(this).data('expiry');
@@ -295,15 +352,6 @@ function updateTimers() {
     });
 }
 setInterval(updateTimers, 1000);
-
-function addToCartUI(id, btn) {
-    const orig = btn.innerText;
-    btn.innerText = "ADDING...";
-    setTimeout(() => {
-        btn.innerText = "DONE!";
-        btn.style.background = "#00a650";
-        setTimeout(() => { btn.innerText = orig; btn.style.background = ""; }, 1500);
-    }, 600);
-}
+updateTimers();
 </script>
 {% endblock %}

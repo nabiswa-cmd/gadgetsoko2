@@ -276,34 +276,35 @@ def product_detail(request, pk):
         'discount_expiry': product.discount_expiry.isoformat() if product.discount_expiry else None,
     })
 
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 
 @login_required
+@require_POST
 def add_to_cart(request, product_id):
-    """
-    Adds a product to the user's cart. If the product is already in the cart, 
-    it increments the quantity. Otherwise, it creates a new CartItem entry.
-    """
-    # Step 1: Ensure the product exists in the database
+    # Step 1: Ensure the product exists
     product = get_object_or_404(Product, id=product_id)
     
-    # Step 2: Handle adding the product to the user's cart
+    # Step 2: Handle adding the product
     cart_item, created = CartItem.objects.get_or_create(
         user=request.user, product=product, defaults={'quantity': 1}
     )
     
-    # Step 3: If the item already exists, increment the quantity
+    # Step 3: Increment if it exists
     if not created:
         cart_item.quantity += 1
         cart_item.save()
     
-    # Step 4: Calculate the total quantity in the user's cart (for displaying cart badge)
+    # Step 4: Get total count
     cart_count = CartItem.objects.filter(user=request.user).aggregate(total=Sum('quantity'))['total'] or 0
     
-    # Step 5: Return a JSON response with success and updated cart count
+    # Step 5: Return JSON
     return JsonResponse({
         'success': True,
         'cart_count': cart_count
     })
+
 def products_by_brand(request, brand_id):
     products = Product.objects.filter(brand__id=brand_id)
     brands = Brand.objects.all()
