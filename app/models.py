@@ -42,6 +42,7 @@ class Product(models.Model):
 
     discount_duration_hours = models.PositiveIntegerField(default=0)
     discount_start_time = models.DateTimeField(null=True, blank=True)
+    views = models.PositiveIntegerField(default=0)
 
     # -------------------------------
     # Discount Calculations

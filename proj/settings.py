@@ -4,8 +4,8 @@ import os
 
 # Define BASE_DIR first, then load .env
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv()
 
+#@load_dotenv(os.path.join(BASE_DIR, ".env")')
 # ---------------------------------------------------------------------------
 # SECURITY
 # ---------------------------------------------------------------------------
