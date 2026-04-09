@@ -347,6 +347,7 @@ def products_by_brand(request, brand_id):
     })
 
 @login_required
+@staff_member_required
 
 def add_product(request):
     create_default_categories()
@@ -811,7 +812,7 @@ def activity_view(request):
 
 
 
-
+@staff_member_required
 def analytics_view(request):
     # 1. Revenue by Date (Changed 'total_price' to 'total')
     revenue_data = Order.objects.values('created_at__date').annotate(
@@ -984,7 +985,7 @@ def register_mpesa_urls(request):
     return JsonResponse(response.json())
 
 
-
+@staff_member_required
 def update_price(request, pk):
     if request.method == "POST":
         product = get_object_or_404(Product, id=pk)
@@ -996,7 +997,7 @@ def update_price(request, pk):
     return redirect('manage_products')
 
 
-
+@staff_member_required
 def mark_out_of_stock(request, product_id):
     if request.method == "POST":
         product = get_object_or_404(Product, id=product_id)
@@ -1050,7 +1051,7 @@ def most_purchased_products_view(request):
         'products': products,
     })
 
-
+@staff_member_required
 # Custom Password Form
 class CustomPasswordChangeForm(forms.Form):
     username = forms.CharField(max_length=150, widget=forms.TextInput(attrs={
@@ -1087,7 +1088,7 @@ class CustomPasswordChangeForm(forms.Form):
 
 
 
-
+@staff_member_required
 @login_required
 def change_password_view(request):
     if request.method == 'POST':
@@ -1113,7 +1114,7 @@ def change_password_view(request):
 
 
 
-
+@staff_member_required
 # Optional: Only allow existing superusers to add new admins
 @user_passes_test(lambda u: u.is_superuser)
 def add_admin_view(request):
@@ -1303,25 +1304,27 @@ def shop_view(request):
 
 from django.shortcuts import redirect
 from .models import Order, UserActivity # Ensure these imports match your models
-
+@staff_member_required
 def delete_orders(request):
     if request.method == 'POST':
         order_ids = request.POST.getlist('selected_ids')
         Order.objects.filter(id__in=order_ids).delete()
     return redirect('dashboard') # Change this to your dashboard's URL name
 
+@staff_member_required
 def delete_logs(request):
     if request.method == 'POST':
         log_ids = request.POST.getlist('selected_ids')
         UserActivity.objects.filter(id__in=log_ids).delete()
     return redirect('dashboard')
 
+@staff_member_required
 def delete_orders(request):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('selected_ids')
         Order.objects.filter(id__in=selected_ids).delete()
     return redirect('dashboard') 
-
+@staff_member_required
 def bulk_delete_products(request):
     if request.method == 'POST':
         product_ids = request.POST.getlist('product_ids')
@@ -1332,7 +1335,7 @@ def bulk_delete_products(request):
 
 from django.shortcuts import redirect
 from .models import Order  # Ensure your model name is Order
-
+@staff_member_required
 def bulk_delete_orders(request):
     if request.method == 'POST':
         order_ids = request.POST.getlist('order_ids') # This catches the checkboxes
