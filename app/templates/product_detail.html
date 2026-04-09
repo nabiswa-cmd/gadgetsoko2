@@ -16,6 +16,8 @@
         --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
+    a { text-decoration: none !important; }
+
     /* ── BACK NAV ── */
     .back-link {
         text-decoration: none;
@@ -249,7 +251,7 @@
     /* ── RIGHT BOTTOM COMMUNICATION BUTTONS ── */
     .comm-float {
         position: fixed;
-        bottom: 90px; /* Positions it above the sticky cart bar on mobile */
+        bottom: 90px;
         right: 20px;
         display: flex;
         flex-direction: column;
@@ -364,7 +366,7 @@
             <div class="swiper-wrapper">
                 {% for item in recommended_products %}
                 <div class="swiper-slide">
-                    <a href="{% url 'product_detail' item.id %}" style="text-decoration:none; color:inherit;">
+                    <a href="{% url 'product_detail' item.id %}" style="color:inherit;">
                         <div class="rope-item">
                             <div class="rope-thumb">
                                 <img src="{% if item.images.first %}{{ item.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}"

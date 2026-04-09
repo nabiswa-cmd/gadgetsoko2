@@ -99,6 +99,7 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'proj.wsgi.application'
 SITE_ID = 1
 
@@ -107,10 +108,11 @@ SITE_ID = 1
 # ---------------------------------------------------------------------------
 
 #DATABASES = {
-     #'default': {
-       #  'ENGINE': 'django.db.backends.sqlite3',
-       #  'NAME': BASE_DIR / 'db.sqlite3',
-     #~````````````````````````````````}
+ #    'default': {
+   #      'ENGINE': 'django.db.backends.sqlite3',
+  #
+ #@        'NAME': BASE_DIR / 'db.sqlite3',
+   #  }
 #}
 DATABASES = {
     'default':{   

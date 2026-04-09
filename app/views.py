@@ -56,50 +56,80 @@ from .models import Product
 from datetime import datetime
 import random
 
-def index_view(request):
-    # 1. Fetching base data
-    products = Product.objects.all() # Kept as per your original code
-    brands = Brand.objects.all()
-    recommended_products = get_recommended_products(request.user)
+from django.utils import timezone
+from django.db.models import Sum
+from django.core.paginator import Paginator
+from django.shortcuts import render
 
-    # 2. QUICK SALES (Rectified)
-    # Pulls the top 8 discounted items to show at the top of the homepage
-    quick_sales = Product.objects.filter(
+from django.shortcuts import render
+from django.utils import timezone
+from django.db.models import F, ExpressionWrapper, DateTimeField, Sum
+from django.core.paginator import Paginator
+from datetime import timedelta
+from .models import Product, Brand, CartItem # Ensure these are imported
+from django.db.models import F, ExpressionWrapper, DateTimeField, Sum, Value, DurationField
+
+def index_view(request):
+    now = timezone.now()
+
+    # 1. Base query with annotation
+    active_products_query = Product.objects.annotate(
+        expiry=ExpressionWrapper(
+            F('discount_start_time') + (F('discount_duration_hours') * Value(timedelta(hours=1), output_field=DurationField())),
+            output_field=DateTimeField()
+        )
+    )
+
+    # ✅ FIX 1: Convert expired QuerySet to a list to avoid SQLite math errors
+    try:
+        expired_products = list(active_products_query.filter(
+            discount_start_time__isnull=False,
+            expiry__lt=now
+        ).values_list('id', flat=True))
+
+        if expired_products:
+            Product.objects.filter(id__in=expired_products).update(
+                discount=0, 
+                discount_start_time=None, 
+                discount_duration_hours=0
+            )
+    except Exception as e:
+        print(f"Cleanup error: {e}")
+
+    # 2. Sidebar data
+    brands = Brand.objects.all()
+    
+    # ✅ FIX 2: Convert quick_sales to a list immediately
+    # This executes the query HERE in the view, rather than letting the template 
+    # trigger the crash at line 439.
+    quick_sales = list(active_products_query.filter(
         discount__gt=0,
         stock__gt=0,
-    ).order_by('-discount')[:8]
+        discount_start_time__isnull=False,
+        expiry__gt=now
+    ).order_by('-discount')[:8])
 
-    # 3. FEATURED PRODUCTS (With Pagination)
-    # Shows the latest products first. 
-    # Change '-id' to '-created_at' if you have a timestamp field.
+    # 3. Featured Products
     all_featured = Product.objects.all().order_by('-id')
-    
-    # We set this to 10 per page as requested.
-    paginator = Paginator(all_featured, 10) 
+    paginator = Paginator(all_featured, 10)
     page_number = request.GET.get('page')
     featured_products = paginator.get_page(page_number)
 
-    # 4. CART COUNT (Kept your exact logic)
+    # 4. Cart Count
     cart_count = 0
     if request.user.is_authenticated:
-        result = CartItem.objects.filter(user=request.user).aggregate(
-            total=Sum('quantity')
-        )
+        result = CartItem.objects.filter(user=request.user).aggregate(total=Sum('quantity'))
         cart_count = result['total'] or 0
 
-    # 5. Rendering everything to the template
     return render(request, 'index.html', {
-        'products': products,
         'brands': brands,
-        'recommended_products': recommended_products,
-        'quick_sales': quick_sales,
-        'featured_products': featured_products, # Now handles 1, 2, 3 pagination
+        'quick_sales': quick_sales,  # Now a safe Python list
+        'featured_products': featured_products,
         'cart_count': cart_count
     })
 
-
 def products_view(request):
-    products_list = Product.objects.all().order_by('-created_at')
+    products_list = Product.objects.all().order_by('-id')
     categories = Category.objects.all()
     brands = Brand.objects.all()
     

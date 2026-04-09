@@ -65,8 +65,19 @@
 
 /* ── LAYOUT ── */
 .shop-wrapper { display: flex; gap: 20px; padding: 20px 5%; max-width: 1400px; margin: 0 auto; min-height: 600px; }
-.sidebar { width: 220px; flex-shrink: 0; }
+.sidebar { width: 420px; flex-shrink: 0; }
 .sidebar-sticky { position: sticky; top: 80px; }
+
+/* ── SIDEBAR CARDS SIDE BY SIDE ── */
+.sidebar-cards-row {
+    display: flex;
+    gap: 10px;
+}
+.sidebar-cards-row .sidebar-card {
+    flex: 1;
+    min-width: 0;
+}
+
 .sidebar-card { background: #fff; padding: 15px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 15px; }
 .sidebar-card h4 { font-size: 11px; text-transform: uppercase; color: var(--gs-navy); border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
 .sidebar-card ul { list-style: none; padding: 0; }
@@ -147,21 +158,23 @@
 <div class="shop-wrapper">
     <aside class="sidebar">
         <div class="sidebar-sticky">
-            <div class="sidebar-card">
-                <h4>All Brands</h4>
-                <ul>
-                    {% for b in brands %}
-                    <li><a href="?brand={{ b.id }}" class="{% if selected_brand == b.id|stringformat:'s' %}active{% endif %}">{{ b.name }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="sidebar-card">
-                <h4>Categories</h4>
-                <ul>
-                    {% for c in categories %}
-                    <li><a href="?category={{ c.id }}" class="{% if selected_category == c.id|stringformat:'s' %}active{% endif %}">{{ c.name }}</a></li>
-                    {% endfor %}
-                </ul>
+            <div class="sidebar-cards-row">
+                <div class="sidebar-card">
+                    <h4>All Brands</h4>
+                    <ul>
+                        {% for b in brands %}
+                        <li><a href="?brand={{ b.id }}" class="{% if selected_brand == b.id|stringformat:'s' %}active{% endif %}">{{ b.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="sidebar-card">
+                    <h4>Categories</h4>
+                    <ul>
+                        {% for c in categories %}
+                        <li><a href="?category={{ c.id }}" class="{% if selected_category == c.id|stringformat:'s' %}active{% endif %}">{{ c.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </aside>
@@ -257,24 +270,19 @@ function filterAction(key, val) {
     window.location.href = url.href;
 }
 function addToCartUI(productId, btn) {
-    // 1. Check if user is authenticated using Django template variable
     const isAuthenticated = "{{ request.user.is_authenticated|yesno:'true,false' }}" === "true";
 
     if (!isAuthenticated) {
-        // Show the auth-loader
         const loader = document.getElementById('auth-loader');
         if (loader) {
             loader.style.display = 'flex';
         }
-
-        // Redirect to login after a short delay (to let them see the loader)
         setTimeout(() => {
             window.location.href = "{% url 'userlog' %}?next=" + window.location.pathname;
         }, 800);
         return; 
     }
 
-    // 2. If authenticated, proceed with the normal Add to Cart logic
     const csrfToken = document.getElementById("csrf_token").value;
     const origHTML = btn.innerHTML;
 
@@ -290,7 +298,6 @@ function addToCartUI(productId, btn) {
         }
     })
     .then(res => {
-        // Fallback: If server returns 401 Unauthorized
         if (res.status === 401) {
             document.getElementById('auth-loader').style.display = 'flex';
             window.location.href = "{% url 'userlog' %}";
@@ -328,15 +335,11 @@ function addToCartUI(productId, btn) {
     });
 }
 
-        // Reset button after 1.5s
         setTimeout(() => {
             btn.innerHTML = origHTML;
             btn.style.backgroundColor = "";
             btn.disabled = false;
         }, 1500);
-    
- 
-
 
 /* ── DISCOUNT TIMERS ── */
 function updateTimers() {
