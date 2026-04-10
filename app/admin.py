@@ -22,12 +22,12 @@ class ProductImageInline(admin.TabularInline):
 # --- PRODUCT ---
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'brand', 'category', 'price','short_description', 'discount', 'get_discounted_price', 'stock')
+    list_display = ('name', 'brand', 'category', 'price','short_description', 'discount', 'get_discounted_price', 'stock','discount_start_time')
     list_filter = ('category', 'brand')
     search_fields = ('name',)
     list_editable = ('price', 'discount', 'stock')
     inlines = [ProductImageInline]
-    list_editable = ('price', 'discount', 'stock', 'short_description')
+    list_editable = ('price', 'discount', 'stock', 'short_description','discount_start_time')
 
     def get_discounted_price(self, obj):
         return obj.discounted_price

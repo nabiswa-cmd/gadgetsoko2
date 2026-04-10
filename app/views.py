@@ -111,7 +111,7 @@ def index_view(request):
 
     # 3. Featured Products
     all_featured = Product.objects.all().order_by('-id')
-    paginator = Paginator(all_featured, 22)
+    paginator = Paginator(all_featured, 24)
     page_number = request.GET.get('page')
     featured_products = paginator.get_page(page_number)
 
