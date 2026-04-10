@@ -4,9 +4,51 @@
 {% block title %}Gadget Soko Kenya | Home{% endblock %}
 
 {% block content %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Gadget Soko Kenya",
+  "url": "https://gadgetsoko.com/",
+  "logo": "https://gadgetsoko.com/static/images/tab.png",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+254-700-000-000",
+    "contactType": "customer service",
+    "areaServed": "KE",
+    "availableLanguage": "English"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [{
+    "@type": "Question",
+    "name": "Do you deliver across Kenya?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, we deliver country-wide across all 47 counties in Kenya."
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "What are your payment methods?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "We accept M-Pesa, Bank Transfers, and Payment on Delivery (POD) within Nairobi."
+    }
+  }]
+}
+</script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+/* Your existing styles */
+
     :root {
         --gs-orange: #ee4d2d;
         --gs-navy: #0b3a63;
@@ -662,7 +704,7 @@
         "{% static 'images/photo1.png' %}", 
         "{% static 'images/photo2.png' %}", 
         "{% static 'images/photo4.png' %}", 
-        "{% static 'images/photo3.png' %[]}",
+        "{% static 'images/photo3.png' %}",
         "{% static 'images/photo5.png' %}",
         "{% static 'images/f.png' %}",
         "{% static 'images/G.png' %}",
