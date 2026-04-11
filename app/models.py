@@ -7,6 +7,10 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.timezone import now
 
+from django.db import models
+from django.urls import reverse
+from django.utils.text import slugify
+
 # 1. BRAND
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -43,6 +47,7 @@ class Product(models.Model):
     discount_duration_hours = models.PositiveIntegerField(default=0)
     discount_start_time = models.DateTimeField(null=True, blank=True)
     views = models.PositiveIntegerField(default=0)
+    slug = models.SlugField(unique=True, blank=True, null=True)
 
     # -------------------------------
     # Discount Calculations
@@ -52,6 +57,10 @@ class Product(models.Model):
         if self.discount_start_time and self.discount_duration_hours:
             return self.discount_start_time + timedelta(hours=self.discount_duration_hours)
         return None
+    def get_absolute_url(self):
+        # We use 'pk' here because your path('products/<int:pk>/'...) 
+        # specifically looks for an integer Primary Key.
+        return reverse('product_detail', kwargs={'pk': self.pk})
 
     @property
     def is_discount_active(self):

@@ -852,6 +852,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <li><a href="{% url 'index' %}" onclick="toggleMenu()"><i class="bi bi-house-door me-2"></i>Home</a></li>
         <li><a href="{% url 'products' %}" onclick="toggleMenu()"><i class="bi bi-laptop me-2"></i>Products</a></li>
         <li><a href="{% url 'index' %}#FAQ" onclick="toggleMenu()"><i class="bi bi-headset me-2"></i>FAQs</a></li>
+        <li><a href="{% url 'about' %}" onclick="toggleMenu()"><i class="bi bi-info-circle me-2"></i>About</a></li>
         <li><a href="{% url 'index' %}#contacts" onclick="toggleMenu()"><i class="bi bi-envelope me-2"></i>Contact</a></li>
         <hr class="text-white-50 my-3">
         {% if user.is_authenticated %}
@@ -885,6 +886,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <a href="{% url 'index' %}" class="gs-nav-link">Home</a>
                 <a href="{% url 'products' %}" class="gs-nav-link">Products</a>
                 <a href="{% url 'index' %}#FAQ" class="gs-nav-link">FAQs</a>
+                <a href="{% url 'about' %}" class="gs-nav-link"></i>About</a>
                 <a href="{% url 'index' %}#contacts" class="gs-nav-link">Contacts</a>
             </div>
         </div>

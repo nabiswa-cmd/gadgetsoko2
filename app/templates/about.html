@@ -1,0 +1,385 @@
+{% extends 'base_site.html' %}
+{% load static %}
+
+{% block title %}About Us | Gadget Soko Kenya - Authentic Tech & Gadgets{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --gs-orange: #ee4d2d;
+        --gs-navy: #0b3a63;
+        --gs-dark: #1a1a1a;
+        --gs-gray: #6b7280;
+        --white: #ffffff;
+    }
+
+    body {
+        background-color: #fafafa;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--gs-dark);
+        margin: 0;
+    }
+
+    /* --- HERO SECTION --- */
+    .about-hero {
+        background: var(--gs-navy);
+        padding: 100px 5% 80px;
+        color: var(--white);
+        position: relative;
+    }
+
+    .hero-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .hero-content {
+        max-width: 650px;
+    }
+
+    .hero-content .tagline {
+        color: var(--gs-orange);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 14px;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .hero-content h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        line-height: 1.1;
+        font-weight: 800;
+        margin: 0 0 25px;
+    }
+
+    .hero-content h1 span {
+        color: var(--gs-orange);
+    }
+
+    .hero-content p {
+        font-size: 18px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 35px;
+    }
+
+    .hero-image-box {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 40px;
+        padding: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hero-image-box img {
+        max-width: 300px;
+        filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+    }
+
+    /* --- TRUST BAR --- */
+    .trust-bar {
+        background: var(--white);
+        padding: 40px 5%;
+        border-bottom: 1px solid #eee;
+    }
+
+    .trust-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .trust-item {
+        text-align: center;
+    }
+
+    .trust-item strong {
+        display: block;
+        font-size: 24px;
+        color: var(--gs-navy);
+        font-weight: 800;
+    }
+
+    .trust-item span {
+        font-size: 13px;
+        color: var(--gs-gray);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    /* --- STORY SECTION --- */
+    .story-section {
+        padding: 100px 5%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .story-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 80px;
+        align-items: center;
+    }
+
+    .story-text h2 {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 25px;
+        color: var(--gs-navy);
+    }
+
+    .story-text p {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #444;
+        margin-bottom: 20px;
+    }
+
+    .story-visual {
+        position: relative;
+    }
+
+    .story-visual img {
+        width: 100%;
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    }
+
+    /* --- WHY US (Humanized Style) --- */
+    .features-section {
+        background: #f0f2f5;
+        padding: 100px 5%;
+    }
+
+    .section-header {
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto 60px;
+    }
+
+    .section-header h2 {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--gs-navy);
+        margin-bottom: 15px;
+    }
+
+    .features-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+
+    .feature-card {
+        background: var(--white);
+        padding: 45px 35px;
+        border-radius: 24px;
+        transition: all 0.4s ease;
+        border: 1px solid transparent;
+    }
+
+    /* Clean hover: no lines, just a soft shadow and scale */
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        border-color: rgba(238, 77, 45, 0.1);
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(238, 77, 45, 0.08);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: var(--gs-orange);
+        margin-bottom: 25px;
+    }
+
+    .feature-card h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .feature-card p {
+        font-size: 15px;
+        color: var(--gs-gray);
+        line-height: 1.6;
+    }
+
+    /* --- CONTACT CTA --- */
+    .cta-section {
+        padding: 80px 5%;
+    }
+
+    .cta-card {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: var(--gs-navy);
+        border-radius: 30px;
+        padding: 60px;
+        text-align: center;
+        color: var(--white);
+        background-image: radial-gradient(circle at top right, rgba(238, 77, 45, 0.15), transparent);
+    }
+
+    .cta-card h2 {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 15px;
+    }
+
+    .cta-card p {
+        margin-bottom: 35px;
+        opacity: 0.9;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-main {
+        background: var(--gs-orange);
+        color: white;
+        padding: 16px 35px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .btn-whatsapp {
+        background: #25D366;
+        color: white;
+        padding: 16px 35px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .btn-main:hover, .btn-whatsapp:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 992px) {
+        .hero-container, .story-layout { grid-template-columns: 1fr; text-align: center; }
+        .hero-image-box { display: none; }
+        .hero-content { max-width: 100%; }
+        .features-grid { grid-template-columns: 1fr; }
+        .trust-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+    }
+</style>
+
+<section class="about-hero">
+    <div class="hero-container">
+        <div class="hero-content">
+            <span class="tagline">Authentic Tech in Kenya</span>
+            <h1>Quality Gadgets.<br><span>No Compromise.</span></h1>
+            <p>Gadget Soko Kenya is your trusted partner for genuine electronics. We bridge the gap between global innovation and the Kenyan doorstep, ensuring you never have to settle for "clones" again.</p>
+            <a href="{% url 'products' %}" class="btn-main">Explore Our Catalog</a>
+        </div>
+        <div class="hero-image-box">
+            <img src="{% static 'images/FF.png' %}" alt="Gadget Soko Kenya">
+        </div>
+    </div>
+</section>
+
+<div class="trust-bar">
+    <div class="trust-grid">
+        <div class="trust-item">
+            <strong>47+</strong>
+            <span>Counties Delivered</span>
+        </div>
+        <div class="trust-item">
+            <strong>100%</strong>
+            <span>Genuine Products</span>
+        </div>
+        <div class="trust-item">
+            <strong>24/7</strong>
+            <span>Support via WhatsApp</span>
+        </div>
+        <div class="trust-item">
+            <strong>Lipa na M-PESA</strong>
+            <span>Secure Payments</span>
+        </div>
+    </div>
+</div>
+
+<section class="story-section">
+    <div class="story-layout">
+        <div class="story-text">
+            <h2>The Gadget Soko Story</h2>
+            <p>Born out of the frustration of seeing overpriced clones in the local market, <strong>Gadget Soko Kenya</strong> was founded to provide a transparent, reliable, and tech-focused shopping experience.</p>
+            <p>We aren't just a shop; we are tech enthusiasts. From the latest iPhones and Samsung devices to high-performance laptops and smart home accessories, we hand-pick every item to ensure it meets international standards.</p>
+            <p>Our mission is simple: To provide Kenyans with the best technology at the most competitive prices, backed by local warranties and genuine customer care.</p>
+        </div>
+        <div class="story-visual">
+             <img src="{% static 'images/FF.png' %}" alt="Gadget Soko Team" style="background: #eee;">
+        </div>
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="section-header">
+        <h2>Why Kenyans Choose Us</h2>
+        <p>We’ve built our reputation on three core pillars that keep our customers coming back.</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa fa-shield-check"></i></div>
+            <h3>Verified Authenticity</h3>
+            <p>Every product undergoes a strict quality check. We source directly from authorized distributors to ensure you receive 100% original hardware every single time.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa fa-truck-fast"></i></div>
+            <h3>Swift Delivery</h3>
+            <p>Whether you are in Nairobi, Mombasa, Kisumu, or Eldoret, our logistics network ensures your gadget reaches you safely and on time. Same-day delivery available in Nairobi.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa fa-handshake"></i></div>
+            <h3>After-Sales Support</h3>
+            <p>Our relationship doesn't end at the checkout. We provide setup assistance and clear warranty terms, so you can shop with absolute peace of mind.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="cta-card">
+        <h2>Ready to upgrade your lifestyle?</h2>
+        <p>Visit us at <strong>Laxmi Plaza, Shop 5, Nairobi</strong> or chat with our experts today for a personalized recommendation.</p>
+        <div class="btn-group">
+            <a href="{% url 'products' %}" class="btn-main">Shop All Gadgets</a>
+            <a href="https://wa.me/254759829235" class="btn-whatsapp" target="_blank">
+                <i class="fab fa-whatsapp"></i> WhatsApp Us
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

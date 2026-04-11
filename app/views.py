@@ -127,7 +127,8 @@ def index_view(request):
         'featured_products': featured_products,
         'cart_count': cart_count
     })
-
+def about(request):
+    return render(request, 'about.html')
 def products_view(request):
     products_list = Product.objects.all().order_by('-id')
     categories = Category.objects.all()

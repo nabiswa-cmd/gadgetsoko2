@@ -216,3 +216,6 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'Gadget Soko <sammytings2@gmail.com>'
 
+
+CRON_SECRET = os.environ.get('CRON_SECRET', 'change-this-secret')
+WHATSAPP_GROUP_URL = os.environ.get('WHATSAPP_GROUP_URL', 'https://chat.whatsapp.com/your-group-link')
