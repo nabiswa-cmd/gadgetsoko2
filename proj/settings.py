@@ -34,13 +34,18 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Production security settings (active when DEBUG=False)
 # --- This line must have ZERO spaces at the start ---
+# settings.py
+
+# Only force HTTPS if we are NOT in debug mode (i.e., in production)
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+else:
+    # Ensure these are False locally
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
 # ---------------------------------------------------------------------------
 # APPLICATION
@@ -215,5 +220,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'Gadget Soko <sammytings2@gmail.com>'
+
 
 
