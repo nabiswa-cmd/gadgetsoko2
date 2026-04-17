@@ -29,7 +29,7 @@ ALLOWED_HOSTS = [
 #SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://gadgetsoko.vercel.app','https://gadgetsoko.com','https://gadgetsoko.com','https://www.gadgetsoko.com'
+    'https://gadgetsoko.vercel.app','https://gadgetsoko.com','https://gadgetsoko.com','https://www.gadgetsoko.com','https://127.0.0.1:8000/'
 ]
 
 # Production security settings (active when DEBUG=False)
@@ -217,5 +217,3 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'Gadget Soko <sammytings2@gmail.com>'
 
 
-CRON_SECRET = os.environ.get('CRON_SECRET', 'change-this-secret')
-WHATSAPP_GROUP_URL = os.environ.get('WHATSAPP_GROUP_URL', 'https://chat.whatsapp.com/your-group-link')
