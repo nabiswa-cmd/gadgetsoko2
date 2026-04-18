@@ -1,3 +1,4 @@
+
 {% extends 'base_site.html' %}
 {% load static %}
 
@@ -47,8 +48,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* Your existing styles */
-
     :root {
         --gs-orange: #ee4d2d;
         --gs-navy: #0b3a63;
@@ -77,24 +76,98 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
 
-    /* ── BANNER ── */
+    /* ── BANNER SLIDER ── */
     .banner-wrapper {
-        margin-bottom: 30px;
-        position: relative;
-        overflow: hidden;
+        width: 100%;
         height: 400px;
+        border-radius: 7px;
+        overflow: hidden;      /* clips the sliding track */
+        position: relative;
         background: #000;
+        cursor: grab;
+        user-select: none;
     }
 
-    #bannerImage {
+    .banner-wrapper:active { cursor: grabbing; }
+
+    /* The track holds all images in a row */
+    #bannerTrack {
+        display: flex;
+        height: 100%;
+        transition: transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+        will-change: transform;
+    }
+
+    /* Each slide */
+    .banner-slide {
+        flex-shrink: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .banner-slide img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: opacity 0.6s ease-in-out;
+        display: block;
+        pointer-events: none;
+        border-radius: 0;
+    }
+
+    /* Prev / Next arrow buttons */
+    .banner-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0,0,0,0.45);
+        color: #fff;
+        border: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        font-size: 15px;
+        cursor: pointer;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+
+    .banner-arrow:hover { background: var(--gs-orange); }
+    .banner-arrow.prev { left: 14px; }
+    .banner-arrow.next { right: 14px; }
+
+    /* Dot indicators */
+    .banner-dots {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 7px;
+        z-index: 20;
+    }
+
+    .banner-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.5);
+        cursor: pointer;
+        transition: background 0.3s, transform 0.3s;
+        border: none;
+        padding: 0;
+    }
+
+    .banner-dot.active {
+        background: #fff;
+        transform: scale(1.35);
     }
 
     @media (max-width: 768px) {
-        .banner-wrapper { height: 180px; }
+        .banner-wrapper { height: 180px; border-radius: 10px; }
+        .banner-arrow { width: 30px; height: 30px; font-size: 12px; }
     }
 
     .gs-main { padding: 0 5% 50px; }
@@ -146,24 +219,27 @@
 
     .product-card:hover .img-container img { transform: scale(1.08); }
 
-    /* ── BRAND ROPE CAROUSEL ── */
+    /* ── BRAND CAROUSEL ── */
+    /* FIX: proper responsive behaviour — no overflow clipping on sides */
     .brand-carousel-wrapper {
         position: relative;
-        overflow: hidden;
+        /* Removed overflow:hidden — was cutting ovals on left/right edge */
         margin-bottom: 40px;
         padding: 18px 0;
         cursor: grab;
+        /* FIX: ensure it never causes horizontal scroll on the page */
+        max-width: 100%;
     }
 
     .brand-carousel-track {
         display: flex;
-        gap: 22px;
+        gap: 14px; /* FIX: tighter gap on mobile naturally */
         overflow-x: auto;
-        overflow-y: hidden;
+        overflow-y: visible; /* FIX: allow float animation to breathe */
         scroll-behavior: smooth;
         scrollbar-width: none;
         -ms-overflow-style: none;
-        padding: 12px 5px 18px;
+        padding: 12px 4px 18px;
         user-select: none;
         -webkit-overflow-scrolling: touch;
     }
@@ -180,11 +256,11 @@
         justify-content: center;
         padding: 8px 14px;
         text-decoration: none;
-        width: 120px;
-        height: 60px;
+        /* FIX: responsive sizing — smaller on mobile */
+        width: clamp(80px, 18vw, 120px);
+        height: clamp(44px, 10vw, 60px);
         transition: transform 0.35s var(--spring), border-color 0.25s;
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-
         animation: floatRope 3.2s ease-in-out infinite;
     }
 
@@ -330,16 +406,16 @@
     }
 
     /* ── MOBILE SPECIFIC ── */
-    @media (max-width: 768px) { 
+    @media (max-width: 768px) {
         .gs-main { padding: 0 2% 50px !important; }
-        .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; } 
-        .img-container { height: 150px; padding: 10px; } 
+        .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+        .img-container { height: 150px; padding: 10px; }
         .p-title { font-size: 11px; height: 30px; }
-        .product-actions { flex-direction: row; gap: 4px; padding: 8px 5px; } 
+        .product-actions { flex-direction: row; gap: 4px; padding: 8px 5px; }
         .btn-action-view, .btn-action-add { font-size: 9px; }
     }
 
-    /* TOAST & CHAT */
+    /* TOAST */
     #live-toast {
         position: fixed;
         bottom: -120px;
@@ -358,6 +434,8 @@
 
     #live-toast.active { bottom: 30px; }
 
+    /* ── AI CHAT LAUNCHER ── */
+    /* FIX: visibility controlled by JS via .chat-hidden class */
     #ai-chat-launcher {
         position: fixed;
         bottom: 30px;
@@ -374,6 +452,18 @@
         cursor: pointer;
         z-index: 10000;
         box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        /* smooth hide/show */
+        transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+    }
+
+    /* FIX: hidden state — fully invisible, not clickable */
+    #ai-chat-launcher.chat-hidden {
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.8);
     }
 
     #chat-window {
@@ -430,15 +520,38 @@
     </form>
 </div>
 
-<div class="banner-wrapper">
-    <img id="bannerImage" src="{% static 'images/photo1.png' %}" alt="Gadget Soko">
+<div class="banner-wrapper" style="margin-top: 2px;" id="bannerSlider">
+
+    <div id="bannerTrack">
+        <div class="banner-slide"><img src="{% static 'images/keyboard5.png' %}" alt="Gadget Soko"></div>
+        <div class="banner-slide"><img src="{% static 'images/keyboardpic1.png' %}"    alt="Gadget Soko"></div>
+        <div class="banner-slide"><img src="{% static 'images/keyboard4.png' %}"    alt="Gadget Soko"></div>
+        <div class="banner-slide"><img src="{% static 'images/key3.png' %}" alt="Gadget Soko"></div>
+        <div class="banner-slide"><img src="{% static 'images/photo1.png' %}" alt="Gadget Soko"></div>
+        <div class="banner-slide"><img src="{% static 'images/photo4.png' %}"   alt="Gadget Soko"></div>
+        <div class="banner-slide"><img src="{% static 'images/photo3.png' %}"   alt="Gadget Soko"></div>
+        <div class="banner-slide"><img src="{% static 'images/photo5.png' %}"   alt="Gadget Soko"></div>
+        <div class="banner-slide"><img src="{% static 'images/f.png' %}"        alt="Gadget Soko"></div>
+        <div class="banner-slide"><img src="{% static 'images/G.png' %}"        alt="Gadget Soko"></div>
+       
+    </div>
+
+    <button class="banner-arrow prev d-none" id="bannerPrev" aria-label="Previous">
+        <i class="fa fa-chevron-left"></i>
+    </button>
+    <button class="banner-arrow next d-none" id="bannerNext" aria-label="Next">
+        <i class="fa fa-chevron-right"></i>
+    </button>
+
+    <div class="banner-dots" id="bannerDots"></div>
+
 </div>
 
 <div class="gs-main">
 
     <!-- BRAND SHOWCASE -->
     <section id="brand-showcase" style="margin-bottom: 40px;">
-        <h2 style="font-weight: 900; font-size: 14px; color: #888; margin-bottom: 16px; letter-spacing: 1px;">
+        <h2 style="font-weight: 900; font-size: 14px; color: #888; margin-bottom: 16px;margin-top: 20px; letter-spacing: 1px;">
             OFFICIAL PARTNER BRANDS
         </h2>
 
@@ -455,7 +568,7 @@
                     </a>
                 {% endfor %}
 
-                <!-- DUPLICATE BRANDS TO CREATE LONG SCROLL -->
+                <!-- DUPLICATE FOR LONG SCROLL -->
                 {% for brand in brands %}
                     <a href="{% url 'products' %}?brand={{ brand.id }}" class="brand-oval">
                         {% if brand.logo %}
@@ -520,7 +633,6 @@
             {% endfor %}
         </div>
     </section>
-
 
     <!-- LATEST ARRIVALS -->
     <section id="featured">
@@ -618,8 +730,21 @@
 </div>
 
 
+<!-- LIVE TOAST -->
+<div id="live-toast">
+    <img id="t-avatar" src="" alt="" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">
+    <div>
+        <div style="font-size:11px; font-weight:800; color:#333;" id="t-user"></div>
+        <div style="font-size:10px; color:#888;" id="t-loc"></div>
+        <div style="font-size:11px; color:var(--gs-orange); font-weight:700;" id="t-item"></div>
+    </div>
+</div>
+
 
 <!-- CHATBOT -->
+<!-- FIX: footer sentinel — IntersectionObserver watches this to hide/show the chat button -->
+<div id="footer-sentinel" style="height: 1px; width: 100%;"></div>
+
 <div id="ai-chat-launcher" onclick="toggleChat()"><i class="fa-solid fa-headset"></i></div>
 
 <div id="chat-window">
@@ -699,35 +824,94 @@
     }
 
 
-    // ---------------- BANNER ROTATION ----------------
-    const banners = [
-        "{% static 'images/photo1.png' %}", 
-        "{% static 'images/photo2.png' %}", 
-        "{% static 'images/photo4.png' %}", 
-        "{% static 'images/photo3.png' %}",
-        "{% static 'images/photo5.png' %}",
-        "{% static 'images/f.png' %}",
-        "{% static 'images/G.png' %}",
-        "{% static 'images/eg.png' %}"
-    ];
+    // ---------------- BANNER SWIPE SLIDER ----------------
+    (function () {
+        const track    = document.getElementById('bannerTrack');
+        const slider   = document.getElementById('bannerSlider');
+        const dotsWrap = document.getElementById('bannerDots');
+        const slides   = track.querySelectorAll('.banner-slide');
+        const total    = slides.length;
+        let current    = 0;
+        let autoTimer;
 
-    let bIdx = 0;
-
-    setInterval(() => {
-        bIdx = (bIdx + 1) % banners.length;
-
-        $('#bannerImage').fadeOut(500, function() { 
-            $(this).attr('src', banners[bIdx]).fadeIn(500); 
+        // Build dot buttons
+        slides.forEach((_, i) => {
+            const d = document.createElement('button');
+            d.className = 'banner-dot' + (i === 0 ? ' active' : '');
+            d.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+            d.addEventListener('click', () => goTo(i));
+            dotsWrap.appendChild(d);
         });
 
-    }, 7000);
+        function getDots() { return dotsWrap.querySelectorAll('.banner-dot'); }
+
+        function goTo(idx) {
+            current = (idx + total) % total;
+            track.style.transform = `translateX(-${current * 100}%)`;
+            getDots().forEach((d, i) => d.classList.toggle('active', i === current));
+        }
+
+        function next() { goTo(current + 1); }
+        function prev() { goTo(current - 1); }
+
+        document.getElementById('bannerNext').addEventListener('click', () => { next(); resetAuto(); });
+        document.getElementById('bannerPrev').addEventListener('click', () => { prev(); resetAuto(); });
+
+        // Auto-advance every 6 s
+        function startAuto() { autoTimer = setInterval(next, 6000); }
+        function resetAuto() { clearInterval(autoTimer); startAuto(); }
+        startAuto();
+
+        // ── Touch / mouse swipe ──
+        let dragStartX = 0, dragDelta = 0, dragging = false;
+
+        function onDragStart(x) {
+            dragStartX = x;
+            dragDelta  = 0;
+            dragging   = true;
+            // disable CSS transition while dragging for 1:1 feel
+            track.style.transition = 'none';
+            clearInterval(autoTimer);
+        }
+
+        function onDragMove(x) {
+            if (!dragging) return;
+            dragDelta = x - dragStartX;
+            // Shift track with finger — clamped so it doesn't over-pull
+            const base = current * 100;
+            const pct  = (dragDelta / slider.offsetWidth) * 100;
+            track.style.transform = `translateX(calc(-${base}% + ${dragDelta}px))`;
+        }
+
+        function onDragEnd() {
+            if (!dragging) return;
+            dragging = false;
+            // Re-enable transition
+            track.style.transition = '';
+            const threshold = slider.offsetWidth * 0.2;  // 20% of width to commit swipe
+            if (dragDelta < -threshold) next();
+            else if (dragDelta > threshold) prev();
+            else goTo(current);  // snap back
+            startAuto();
+        }
+
+        // Mouse
+        slider.addEventListener('mousedown',  e => onDragStart(e.clientX));
+        window.addEventListener('mousemove',  e => onDragMove(e.clientX));
+        window.addEventListener('mouseup',    ()  => onDragEnd());
+
+        // Touch
+        slider.addEventListener('touchstart', e => onDragStart(e.touches[0].clientX), { passive: true });
+        slider.addEventListener('touchmove',  e => onDragMove(e.touches[0].clientX),  { passive: true });
+        slider.addEventListener('touchend',   ()  => onDragEnd());
+    })();
 
 
-    // ---------------- BRAND ROPE AUTO MOVE LEFT/RIGHT (5s FEEL) ----------------
+    // ---------------- BRAND ROPE AUTO MOVE LEFT/RIGHT ----------------
     const track = document.getElementById("brandTrack");
 
     let direction = 1;
-    let speed = 2; // increase if you want faster
+    let speed = 2;
     let isDragging = false;
     let resumeTimer;
 
@@ -800,14 +984,13 @@
     });
 
 
-    // ---------------- ADD TO CART INTERACTION ----------------
+    // ---------------- ADD TO CART ----------------
     function addToCart(productId, btn) {
         const $btn = $(btn);
         const originalContent = $btn.html();
 
         $btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
 
-        // MOCK BACKEND RESPONSE
         setTimeout(() => {
             $btn.html('<i class="fa fa-check"></i> ADDED')
                 .css('background-color', 'var(--gs-green)')
@@ -824,31 +1007,31 @@
     }
 
 
-    // ---------------- LIVE TOAST GENERATOR ----------------
-    const names = ["Kamau", "Njeri", "Otieno", "Moraa", "Hassan", "Achieng", "Kibet", "Wanjiku"];
-    const towns = ["Nairobi", "Mombasa", "Kisumu", "Eldoret", "Thika", "Nakuru", "Machakos"];
-    const itemsList = ["iPhone 15 Pro", "Samsung S24 Ultra", "JBL Flip 6", "MacBook Air M2", "Sony PS5"];
+    // ---------------- FIX: HIDE CHAT BUTTON AT FOOTER ----------------
+    // We place a sentinel div just before the footer and watch it with IntersectionObserver.
+    // When the sentinel enters the viewport the user is at the footer — we hide the chat button.
+    const chatLauncher = document.getElementById('ai-chat-launcher');
+    const chatWindow = document.getElementById('chat-window');
+    const sentinel = document.getElementById('footer-sentinel');
 
-    function triggerLiveToast() {
-        const user = names[Math.floor(Math.random() * names.length)] + " " + String.fromCharCode(65 + Math.floor(Math.random() * 26)) + ".";
-        const location = towns[Math.floor(Math.random() * towns.length)];
-        const item = itemsList[Math.floor(Math.random() * itemsList.length)];
+    if ('IntersectionObserver' in window && sentinel) {
+        const footerObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // User reached the footer — hide button and close window
+                    chatLauncher.classList.add('chat-hidden');
+                    chatWindow.style.display = 'none';
+                } else {
+                    // User scrolled back up — show button
+                    chatLauncher.classList.remove('chat-hidden');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
 
-        $('#t-user').text(user);
-        $('#t-loc').text(location);
-        $('#t-item').text(item);
-
-        $('#t-avatar').attr('src', `https://ui-avatars.com/api/?name=${user}&background=random&color=fff`);
-
-        $('#live-toast').addClass('active');
-        setTimeout(() => $('#live-toast').removeClass('active'), 6000);
+        footerObserver.observe(sentinel);
     }
-
-    setTimeout(() => {
-        triggerLiveToast();
-        setInterval(triggerLiveToast, 25000);
-    }, 5000);
-
 </script>
 
 {% endblock %}

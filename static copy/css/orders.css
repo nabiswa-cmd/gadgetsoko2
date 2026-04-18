@@ -1,0 +1,56 @@
+body {
+    font-family: Arial;
+    background: #f4f6f9;
+    margin: 0;
+}
+
+.navbar {
+    background: #ff5a2c;
+    color: white;
+    padding: 15px;
+}
+
+.container {
+    padding: 20px;
+}
+
+.filters {
+    margin-bottom: 20px;
+}
+
+.filters a {
+    margin-right: 10px;
+    text-decoration: none;
+    background: #111;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+}
+
+.filters a:hover {
+    background: #ff5a2c;
+}
+
+table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #111;
+    color: white;
+}
+
+button {
+    padding: 6px 10px;
+    background: #ff5a2c;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
