@@ -196,8 +196,6 @@ CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 # Force the login to happen immediately on the GET/POST request
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# Skip the "Are you sure you want to log in with Google?" page
-SOCIALACCOUNT_QUERY_EMAIL = True
 
 # Ensure users go straight to the account picker
 SOCIALACCOUNT_PROVIDERS = {
@@ -223,3 +221,4 @@ DEFAULT_FROM_EMAIL = 'Gadget Soko <sammytings2@gmail.com>'
 
 
 
+SOCIALACCOUNT_LOGIN_ON_GET = True
