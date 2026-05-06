@@ -222,3 +222,5 @@ DEFAULT_FROM_EMAIL = 'Gadget Soko <sammytings2@gmail.com>'
 
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
+
+GEMINI_API_KEY =  "AIzaSyBvuzWyutF1NItMRXNx7F6B7ExF_V3ReS8"

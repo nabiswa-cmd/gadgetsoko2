@@ -400,8 +400,13 @@
                 <i class="bi bi-truck"></i> Upcountry
             </button>
         </div>
+        {% if direct_product %}
+    <input type="hidden" name="direct_product_id" value="{{ direct_product.id }}">
+{% elif cart_items %}
+    <input type="hidden" name="direct_product_id" value="{{ cart_items.0.product.id }}">
+{% endif %}
+<form method="POST" action="{% url 'check' %}">
 
-        <form method="POST" action="{% url 'check' %}" id="checkout-form">
             {% csrf_token %}
             <input type="hidden" name="region" id="region-input" value="nairobi">
 
@@ -421,8 +426,14 @@
                     <label class="field-label">
                         <i class="bi bi-phone"></i> M-Pesa Number
                     </label>
-                    <input type="tel" name="phone" id="phone-input"
-                           placeholder="254712345678" required>
+                    <input type="tel" 
+       name="phone" 
+       id="phone-input"
+       placeholder="0712345678"
+       pattern="^0\d{9}$"
+       maxlength="10"
+       required>
+                   
                 </div>
                 <div class="form-group">
                     <label class="field-label">
@@ -598,6 +609,19 @@
 </div>
 
 <script>
+    
+const phoneInput = document.getElementById('phone-input');
+
+phoneInput.addEventListener('input', function () {
+    // Remove non-numbers
+    this.value = this.value.replace(/\D/g, '');
+
+    // Limit to 10 digits
+    if (this.value.length > 10) {
+        this.value = this.value.slice(0, 10);
+    }
+});
+
     const subtotal        = parseFloat("{{ subtotal|default:0 }}");
     const shippingNairobi = parseFloat("{{ shipping_nairobi|default:200 }}");
     const shippingOutside = parseFloat("{{ max_shipping|default:500 }}");

@@ -1,0 +1,36 @@
+{% extends 'base_site.html' %}
+{% load static %}
+
+{% block content %}
+
+<div style="max-width:450px; margin:60px auto; background:#fff; padding:30px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+
+    <h2 style="font-weight:900; color:#0b3a63;">Verify Email OTP</h2>
+    <p style="color:#666; font-size:14px;">
+        We sent an OTP to: <b>{{ email }}</b>
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <input type="text" name="otp" placeholder="Enter OTP"
+               maxlength="6" required
+               style="width:100%; padding:14px; border:1.5px solid #ddd; border-radius:10px; outline:none; margin:15px 0;">
+
+        <button type="submit"
+                style="width:100%; padding:14px; background:#ee4d2d; border:none; border-radius:10px; color:#fff; font-weight:900; cursor:pointer;">
+            Verify OTP
+        </button>
+    </form>
+
+    {% if messages %}
+        <div style="margin-top:15px;">
+            {% for message in messages %}
+                <p style="color:red; font-size:13px; font-weight:700;">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

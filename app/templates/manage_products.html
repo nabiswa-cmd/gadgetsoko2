@@ -175,7 +175,7 @@ input[type="checkbox"] { transform: scale(1.2); accent-color: var(--gs-orange); 
                         </td>
 
                         <td>
-                            <button type="button" class="btn btn-danger" onclick="location.href='{% url 'mark_out_of_stock' product.id %}'">
+                            <button type="button" class="btn btn-danger"onclick="location.href='{% url 'mark_out_of_stock' product.pk %}'"onclick="location.href='{% url 'mark_out_of_stock' product.pk %}'"onclick="location.href='{% url 'mark_out_of_stock' product.pk %}'"
                                 <i class="bi bi-x-circle"></i> Off-Stock
                             </button>
                         </td>

@@ -48,6 +48,9 @@ class Product(models.Model):
     discount_start_time = models.DateTimeField(null=True, blank=True)
     views = models.PositiveIntegerField(default=0)
     slug = models.SlugField(unique=True, blank=True, null=True)
+    @property
+    def is_out_of_stock(self):
+        return self.stock <= 0
 
     # -------------------------------
     # Discount Calculations
@@ -212,3 +215,38 @@ class ProductView(models.Model):
 
     def __str__(self):
         return f"{self.user.username} viewed {self.product.name}"
+    
+from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth.models import User
+
+
+class EmailOTP(models.Model):
+    email = models.EmailField(unique=True)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(minutes=10)
+
+    def __str__(self):
+        return f"{self.email} - {self.otp}"
+
+from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+
+
+class SignupOTP(models.Model):
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=150)
+    password = models.CharField(max_length=255)  # temporarily store raw password
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(minutes=10)
+
+    def __str__(self):
+        return self.email

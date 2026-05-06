@@ -47,7 +47,7 @@ urlpatterns = [
     
     path('update_order_status/<int:order_id>/', views.update_order_status, name='update_order_status'),
     path('update-price/<int:pk>/', views.update_price, name='update_price'),
-    path('mark-out-of-stock/<int:product_id>/', views.mark_out_of_stock, name='mark_out_of_stock'),
+    path('mark-out-of-stock/<int:pk>/', views.mark_out_of_stock, name='mark_out_of_stock'),
 
 
     # Allauth handled in proj/urls.py
@@ -60,6 +60,9 @@ urlpatterns = [
     path('decrease-cart/<int:item_id>/', views.decrease_cart, name='decrease_cart'),
     path('remove-cart/<int:item_id>/', views.remove_cart, name='remove_cart'),
     path('search/',views.search_view,name="search"),
+    
+    path("sokobot-chat/", views.sokobot_chat, name="sokobot_chat"),
+    path("verify-signup-otp/", views.verify_signup_otp, name="verify_signup_otp"),
     # urls.py
     path('receipt/download/<int:order_id>/', views.download_receipt, name='download_receipt'),
     path('dashboard/delete-orders/', views.delete_orders, name='delete_orders'),
@@ -67,6 +70,7 @@ urlpatterns = [
     
     path('bulk-delete/', views.bulk_delete_products, name='bulk_delete_products'),
     path('bulk-delete-orders/', views.bulk_delete_orders, name='bulk_delete_orders'),
+    path('checkout/direct/<int:product_id>/', views.direct_checkout, name='direct_checkout'),
 
     
 ]

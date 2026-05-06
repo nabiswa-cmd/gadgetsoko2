@@ -60,6 +60,13 @@ from django.utils import timezone
 from django.db.models import Sum
 from django.core.paginator import Paginator
 from django.shortcuts import render
+import random
+from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.contrib import messages
+from django.conf import settings
+from .models import EmailOTP
+from django.contrib.auth.models import User
 
 from django.shortcuts import render
 from django.utils import timezone
@@ -131,6 +138,7 @@ def about(request):
     return render(request, 'about.html')
 def products_view(request):
     products_list = Product.objects.all().order_by('-id')
+    
     categories = Category.objects.all()
     brands = Brand.objects.all()
     
@@ -270,6 +278,14 @@ def products_by_category_view(request, brand_id=None, category_id=None):
     }
     return render(request, 'products.html', context)
 def product_detail(request, pk):
+    product = get_object_or_404(Product, id=pk)
+    if product.stock <=0:
+        messages.error(request,"This product is currently out of stock.")
+        return redirect('products')
+
+    now_time= datetime.now()
+    seed_value = int(f"{pk}{now_time.day}{now_time.hour // 12}")
+    random.seed(seed_value)
     """
     Displays product detail including reviews, recommendations, and dynamic pricing.
     """
@@ -314,26 +330,27 @@ from django.db.models import Sum
 @login_required
 @require_POST
 def add_to_cart(request, product_id):
-    # Step 1: Ensure the product exists
     product = get_object_or_404(Product, id=product_id)
     
-    # Step 2: Handle adding the product
+
+    if not product.stock or product.stock <= 0:
+        return JsonResponse({"success": False, "message": "Product is out of stock."})
+
     cart_item, created = CartItem.objects.get_or_create(
         user=request.user, product=product, defaults={'quantity': 1}
     )
-    
-    # Step 3: Increment if it exists
+
     if not created:
+        if cart_item.quantity + 1 > product.stock:
+            return JsonResponse({"success": False, "message": "Not enough stock available."})
         cart_item.quantity += 1
         cart_item.save()
-    
-    # Step 4: Get total count
+
     cart_count = CartItem.objects.filter(user=request.user).aggregate(total=Sum('quantity'))['total'] or 0
-    
-    # Step 5: Return JSON
+
     return JsonResponse({
-        'success': True,
-        'cart_count': cart_count
+        "success": True,
+        "cart_count": cart_count
     })
 
 def products_by_brand(request, brand_id):
@@ -450,15 +467,50 @@ def remove_cart(request, item_id):
 
 
 import traceback
+from decimal import Decimal
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.db import transaction
+from django.urls import reverse
+from django.core.mail import send_mail
 def check(request):
     # --- FETCH DATA ---
     config, _ = SiteSettings.objects.get_or_create(id=1)
-    cart_items = CartItem.objects.filter(user=request.user)
 
-    # --- EMPTY CART ---
-    if not cart_items.exists():
+    direct_product_id = request.session.get('direct_product')
+
+    # --- HANDLE DIRECT CHECKOUT ---
+    if direct_product_id:
+        product = get_object_or_404(Product, id=direct_product_id)
+
+        class SingleItem:
+            def __init__(self, product):
+                self.product = product
+                self.quantity = 1
+
+        cart_items = [SingleItem(product)]
+        is_direct = True
+    else:
+        cart_items = CartItem.objects.filter(user=request.user)
+        is_direct = False
+
+    # --- EMPTY CART CHECK ---
+    if not is_direct and not cart_items.exists():
         messages.warning(request, "Your cart is empty.")
         return redirect('view_cart')
+
+    # --- STOCK VALIDATION ---
+    for item in cart_items:
+        if item.product.stock <= 0:
+            messages.error(request, f"{item.product.name} is OUT OF STOCK.")
+            return redirect("view_cart")
+
+        if item.quantity > item.product.stock:
+            messages.error(
+                request,
+                f"Only {item.product.stock} units available for {item.product.name}."
+            )
+            return redirect("view_cart")
 
     # --- CALCULATIONS ---
     subtotal = sum(item.quantity * item.product.final_price for item in cart_items)
@@ -469,123 +521,134 @@ def check(request):
     # --- POST: PROCESS ORDER ---
     if request.method == "POST":
         try:
-            name = request.POST.get("name")
-            email = request.POST.get("email")
-            phone = request.POST.get("phone")
-            address = request.POST.get("address")
-            region = request.POST.get("region")
-            payment_method = request.POST.get("payment_method")
+            with transaction.atomic():
 
-            # --- SHIPPING ---
-            shipping_fee = max_cart_shipping if region == "outside" else config.shipping_fee_nairobi
-            final_total = subtotal + shipping_fee
+                name = request.POST.get("name")
+                email = request.POST.get("email")
+                phone = request.POST.get("phone")
+                address = request.POST.get("address")
+                region = request.POST.get("region")
+                payment_method = request.POST.get("payment_method")
 
-            # --- PHONE FORMAT ---
-            clean_phone = phone.strip().replace("+", "")
-            if clean_phone.startswith("0"):
-                clean_phone = "254" + clean_phone[1:]
-            elif not clean_phone.startswith("254"):
-                clean_phone = "254" + clean_phone
+                # --- SHIPPING ---
+                shipping_fee = max_cart_shipping if region == "outside" else config.shipping_fee_nairobi
+                final_total = subtotal + shipping_fee
 
-            # --- LOCATION ---
-            location_area = (
-                request.POST.get("nairobi_area")
-                if region == "nairobi"
-                else request.POST.get("outside_town")
-            )
-            full_destination = f"{location_area} - {address}"
+                # --- PHONE FORMAT ---
+                clean_phone = phone.strip().replace("+", "")
+                if clean_phone.startswith("0"):
+                    clean_phone = "254" + clean_phone[1:]
+                elif not clean_phone.startswith("254"):
+                    clean_phone = "254" + clean_phone
 
-            # --- CREATE ORDER ---
-            order = Order.objects.create(
-                user=request.user,
-                name=name,
-                email=email,
-                phone=clean_phone,
-                destination=full_destination,
-                total=final_total,
-                shipping_fee=shipping_fee,
-                region=region,
-                status="Pending",
-                payment_status="Awaiting Payment",
-                payment_method=payment_method
-            )
+                # --- LOCATION ---
+                location_area = (
+                    request.POST.get("nairobi_area")
+                    if region == "nairobi"
+                    else request.POST.get("outside_town")
+                )
+                full_destination = f"{location_area} - {address}"
 
-            # --- CREATE ORDER ITEMS ---
-            items_summary = ""
-            for item in cart_items:
-                item_price = item.product.final_price
-
-                OrderItem.objects.create(
-                    order=order,
-                    product=item.product,
-                    quantity=item.quantity,
-                    price=item_price
+                # --- CREATE ORDER ---
+                order = Order.objects.create(
+                    user=request.user,
+                    name=name,
+                    email=email,
+                    phone=clean_phone,
+                    destination=full_destination,
+                    total=final_total,
+                    shipping_fee=shipping_fee,
+                    region=region,
+                    status="Pending",
+                    payment_status="Awaiting Payment",
+                    payment_method=payment_method
                 )
 
-                items_summary += f"- {item.product.name} (x{item.quantity}) @ KES {item_price}\n"
+                # --- CREATE ORDER ITEMS ---
+                items_summary = ""
 
-            # --- RECEIPT URL ---
-            protocol = 'https' if request.is_secure() else 'http'
-            domain = request.get_host()
-            receipt_url = f"{protocol}://{domain}{reverse('download_receipt', args=[order.id])}"
+                for item in cart_items:
+                    product = item.product
 
-            # --- SEND EMAIL ---
-            subject = f"Order Confirmed - Gadget Soko #{order.id}"
-            message = (
-                f"Hello {name},\n\n"
-                f"Your order #{order.id} has been received.\n\n"
-                f"Items:\n{items_summary}\n"
-                f"Shipping: KES {shipping_fee}\n"
-                f"Total: KES {final_total}\n\n"
-                f"Download Receipt:\n{receipt_url}\n\n"
-                f"Thank you for shopping with us!"
-            )
-
-            try:
-                send_mail(
-                    subject,
-                    message,
-                    settings.EMAIL_HOST_USER,  # safer than DEFAULT_FROM_EMAIL
-                    [email],
-                    fail_silently=False
-                )
-                print("email sent succesfully")
-            except Exception as e:
-                print("EMAIL ERROR:", str(e))
-                traceback.print_exc()
-
-            # --- PAYMENT HANDLING ---
-            if payment_method == "mpesa":
-                try:
-                    response = lipa_na_mpesa(
-                        phone_number=clean_phone,
-                        amount=int(final_total),
-                        account_ref=f"GSK{order.id}",
-                        transaction_desc="Gadget Purchase"
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        quantity=item.quantity,
+                        price=product.final_price
                     )
 
-                    if response.get('ResponseCode') == '0':
-                        order.checkout_request_id = response.get('CheckoutRequestID')
-                        order.status = 'STK_Sent'
-                        order.save()
+                    # 🔥 REDUCE STOCK
+                    product.stock -= item.quantity
+                    product.save()
+
+                    items_summary += f"- {product.name} (x{item.quantity}) @ KES {product.final_price}\n"
+
+                # --- RECEIPT URL ---
+                protocol = 'https' if request.is_secure() else 'http'
+                domain = request.get_host()
+                receipt_url = f"{protocol}://{domain}{reverse('download_receipt', args=[order.id])}"
+
+                # --- SEND EMAIL ---
+                subject = f"Order Confirmed - Gadget Soko #{order.id}"
+                message = (
+                    f"Hello {name},\n\n"
+                    f"Your order #{order.id} has been received.\n\n"
+                    f"Items:\n{items_summary}\n"
+                    f"Shipping: KES {shipping_fee}\n"
+                    f"Total: KES {final_total}\n\n"
+                    f"Download Receipt:\n{receipt_url}\n\n"
+                    f"Thank you for shopping with us!"
+                )
+
+                try:
+                    send_mail(
+                        subject,
+                        message,
+                        settings.EMAIL_HOST_USER,
+                        [email],
+                        fail_silently=False
+                    )
                 except Exception as e:
-                    print("MPESA ERROR:", str(e))
-                    messages.error(request, "M-Pesa request failed.")
+                    print("EMAIL ERROR:", str(e))
+                    traceback.print_exc()
 
-            elif payment_method == "pod":
-                order.payment_status = "Pay on Delivery"
-                order.status = "Confirmed"
-                order.save()
+                # --- PAYMENT ---
+                if payment_method == "mpesa":
+                    try:
+                        response = lipa_na_mpesa(
+                            phone_number=clean_phone,
+                            amount=int(final_total),
+                            account_ref=f"GSK{order.id}",
+                            transaction_desc="Gadget Purchase"
+                        )
 
-            # --- CLEAR CART ---
-            cart_items.delete()
+                        if response.get('ResponseCode') == '0':
+                            order.checkout_request_id = response.get('CheckoutRequestID')
+                            order.status = 'STK_Sent'
+                            order.save()
 
-            messages.success(request, f"Order #{order.id} placed successfully!")
-            return redirect('payment_instructions', order_id=order.id)
+                    except Exception as e:
+                        print("MPESA ERROR:", str(e))
+                        messages.error(request, "M-Pesa request failed.")
+
+                elif payment_method == "pod":
+                    order.payment_status = "Pay on Delivery"
+                    order.status = "Confirmed"
+                    order.save()
+
+                # --- CLEAR CART OR SESSION ---
+                if is_direct:
+                    request.session.pop('direct_product', None)
+                else:
+                    cart_items.delete()
+
+                messages.success(request, f"Order #{order.id} placed successfully!")
+                return redirect('payment_instructions', order_id=order.id)
 
         except Exception as e:
             print("CHECKOUT ERROR:", str(e))
-            messages.error(request, "Something went wrong. Please try again.")
+            traceback.print_exc()
+            messages.error(request, "Something went wrong.")
             return redirect('view_cart')
 
     # --- GET REQUEST ---
@@ -599,6 +662,7 @@ def check(request):
 
     return render(request, 'check.html', context)
 
+
 def payment_instructions(request, order_id):
     # Fetch the order and ensure it belongs to the logged-in user
     order = get_object_or_404(Order, id=order_id, user=request.user)
@@ -607,6 +671,7 @@ def payment_instructions(request, order_id):
         'order': order,
         'method': order.payment_status # Or order.payment_method depending on your model
     })
+
 
 def get_mpesa_access_token():
     url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
@@ -625,6 +690,15 @@ def get_mpesa_access_token():
         print("Token response error:", response.text)  # log raw response for debugging
         return None
 # --- 1. USER SIGNUP (Create Account) ---
+import random
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from .models import SignupOTP
+
+
 def usersignup_view(request):
     if request.user.is_authenticated:
         return redirect('index')
@@ -647,14 +721,81 @@ def usersignup_view(request):
         elif User.objects.filter(email=email).exists():
             messages.error(request, "An account with that email already exists.")
         else:
-            # ✅ create_user handles password hashing and saving automatically
-            user = User.objects.create_user(username=username, email=email, password=password1)
-            # Specify the backend to avoid ambiguity
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            messages.success(request, f"Account created! Welcome to Gadget Soko, {username}! 🎉")
-            return redirect('index')
+            otp = str(random.randint(100000, 999999))
+
+            # store OTP + user details temporarily
+            SignupOTP.objects.update_or_create(
+                email=email,
+                defaults={
+                    "username": username,
+                    "password": password1,
+                    "otp": otp
+                }
+            )
+
+            # send OTP
+            send_mail(
+                subject="Gadget Soko OTP Verification",
+                message=f"Your OTP code is {otp}. It expires in 10 minutes.",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False
+            )
+
+            # store email in session
+            request.session["signup_email"] = email
+
+            messages.success(request, "OTP has been sent to your email. Please verify.")
+            return redirect("verify_signup_otp")
 
     return render(request, 'signup.html')
+
+    return render(request, 'signup.html')
+
+from django.contrib.auth import login
+
+
+def verify_signup_otp(request):
+    email = request.session.get("signup_email")
+
+    if not email:
+        messages.error(request, "Session expired. Please signup again.")
+        return redirect("signup")
+
+    try:
+        otp_obj = SignupOTP.objects.get(email=email)
+    except SignupOTP.DoesNotExist:
+        messages.error(request, "OTP not found. Please signup again.")
+        return redirect("signup")
+
+    if request.method == "POST":
+        otp_input = request.POST.get("otp", "").strip()
+
+        if otp_obj.is_expired():
+            otp_obj.delete()
+            messages.error(request, "OTP expired. Please signup again.")
+            return redirect("signup")
+
+        if otp_input != otp_obj.otp:
+            messages.error(request, "Invalid OTP. Try again.")
+            return redirect("verify_signup_otp")
+
+        # create user after OTP success
+        user = User.objects.create_user(
+            username=otp_obj.username,
+            email=otp_obj.email,
+            password=otp_obj.password
+        )
+
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+        otp_obj.delete()
+        request.session.pop("signup_email", None)
+
+        messages.success(request, f"Account created successfully! Welcome {user.username} 🎉")
+        return redirect("index")
+
+    return render(request, "verify_otp.html", {"email": email})
 # --- 2. USER LOGIN (Sign In) ---
 def userlog_view(request):
     if request.user.is_authenticated:
@@ -998,17 +1139,16 @@ def update_price(request, pk):
     return redirect('manage_products')
 
 
+from django.shortcuts import get_object_or_404, redirect
+from .models import Product
+
 @staff_member_required
-def mark_out_of_stock(request, product_id):
-    if request.method == "POST":
-        product = get_object_or_404(Product, id=product_id)
-        product.in_stock = 0  # or whatever field you use
-        product.save()
+
+def mark_out_of_stock(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.stock = 0
+    product.save()
     return redirect('manage_products')
-    # app/views.py
-
-
-
 
 
 def live_search(request):
@@ -1344,4 +1484,97 @@ def bulk_delete_orders(request):
             # This clears the orders and their associated items
             Order.objects.filter(id__in=order_ids).delete()
             
-    return redirect('customers') # Redirect back to the customer list
+    return redirect('customers')
+
+import google.generativeai as genai
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import json
+
+genai.configure(api_key=settings.GEMINI_API_KEY)
+
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+import json
+import google.generativeai as genai
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+genai.configure(api_key=settings.GEMINI_API_KEY)
+
+@csrf_exempt
+def sokobot_chat(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get("message", "")
+
+            model = genai.GenerativeModel("models/gemini-2.0-flash")
+
+       
+            prompt = f"""
+You are SokoBot AI for an ecommerce website called Gadget Soko Kenya.
+Answer like a professional customer support AI.
+
+Business Info:
+- Name: Gadget Soko Kenya
+- Location: CBD, Laxmi Plaza shop number 5
+- Delivery: We deliver across all 47 counties in Kenya
+- Payments: M-Pesa Till 5280343, Bank Transfer, and POD within Nairobi
+
+Rules:
+- Be short and clear
+- If asked about products, recommend politely and ask what budget they have
+- If asked something unknown, suggest contacting support
+
+Customer message: {user_message}
+"""
+
+            response = model.generate_content(prompt)
+
+            return JsonResponse({"reply": response.text})
+
+        except Exception as e:
+            return JsonResponse({"reply": f"Error: {str(e)}"}, status=500)
+
+    return JsonResponse({"reply": "Invalid request"}, status=400)
+
+from django.shortcuts import render, get_object_or_404
+from .models import Product
+from decimal import Decimal
+
+def direct_checkout(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    # ❌ Block if out of stock
+    if product.stock <= 0:
+        messages.error(request, "This product is out of stock.")
+        return redirect('product_detail', product_id=product.id)
+
+    # 👇 Fake cart item (single product)
+    class SingleItem:
+        def __init__(self, product):
+            self.product = product
+            self.quantity = 1
+
+        @property
+        def get_total(self):
+            return self.product.final_price * self.quantity
+
+    item = SingleItem(product)
+
+    subtotal = item.get_total
+    shipping_nairobi = SiteSettings.objects.first().shipping_fee_nairobi
+
+    context = {
+        'cart_items': [item],  # 👈 acts like cart
+        'subtotal': subtotal,
+        'max_shipping': product.shipping_fee,
+        'shipping_nairobi': shipping_nairobi,
+        'direct_product': product.id  # 👈 IMPORTANT FLAG
+    }
+    request.session['direct_product'] = product.id
+
+    return render(request, 'check.html', context)

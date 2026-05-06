@@ -607,8 +607,35 @@
                 </div>
 
                 <div class="img-container">
-                    <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
-                </div>
+                    {% if product.stock <= 0 %}
+<div style="
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:5;
+">
+    <span style="
+        color:white;
+        font-weight:900;
+        border:3px solid white;
+        padding:8px 20px;
+        border-radius:10px;
+        font-size:14px;
+        letter-spacing:2px;
+        transform:rotate(-10deg);
+    ">
+        OUT OF STOCK
+    </span>
+</div>
+{% endif %}
+    <a href="{% url 'product_detail' product.id %}">
+        <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
+    </a>
+</div>
 
                 <div class="product-info">
                     {% if product.brand %}<div class="brand-text">{{ product.brand.name }}</div>{% endif %}
@@ -624,9 +651,16 @@
                     <a href="{% url 'product_detail' product.id %}" class="btn-action-view">
                         <i class="fa fa-eye"></i> VIEW
                     </a>
-                    <button class="btn-action-add" onclick="addToCart({{ product.id }}, this)">
-                        <i class="fa fa-cart-plus"></i> ADD
-                    </button>
+                    <button class="btn-action-add"
+    onclick="addToCart({{ product.id }}, this)"
+    {% if product.stock <= 0 %}disabled style="background:#999; cursor:not-allowed; opacity:0.6;"{% endif %}>
+
+    {% if product.stock <= 0 %}
+        <i class="fa fa-ban"></i> OUT
+    {% else %}
+        <i class="fa fa-cart-plus"></i> ADD
+    {% endif %}
+</button>
                 </div>
 
             </div>
@@ -649,8 +683,10 @@
                 {% endif %}
 
                 <div class="img-container">
-                    <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
-                </div>
+    <a href="{% url 'product_detail' product.id %}">
+        <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
+    </a>
+</div>
 
                 <div class="product-info">
                     {% if product.brand %}<div class="brand-text">{{ product.brand.name }}</div>{% endif %}
@@ -668,9 +704,16 @@
                     <a href="{% url 'product_detail' product.id %}" class="btn-action-view">
                         <i class="fa fa-eye"></i> VIEW
                     </a>
-                    <button class="btn-action-add" onclick="addToCart({{ product.id }}, this)">
-                        <i class="fa fa-cart-plus"></i> ADD
-                    </button>
+                   <button class="btn-action-add"
+    onclick="addToCart({{ product.id }}, this)"
+    {% if product.stock <= 0 %}disabled style="background:#999; cursor:not-allowed; opacity:0.6;"{% endif %}>
+
+    {% if product.stock <= 0 %}
+        <i class="fa fa-ban"></i> OUT
+    {% else %}
+        <i class="fa fa-cart-plus"></i> ADD
+    {% endif %}
+</button>
                 </div>
 
             </div>
@@ -739,13 +782,12 @@
         <div style="font-size:11px; color:var(--gs-orange); font-weight:700;" id="t-item"></div>
     </div>
 </div>
-
-
-<!-- CHATBOT -->
 <!-- FIX: footer sentinel — IntersectionObserver watches this to hide/show the chat button -->
 <div id="footer-sentinel" style="height: 1px; width: 100%;"></div>
 
-<div id="ai-chat-launcher" onclick="toggleChat()"><i class="fa-solid fa-headset"></i></div>
+<div id="ai-chat-launcher" onclick="toggleChat()">
+    <i class="fa-solid fa-headset"></i>
+</div>
 
 <div id="chat-window">
     <div style="background:var(--gs-navy); color:white; padding:18px; display:flex; justify-content:space-between; align-items:center;">
@@ -771,6 +813,84 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
+    
+document.addEventListener("DOMContentLoaded", function () {
+
+    const chatWindow = document.getElementById("chat-window");
+    const chatInput = document.getElementById("chatInput");
+    const chatBody = document.getElementById("chatBody");
+
+    // hide chat by default
+    chatWindow.style.display = "none";
+
+    window.toggleChat = function () {
+        chatWindow.style.display = (chatWindow.style.display === "flex") ? "none" : "flex";
+    }
+
+    window.sendMsg = function () {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        // User message
+        chatBody.innerHTML += `
+            <div style="background:var(--gs-navy); color:white; padding:10px 15px; border-radius:15px 15px 0 15px; align-self:flex-end; font-size:12px;">
+                ${message}
+            </div>
+        `;
+
+        chatInput.value = "";
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        // Typing indicator
+        chatBody.innerHTML += `
+            <div id="typing" style="background:#eee; padding:10px 15px; border-radius:15px 15px 15px 0; align-self:flex-start; font-size:12px;">
+                SokoBot is typing...
+            </div>
+        `;
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        fetch("/sokobot-chat/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const typing = document.getElementById("typing");
+            if (typing) typing.remove();
+
+            chatBody.innerHTML += `
+                <div style="background:#eee; padding:10px 15px; border-radius:15px 15px 15px 0; align-self:flex-start; font-size:12px;">
+                    ${data.reply}
+                </div>
+            `;
+
+            chatBody.scrollTop = chatBody.scrollHeight;
+        })
+        .catch(() => {
+            const typing = document.getElementById("typing");
+            if (typing) typing.remove();
+
+            chatBody.innerHTML += `
+                <div style="background:#eee; padding:10px 15px; border-radius:15px 15px 15px 0; align-self:flex-start; font-size:12px;">
+                    Sorry, something went wrong.
+                </div>
+            `;
+        });
+    }
+
+    // Enter key support
+    chatInput.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            sendMsg();
+        }
+    });
+
+});
+
     // ---------------- FLASH SALE TIMERS ----------------
     setInterval(function() {
         $('.timer-badge').each(function() {
@@ -794,34 +914,6 @@
         });
     }, 1000);
 
-
-    // ---------------- CHATBOT ----------------
-    function toggleChat() {
-        $('#chat-window').fadeToggle(250).css('display', 'flex');
-    }
-
-    function sendMsg() {
-        let val = $('#chatInput').val();
-        if(!val) return;
-
-        $('#chatBody').append(`
-            <div style="background:var(--gs-navy); color:white; padding:10px 15px; border-radius:15px 15px 0 15px; align-self:flex-end; font-size:12px;">
-                ${val}
-            </div>
-        `);
-
-        $('#chatInput').val('');
-
-        setTimeout(() => {
-            $('#chatBody').append(`
-                <div style="background:#eee; padding:10px 15px; border-radius:15px 15px 15px 0; align-self:flex-start; font-size:12px;">
-                    One of our agents will be with you shortly!
-                </div>
-            `);
-
-            $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
-        }, 1000);
-    }
 
 
     // ---------------- BANNER SWIPE SLIDER ----------------
@@ -984,17 +1076,29 @@
     });
 
 
-    // ---------------- ADD TO CART ----------------
     function addToCart(productId, btn) {
-        const $btn = $(btn);
-        const originalContent = $btn.html();
+    const $btn = $(btn);
+    const originalContent = $btn.html();
 
-        $btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
-
-        setTimeout(() => {
+    $btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
+fetch(`/add-to-cart/${productId}/`, {
+    method: "POST",
+    headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({})
+})
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
             $btn.html('<i class="fa fa-check"></i> ADDED')
                 .css('background-color', 'var(--gs-green)')
                 .css('border-color', 'var(--gs-green)');
+
+            // update badge if you have it
+            const badge = document.getElementById("cart-badge");
+            if (badge) badge.innerText = data.cart_count;
 
             setTimeout(() => {
                 $btn.html(originalContent)
@@ -1003,9 +1107,25 @@
                     .css('border-color', 'var(--gs-orange)');
             }, 2000);
 
-        }, 800);
-    }
+        } else {
+            // ✅ show backend message (out of stock)
+            alert(data.message);
 
+            $btn.html(originalContent)
+                .prop('disabled', false)
+                .css('background-color', 'var(--gs-orange)')
+                .css('border-color', 'var(--gs-orange)');
+        }
+    })
+    .catch(() => {
+        alert("Something went wrong. Try again.");
+
+        $btn.html(originalContent)
+            .prop('disabled', false)
+            .css('background-color', 'var(--gs-orange)')
+            .css('border-color', 'var(--gs-orange)');
+    });
+}
 
     // ---------------- FIX: HIDE CHAT BUTTON AT FOOTER ----------------
     // We place a sentinel div just before the footer and watch it with IntersectionObserver.

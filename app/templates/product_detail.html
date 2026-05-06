@@ -277,6 +277,45 @@
     @media (min-width: 768px) {
         .comm-float { bottom: 30px; }
     }
+    .btn-buy-now {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    font-weight: 900;
+    font-size: 17px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    color: #fff;
+    
+    /* Gradient like your screenshot */
+    background: linear-gradient(135deg, #000000, #2c2c2c);
+    
+    /* Shadow for floating effect */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    
+    transition: all 0.25s ease;
+}
+
+.btn-buy-now i {
+    color: #ffcc00;
+    margin-left: 6px;
+}
+
+.btn-buy-now:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.3);
+}
+
+.btn-buy-now:active {
+    transform: scale(0.97);
+}
+
+.btn-buy-now:disabled {
+    background: #999;
+    cursor: not-allowed;
+    box-shadow: none;
+}
 </style>
 {% endblock %}
 
@@ -297,23 +336,41 @@
 </div>
 
 <div class="container py-3 py-md-4">
-    <div class="mb-3">
+    <div class="mb-3 d-flex justify-content-between align-items-center">
         <a href="{% url 'index' %}" class="back-link">
             <i class="fas fa-arrow-left"></i> BACK TO SHOPPING
         </a>
+        
+        <!-- SHARE TOOLS -->
+        <div class="share-tools d-flex gap-3">
+            <a href="https://wa.me/?text=Check%20out%20{{ product.name|urlencode }}%20on%20Gadget%20Soko:%20{{ request.build_absolute_uri|urlencode }}" target="_blank" class="text-success"><i class="fab fa-whatsapp fa-lg"></i></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" class="text-primary"><i class="fab fa-facebook fa-lg"></i></a>
+            <a href="#" onclick="copyToClipboard('{{ request.build_absolute_uri }}')" class="text-dark"><i class="fas fa-link fa-lg"></i></a>
+        </div>
     </div>
 
     <div class="row g-4 mt-1">
         <div class="col-12 col-md-6 col-lg-7">
-            <div class="stage-box">
-                {% if product.is_on_sale %}
+            <div class="stage-box" style="position: relative; overflow: hidden; border-radius: 15px;">
+                {% if product.is_discount_active and product.stock > 0 %}
                 <div class="timer-overlay">
                     <i class="fas fa-bolt"></i> FLASH SALE: <span id="timer-display">--:--:--</span>
                 </div>
                 {% endif %}
+
+                <!-- OUT OF STOCK IMAGE OVERLAY -->
+                {% if product.is_out_of_stock%}
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5; display: flex; align-items: center; justify-content: center;">
+                    <div style="color: white; font-weight: 900; border: 4px solid white; padding: 10px 25px; font-size: 1.5rem; text-transform: uppercase; transform: rotate(-10deg); letter-spacing: 2px;">
+                        OUT OF STOCK
+                    </div>
+                </div>
+                {% endif %}
+
                 <img id="main-display"
                      src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}"
-                     alt="{{ product.name }}">
+                     alt="{{ product.name }}"
+                     {% if product.is_out_of_stock  %}style="filter: grayscale(100%); opacity: 0.8;"{% endif %}>
             </div>
 
             <div class="thumb-row">
@@ -327,7 +384,44 @@
         </div>
 
         <div class="col-12 col-md-6 col-lg-5">
-            <h1 class="p-title">{{ product.name }}</h1>
+            <!-- TITLE WITH OUT OF STOCK BADGE -->
+            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                <h1 class="p-title mb-0">{{ product.name }}</h1>
+                {% if product.is_out_of_stock %}
+                    <span class="badge bg-danger px-3 py-2" style="font-size: 0.75rem; font-weight: 900; letter-spacing: 1px;">SOLD OUT</span>
+                {% endif %}
+            </div>
+          {% if product.is_out_of_stock %}
+    <span style="background:red;color:white;padding:6px 12px;border-radius:8px;font-weight:800;font-size:12px;">
+        OUT OF STOCK
+    </span>
+{% else %}
+    <span style="background:green;color:white;padding:6px 12px;border-radius:8px;font-weight:800;font-size:12px;">
+        IN STOCK
+    </span>
+{% endif %}
+<button 
+    {% if product.is_out_of_stock %} disabled {% endif %}
+    style="
+        background:var(--gs-navy);
+        color:white;
+        padding:12px;
+        border:none;
+        border-radius:10px;
+        cursor:pointer;
+        opacity:{% if product.is_out_of_stock %}0.5{% else %}1{% endif %};
+    "
+>
+    Add to Cart
+    
+</button>
+
+{% if product.is_out_of_stock %}
+    <p style="color:red;font-weight:700;margin-top:10px;">
+        This item is currently unavailable. Check again later.
+    </p>
+{% endif %}
+
             {% if product.short_description %}
             <div class="p-short-desc">{{ product.short_description }}</div>
             {% endif %}
@@ -336,22 +430,73 @@
                 {% if product.price > product.discounted_price %}
                 <div class="d-flex align-items-center gap-2 mb-1">
                     <span class="old-price">KES {{ product.price|floatformat:0 }}</span>
-                    <span class="badge-discount">-{{ product.discount }}%</span>
+                    <span class="badge-discount">-{{ product.discount|floatformat:0 }}%</span>
                 </div>
                 {% endif %}
                 <div class="p-price"><span style="font-size:55%;">KES </span>{{ product.discounted_price|floatformat:0 }}</div>
-            </div>
+                <div style="margin-top:8px;">
+    {% if product.stock > 0 %}
+        
+        {% if product.stock <= 5 %}
+            
+        {% endif %}
+    {% else %}
+        <span style="color:red; font-weight:900;">
+            Out of Stock
+        </span>
+    {% endif %}
+</div><div style="margin-top:8px;">
+    {% if product.stock > 0 %}
+        <span style="color:green; font-weight:800;">
+            {{ product.stock }} item{{ product.stock|pluralize }} available
+        </span>
 
+        {% if product.stock <= 5 %}
+            <span style="color:#ee4d2d; font-weight:900; margin-left:10px;">
+                ⚠ Only {{ product.stock }} left!
+            </span>
+        {% endif %}
+    {% else %}
+        <span style="color:red; font-weight:900;">
+            Out of Stock
+        </span>
+    {% endif %}
+</div>
+
+                
+               {% if product.is_out_of_stock %}
+    <span class="badge bg-danger">Out of Stock</span>
+{% else %}
+    
+{% endif %}
             <div class="specs-box mb-4">
                 <h6 class="fw-900 mb-2" style="font-weight:900; letter-spacing:.5px;">SPECIFICATIONS</h6>
                 {{ product.specifications|linebreaks }}
             </div>
+            <div class="inline-cart-btn d-grid gap-2">
+    
+    <button class="btn-cart w-100"
+        id="cart-btn-inline"
+        onclick="addToCartDetail({{ product.id }})"
+        {% if product.is_out_of_stock %}disabled{% endif %}>
+        
+        {% if product.stock > 0 %}
+            ADD TO CART <i class="fas fa-shopping-basket ms-1"></i>
+        {% else %}
+            OUT OF STOCK <i class="fas fa-ban ms-1"></i>
+        {% endif %}
+    </button>
 
-            <div class="inline-cart-btn">
-                <button class="btn-cart" id="cart-btn-inline" onclick="addToCartDetail({{ product.id }})">
-                    ADD TO CART <i class="fas fa-shopping-basket ms-1"></i>
-                </button>
-            </div>
+    <button 
+        class="btn-buy-now"
+        onclick="buyNow({{ product.id }})"
+        {% if product.stock <= 0 %}disabled{% endif %}>
+        
+        BUY NOW <i class="fas fa-bolt"></i>
+    </button>
+
+</div>
+
         </div>
     </div>
 
@@ -384,15 +529,70 @@
     </div>
 </div>
 
-<div class="sticky-cart-bar d-md-none">
-    <button class="btn-cart" id="cart-btn-sticky" onclick="addToCartDetail({{ product.id }})">
-        ADD TO CART <i class="fas fa-shopping-basket ms-1"></i>
+<div class="sticky-cart-bar d-md-none d-flex gap-2 p-2 bg-white border-top">
+    <button class="btn-cart flex-grow-1" id="cart-btn-sticky" onclick="addToCartDetail({{ product.id }})"
+        {% if product.is_out_of_stock %}disabled style="background:#ccc;"{% endif %}>
+        {% if product.stock > 0 %}ADD TO CART{% else %}SOLD OUT{% endif %}
     </button>
+    <button 
+    class="btn btn-dark fw-bold py-3"
+    onclick="buyNow({{ product.id }})"
+    {% if product.stock <= 0 %}disabled style="opacity:0.5; cursor:not-allowed;"{% endif %}
+    style="border-radius: 10px; letter-spacing: 1px;">
+    
+    {% if product.stock > 0 %}
+        BUY NOW <i class="fas fa-bolt ms-1 text-warning"></i>
+    {% else %}
+        UNAVAILABLE
+    {% endif %}
+</button>
+
+</button>
 </div>
 
+<!-- SCRIPTS -->
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert("Link copied to clipboard!");
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+function buyNow(productId) {
+    window.location.href = `/checkout/direct/${productId}/`;
+}
+
+function updateMain(url, thumb) {
+    document.getElementById('main-display').src = url;
+    document.querySelectorAll('.thumb-btn').forEach(btn => btn.classList.remove('active'));
+    thumb.classList.add('active');
+}
+</script>
 
 {% endblock %}
 
+
+<!-- SCRIPTS FOR COPY LINK & BUY NOW -->
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert("Link copied to clipboard!");
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+function buyNow(productId) {
+    // Logic: Usually you'd clear the cart via AJAX, add this item, then redirect
+    // For now, let's assume your view handles 'direct_checkout'
+    window.location.href = `/checkout/direct/${productId}/`;
+}
+</script>
+
+
+    
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>

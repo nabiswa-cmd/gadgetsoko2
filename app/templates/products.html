@@ -206,15 +206,23 @@
                         {% endif %}
                     </div>
                 </div>
-
                 <div class="card-btns">
-                    <a href="{% url 'product_detail' p.id %}" class="btn-v">
-                        <i class="fa fa-eye"></i> VIEW
-                    </a>
-                    <button class="btn-a" onclick="addToCartUI('{{ p.id }}', this)">
-                        <i class="fa fa-shopping-cart"></i> ADD
-                    </button>
-                </div>
+    <a href="{% url 'product_detail' p.id %}" class="btn-v">
+        <i class="fa fa-eye"></i> VIEW
+    </a>
+
+    <button class="btn-a"
+        onclick="addToCartUI('{{ p.id }}', this)"
+        {% if p.stock <= 0 %}disabled style="background:#999; cursor:not-allowed; opacity:0.6;"{% endif %}>
+        
+        {% if p.stock <= 0 %}
+            <i class="fa fa-ban"></i> OUT
+        {% else %}
+            <i class="fa fa-shopping-cart"></i> ADD
+        {% endif %}
+    </button>
+</div>
+
             </div>
             {% empty %}
             <div class="no-products-container">
