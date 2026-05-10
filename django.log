@@ -1,0 +1,247 @@
+Watching for file changes with StatReloader
+Email sent to developer@work.com | subject: Order Confirmed — Gadget Soko #72
+M-Pesa STK push status: 200
+Not Found: /hybridaction/zybTrackerStatisticsAction
+Not Found: /hybridaction/zybTrackerStatisticsAction
+Not Found: /hybridaction/zybTrackerStatisticsAction
+Not Found: /hybridaction/zybTrackerStatisticsAction
+Not Found: /hybridaction/zybTrackerStatisticsAction
+Not Found: /hybridaction/zybTrackerStatisticsAction
+C:\Users\user\Desktop\gadgetsoko2\app\views.py changed, reloading.
+Watching for file changes with StatReloader
+Email sent to developer@work.com | subject: Order Confirmed — Gadget Soko #73
+M-Pesa STK push status: 200
+C:\Users\user\Desktop\gadgetsoko2\app\models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+C:\Users\user\Desktop\gadgetsoko2\app\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\user\Desktop\gadgetsoko2\app\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\user\Desktop\gadgetsoko2\app\views.py changed, reloading.
+Watching for file changes with StatReloader
+Email sent to developer@work.com | subject: Order Confirmed — Gadget Soko #74
+M-Pesa STK push status: 200
+C:\Users\user\Desktop\gadgetsoko2\app\forms.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\user\Desktop\gadgetsoko2\proj\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\user\Desktop\gadgetsoko2\proj\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\user\Desktop\gadgetsoko2\proj\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Email sent to nabiswajames27@gmail.com | subject: Order Confirmed — Gadget Soko #75
+M-Pesa STK push status: 200
+C:\Users\user\Desktop\gadgetsoko2\proj\settings.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\user\Desktop\gadgetsoko2\app\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\user\Desktop\gadgetsoko2\app\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\user\Desktop\gadgetsoko2\app\views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /admin-panel/market-product/
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader_tags.py", line 135, in render
+    compiled_parent = self.get_parent(context)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader_tags.py", line 132, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader_tags.py", line 110, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base_admin.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\user\Desktop\gadgetsoko2\app\views.py", line 1722, in market_product
+    return render(request, "market_product.html", {
+        "products": products,
+        "total_users": total_users,
+        "email_users": email_users,
+    })
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base_admin.html
+Internal Server Error: /admin-panel/market-product/
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader_tags.py", line 135, in render
+    compiled_parent = self.get_parent(context)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader_tags.py", line 132, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader_tags.py", line 110, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base_admin.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\user\Desktop\gadgetsoko2\app\views.py", line 1722, in market_product
+    return render(request, "market_product.html", {
+        "products": products,
+        "total_users": total_users,
+        "email_users": email_users,
+    })
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base_admin.html
+C:\Users\user\Desktop\gadgetsoko2\app\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /admin-panel/market-product/
+C:\Users\user\Desktop\gadgetsoko2\app\urls.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /admin-panel/market-product/
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 174, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 166, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 1091, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\base.py", line 1052, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader_tags.py", line 135, in render
+    compiled_parent = self.get_parent(context)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader_tags.py", line 132, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader_tags.py", line 110, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base_admin.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\user\Desktop\gadgetsoko2\app\views.py", line 1722, in market_product
+    return render(request, "market_product.html", {
+        "products": products,
+        "total_users": total_users,
+        "email_users": email_users,
+    })
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\gadgetsoko2\env\Lib\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base_admin.html
+Watching for file changes with StatReloader
+Email sent to soimike30@gmail.com | subject: NEW PRODUCT
+Email sent to skylenono28@gmail.com | subject: NEW PRODUCT
+Email sent to humancalc8@gmail.com | subject: NEW PRODUCT
+Email sent to sammytings2@gmail.com | subject: NEW PRODUCT
+Email sent to mokobilucy687@gmail.com | subject: NEW PRODUCT
+Email sent to caremind18@gmail.com | subject: NEW PRODUCT
+Email sent to nyabokehappiness50@gmail.com | subject: NEW PRODUCT
+Email sent to dd@gmail.com | subject: NEW PRODUCT
+Email sent to briankemei005@gmail.com | subject: NEW PRODUCT
+Email sent to demo@gmail.com | subject: NEW PRODUCT
+Email sent to tyu@gdgd | subject: NEW PRODUCT
+Email sent to omondimichael617@gmail.com | subject: NEW PRODUCT
+Email sent to j69559121@gmail.com | subject: NEW PRODUCT
+Email sent to nigelmicah0@gmail.com | subject: NEW PRODUCT
+Email sent to bwanamaina2010@gmail.com | subject: NEW PRODUCT

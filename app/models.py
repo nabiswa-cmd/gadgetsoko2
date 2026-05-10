@@ -36,7 +36,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount = models.DecimalField(max_digits=5, decimal_places=2, default=0)  # percentage
-    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    shipping_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     stock = models.PositiveIntegerField()
     category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name="products")
     brand = models.ForeignKey('Brand', on_delete=models.CASCADE, related_name='products', null=True, blank=True)

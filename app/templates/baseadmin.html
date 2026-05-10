@@ -142,7 +142,9 @@
     <a href="{% url 'settings' %}" class="{% if url_name == 'settings' %}active{% endif %}">
         <i class="fa fa-cog"></i><span>Settings</span>
     </a>
-
+    <a href="{% url 'market_product' %}" class="{% if url_name == 'market_product' %}active{% endif %}">
+    <i class="fa fa-bullhorn"></i><span>Market Product</span>
+</a>
     <hr style="border-top:1px solid #333; margin:20px 0;">
 
     <a href="{% url 'logout' %}">

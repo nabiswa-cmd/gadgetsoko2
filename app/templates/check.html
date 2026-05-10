@@ -228,10 +228,8 @@
             object-fit: contain;
         }
 
-        /* Equity inline SVG icon */
         .equity-svg { width: 38px; height: 38px; }
 
-        /* POD icon */
         .pay-opt .pod-icon {
             font-size: 24px;
             color: var(--primary);
@@ -307,19 +305,32 @@
         /* ── Order Summary ── */
         .summary-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid #f5f5f5;
-            gap: 10px;
+            gap: 12px;
         }
 
         .summary-item:last-of-type { border-bottom: none; }
+
+        .summary-item .item-thumb {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .item-info { flex: 1; min-width: 0; }
 
         .item-info .item-name {
             font-weight: 600;
             font-size: 14px;
             color: #222;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .item-info .item-meta {
@@ -332,15 +343,50 @@
             font-weight: 700;
             font-size: 14px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .summary-divider { border: none; border-top: 2px solid #f0f0f0; margin: 12px 0; }
+
+        /* ── Shipping badge ── */
+        .shipping-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0 4px;
+        }
+
+        .shipping-row .label {
+            font-size: 13px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .shipping-row .shipping-fee-val {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0b3a63;
+        }
+
+        .shipping-badge {
+            font-size: 11px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
 
         .summary-total {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
+            padding: 10px 0 4px;
+            border-top: 2px solid #f0f0f0;
+            margin-top: 6px;
         }
 
         .summary-total .label { font-size: 15px; font-weight: 600; color: #444; }
@@ -349,13 +395,6 @@
             font-size: 21px;
             font-weight: 800;
             color: var(--primary);
-        }
-
-        .shipping-note {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            text-align: right;
         }
 
         .secure-note {
@@ -400,15 +439,14 @@
                 <i class="bi bi-truck"></i> Upcountry
             </button>
         </div>
-        {% if direct_product %}
-    <input type="hidden" name="direct_product_id" value="{{ direct_product.id }}">
-{% elif cart_items %}
-    <input type="hidden" name="direct_product_id" value="{{ cart_items.0.product.id }}">
-{% endif %}
-<form method="POST" action="{% url 'check' %}">
 
+        <form method="POST" action="{% url 'check' %}">
             {% csrf_token %}
             <input type="hidden" name="region" id="region-input" value="nairobi">
+
+            {% if direct_product %}
+                <input type="hidden" name="direct_product_id" value="{{ direct_product }}">
+            {% endif %}
 
             <!-- Full Name -->
             <div class="form-group">
@@ -426,14 +464,13 @@
                     <label class="field-label">
                         <i class="bi bi-phone"></i> M-Pesa Number
                     </label>
-                    <input type="tel" 
-       name="phone" 
-       id="phone-input"
-       placeholder="0712345678"
-       pattern="^0\d{9}$"
-       maxlength="10"
-       required>
-                   
+                    <input type="tel"
+                           name="phone"
+                           id="phone-input"
+                           placeholder="0712345678"
+                           pattern="^0\d{9}$"
+                           maxlength="10"
+                           required>
                 </div>
                 <div class="form-group">
                     <label class="field-label">
@@ -507,7 +544,6 @@
             </div>
 
             <div class="payment-grid">
-
                 <!-- M-Pesa -->
                 <label class="pay-opt selected" onclick="selectPay(this,'mpesa')">
                     <input type="radio" name="payment_method" value="mpesa" checked>
@@ -539,7 +575,6 @@
                     <i class="bi bi-truck pod-icon"></i>
                     <span class="pay-label">Pay on Delivery</span>
                 </label>
-
             </div>
 
             <!-- Manual Instructions -->
@@ -552,7 +587,7 @@
                 <i class="bi bi-bank" style="color:#e6b800"></i>
                 <strong>Equity Bank Transfer:</strong><br>
                 Account Name: <strong>MIKE OMONDI OUMA</strong><br>
-                Paybill: <strong>247247</strong> <br>
+                Paybill: <strong>247247</strong><br>
                 Account No: <strong>1160181275454</strong>
             </div>
 
@@ -564,7 +599,7 @@
                 </label>
                 <label class="check-row">
                     <input type="checkbox" id="check-shipping" onchange="validateAgreements()">
-                    <span>I understand that the <strong>shipping fee</strong> is based on location &amp; item weight.</span>
+                    <span>I understand that the <strong>shipping fee</strong> is based on my delivery location.</span>
                 </label>
             </div>
 
@@ -584,21 +619,49 @@
 
         {% for item in cart_items %}
         <div class="summary-item">
+            {% with img=item.product.images.first %}
+                {% if img %}
+                    <img class="item-thumb" src="{{ img.image.url }}" alt="{{ item.product.name }}">
+                {% elif item.product.image %}
+                    <img class="item-thumb" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                {% else %}
+                    <img class="item-thumb" src="{% static 'images/default.png' %}" alt="{{ item.product.name }}">
+                {% endif %}
+            {% endwith %}
             <div class="item-info">
                 <div class="item-name">{{ item.product.name }}</div>
-                <div class="item-meta">Qty: {{ item.quantity }} &times; KES {{ item.product.price|floatformat:0 }}</div>
+                <div class="item-meta">Qty: {{ item.quantity }} &times; KES {{ item.product.final_price|floatformat:0 }}</div>
             </div>
-            <span class="item-price">KES {{ item.get_total|floatformat:0 }}</span>
+            <span class="item-price">
+                KES {% widthratio item.product.final_price 1 item.quantity %}
+            </span>
         </div>
         {% endfor %}
 
         <hr class="summary-divider">
 
-        <div class="summary-total">
+        <!-- Subtotal -->
+        <div class="shipping-row">
             <span class="label">Subtotal</span>
-            <span class="amount" id="grand-total-val">KES {{ subtotal }}</span>
+            <span class="shipping-fee-val">KES {{ subtotal|floatformat:0 }}</span>
         </div>
-        <p class="shipping-note" id="shipping-note">+ shipping calculated at checkout</p>
+
+        <!-- Shipping fee — updates live via JS -->
+        <div class="shipping-row">
+            <span class="label">
+                <i class="bi bi-truck" style="color:var(--primary)"></i>
+                Shipping
+                <span class="shipping-badge" id="shipping-location-badge">Within Nairobi</span>
+            </span>
+            <span class="shipping-fee-val" id="shipping-fee-display">
+                KES {{ shipping_nairobi|floatformat:0 }}
+            </span>
+        </div>
+
+        <div class="summary-total">
+            <span class="label">TOTAL</span>
+            <span class="amount" id="grand-total-val">KES 0</span>
+        </div>
 
         <div class="secure-note">
             <i class="bi bi-shield-lock-fill"></i>
@@ -609,22 +672,15 @@
 </div>
 
 <script>
-    
-const phoneInput = document.getElementById('phone-input');
-
-phoneInput.addEventListener('input', function () {
-    // Remove non-numbers
-    this.value = this.value.replace(/\D/g, '');
-
-    // Limit to 10 digits
-    if (this.value.length > 10) {
-        this.value = this.value.slice(0, 10);
-    }
-});
-
+    /* ── Shipping constants from Django context ── */
     const subtotal        = parseFloat("{{ subtotal|default:0 }}");
     const shippingNairobi = parseFloat("{{ shipping_nairobi|default:200 }}");
     const shippingOutside = parseFloat("{{ max_shipping|default:500 }}");
+
+    /* ── Phone input: numbers only, max 10 digits ── */
+    document.getElementById('phone-input').addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    });
 
     /* ── Kenya Counties & Towns ── */
     const kenyaData = {
@@ -698,6 +754,7 @@ phoneInput.addEventListener('input', function () {
         document.getElementById('outside-fields').classList.toggle('hidden', isNairobi);
         document.getElementById('region-input').value = loc;
 
+        // POD only available within Nairobi
         const pod = document.getElementById('pod-option');
         pod.style.display = isNairobi ? 'flex' : 'none';
 
@@ -707,23 +764,35 @@ phoneInput.addEventListener('input', function () {
             selectPay(document.querySelectorAll('.pay-opt')[0], 'mpesa');
         }
 
-        updateTotals(isNairobi ? shippingNairobi : shippingOutside);
+        updateTotals(isNairobi ? shippingNairobi : shippingOutside, isNairobi);
     }
 
-    function updateTotals(shipping) {
+    function updateTotals(shipping, isNairobi) {
         const total = subtotal + shipping;
-        document.getElementById('grand-total-val').innerText = 'KES ' + total.toLocaleString();
-        document.getElementById('btn-total-val').innerText = total.toLocaleString();
-        document.getElementById('shipping-note').innerText =
-            '+ Shipping: KES ' + shipping.toLocaleString();
+
+        // Badge
+        document.getElementById('shipping-location-badge').innerText =
+            isNairobi ? 'Within Nairobi' : 'Upcountry';
+
+        // Shipping fee display
+        document.getElementById('shipping-fee-display').innerText =
+            'KES ' + shipping.toLocaleString();
+
+        // Grand total
+        document.getElementById('grand-total-val').innerText =
+            'KES ' + total.toLocaleString();
+
+        // Button total
+        document.getElementById('btn-total-val').innerText =
+            total.toLocaleString();
     }
 
     function selectPay(el, method) {
         document.querySelectorAll('.pay-opt').forEach(o => o.classList.remove('selected'));
         el.classList.add('selected');
         el.querySelector('input[type="radio"]').checked = true;
-        document.getElementById('manual-mpesa').style.display  = (method === 'mpesa')   ? 'block' : 'none';
-        document.getElementById('manual-equity').style.display = (method === 'equity')  ? 'block' : 'none';
+        document.getElementById('manual-mpesa').style.display  = (method === 'mpesa')  ? 'block' : 'none';
+        document.getElementById('manual-equity').style.display = (method === 'equity') ? 'block' : 'none';
     }
 
     function validateAgreements() {
@@ -736,7 +805,7 @@ phoneInput.addEventListener('input', function () {
 
     document.addEventListener('DOMContentLoaded', () => {
         initCounties();
-        updateLocation('nairobi');
+        updateLocation('nairobi');   // sets totals on page load too
     });
 </script>
 </body>

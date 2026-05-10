@@ -45,3 +45,16 @@ class SignupForm(forms.ModelForm):
             raise forms.ValidationError("Passwords do not match.")
 
         return cleaned_data
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth import get_user_model
+
+class AllUserPasswordResetForm(PasswordResetForm):
+    def get_users(self, email):
+        """
+        By default, Django filters for 'is_active' AND 'has_usable_password'.
+        This override removes the 'has_usable_password' requirement.
+        """
+        active_users = get_user_model()._default_manager.filter(
+            email__iexact=email, is_active=True
+        )
+        return active_users

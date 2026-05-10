@@ -1,4 +1,4 @@
-# proj/urls.py
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -7,25 +7,29 @@ from django.contrib.auth import views as auth_views
 from django.contrib.sitemaps.views import sitemap
 from .sitemaps import ProductSitemap
 
-
+# ── IMPORT YOUR CUSTOM FORM ──
+from app.forms import AllUserPasswordResetForm 
 
 sitemaps = {
     'products': ProductSitemap,
 }
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('app.urls')),
     path('accounts/', include('allauth.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+
     # ── FIXED Built-in Django Password Reset ──
-path('password-reset/',
-     auth_views.PasswordResetView.as_view(
-         template_name='auth/password_reset.html',
-         email_template_name='auth/password_reset_email.html',
-         html_email_template_name='auth/password_reset_email.html', # <── ADD THIS LINE
-         subject_template_name='auth/password_reset_subject.txt'
-     ),
-     name='password_reset'),
+    path('password-reset/',
+         auth_views.PasswordResetView.as_view(
+             form_class=AllUserPasswordResetForm, # <── ADD THIS FOR GOOGLE USERS
+             template_name='auth/password_reset.html',
+             email_template_name='auth/password_reset_email.html',
+             html_email_template_name='auth/password_reset_email.html',
+             subject_template_name='auth/password_reset_subject.txt'
+         ),
+         name='password_reset'),
 
     path('password-reset/done/',
          auth_views.PasswordResetDoneView.as_view(
@@ -49,8 +53,3 @@ path('password-reset/',
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-
-
-
-

@@ -72,5 +72,5 @@ urlpatterns = [
     path('bulk-delete-orders/', views.bulk_delete_orders, name='bulk_delete_orders'),
     path('checkout/direct/<int:product_id>/', views.direct_checkout, name='direct_checkout'),
 
-    
+    path('admin-panel/market-product/', views.market_product, name='market_product'),
 ]
