@@ -73,4 +73,6 @@ urlpatterns = [
     path('checkout/direct/<int:product_id>/', views.direct_checkout, name='direct_checkout'),
 
     path('admin-panel/market-product/', views.market_product, name='market_product'),
+    path('profile/edit/', views.edit_profile,     name='edit_profile'),
+    path('profile/check-username/', views.check_username,  name='check_username'),
 ]

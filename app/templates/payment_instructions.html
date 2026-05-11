@@ -2,172 +2,460 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | Gadget Soko Kenya</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <style>
         @page { size: A4; margin: 1cm; }
-        
-        body { 
-            font-family: 'Helvetica', 'Arial', sans-serif; 
-            background-color: #fdfdfd; 
-            margin: 0; padding: 20px; 
-            color: #1a1a1a;
+
+        :root {
+            --primary: #f4330c;
+            --navy: #0b3a63;
+            --green: #00a650;
+            --bg: #f4f6f9;
         }
 
-        .receipt { 
-            width: 440px; 
-            margin: 0 auto; 
-            background: #ffffff; 
-            border-radius: 24px; 
-            border: 1px solid #f1f1f1;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        .gs-mini-nav {
+            background: var(--primary);
+            padding: 10px 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(238,77,45,0.3);
+        }
+        .gs-mini-nav a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+        .gs-mini-nav a:hover { opacity: 1; }
+        .gs-mini-nav .nav-logo img { height: 34px; }
+        .gs-mini-nav .secure-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.85);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .page-wrap {
+            min-height: calc(100vh - 54px);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 30px 16px 50px;
+        }
+
+        .receipt {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            overflow: hidden;
             position: relative;
         }
 
-        /* Mocking the dotted side decoration with a border since radial-gradients fail in PDF */
         .side-decoration {
             position: absolute;
-            left: 0;
-            top: 20%;
+            left: 0; top: 20%;
             height: 60%;
             border-left: 4px dotted #e5e7eb;
         }
 
-        .header { text-align: center; padding: 30px 20px 10px; }
-
-        .success-icon {
-            width: 60px;
-            height: 60px;
-            background-color: #f0fdf4;
-            color: #00a650;
-            border-radius: 30px;
-            line-height: 60px;
-            font-size: 30px;
-            margin: 0 auto 15px;
-            border: 2px solid #dcfce7;
+        .receipt-header {
             text-align: center;
+            padding: 28px 24px 12px;
         }
 
-        .header h2 { margin: 0; font-size: 24px; font-weight: bold; color: #1a1a1a; }
-        .header p { color: #6b7280; font-size: 14px; margin-top: 5px; }
+        .stamp {
+            display: inline-block;
+            border: 2px solid #f87171;
+            color: #f87171;
+            padding: 3px 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 11px;
+            border-radius: 4px;
+            letter-spacing: 1.5px;
+            margin-bottom: 14px;
+        }
+        .stamp.paid {
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .success-icon {
+            width: 58px;
+            height: 58px;
+            background: #f0fdf4;
+            color: var(--green);
+            border-radius: 50%;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            border: 2px solid #dcfce7;
+        }
+
+        .receipt-header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+        .receipt-header p {
+            color: #6b7280;
+            font-size: 13px;
+        }
 
         .info-table {
             width: 100%;
-            padding: 0 30px;
+            padding: 0 24px;
             border-collapse: collapse;
         }
 
         .info-row td {
             padding: 10px 0;
-            border-bottom: 1px solid #f9fafb;
-            font-size: 14px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 13.5px;
         }
 
         .label { color: #9ca3af; text-align: left; width: 50%; }
-        .value { color: #1a1a1a; text-align: right; font-weight: bold; width: 50%; }
+        .value { color: #1a1a1a; text-align: right; font-weight: 700; width: 50%; }
 
-        .price-section { 
-            background-color: #fff8f6; 
-            margin: 20px 30px; 
-            padding: 20px; 
-            border-radius: 16px; 
+        .tear-line {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin: 20px 0;
+            position: relative;
+        }
+        .tear-line::before,
+        .tear-line::after {
+            content: '';
+            flex: 1;
+            border-top: 2px dashed #e5e7eb;
+        }
+        .tear-circle {
+            width: 18px;
+            height: 18px;
+            background: var(--bg);
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin: 0 -9px;
+            z-index: 1;
+        }
+        .tear-circle.left  { margin-left: -9px; }
+        .tear-circle.right { margin-right: -9px; }
+
+        .price-section {
+            background: #fff8f6;
+            margin: 0 24px 20px;
+            padding: 18px;
+            border-radius: 8px;
             text-align: center;
-            border: 1px dashed #ff5a2c;
+            border: 1px dashed var(--primary);
         }
-        .price-label { font-size: 12px; font-weight: bold; color: #ff5a2c; text-transform: uppercase; }
-        .price-amount { font-size: 30px; font-weight: bold; color: #1a1a1a; display: block; margin-top: 5px; }
+        .price-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .price-amount {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a1a1a;
+            display: block;
+            margin-top: 4px;
+        }
 
-        .payment-instructions { 
-            margin: 20px 30px; 
-            padding: 20px; 
-            background-color: #1a1a1a; 
-            color: #ffffff; 
-            border-radius: 16px;
+        .payment-instructions {
+            margin: 0 24px 24px;
+            padding: 18px;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 8px;
         }
-        
-        .instr-title { 
-            font-size: 14px; 
-            font-weight: bold; 
+        .instr-title {
+            font-size: 13px;
+            font-weight: 700;
             margin-bottom: 12px;
             color: #d1d5db;
             text-align: center;
         }
-
-        .pay-details { 
-            background-color: #2a2a2a; 
-            padding: 15px; 
-            border-radius: 12px;
+        .pay-details {
+            background: #2a2a2a;
+            padding: 14px;
+            border-radius: 8px;
             text-align: center;
         }
-        .pay-value { font-size: 20px; font-weight: bold; color: #ff5a2c; display: block; margin: 5px 0; }
-        .pay-ref { font-size: 12px; color: #9ca3af; }
-
-        .stamp {
-            text-align: center;
-            border: 2px solid #f87171;
-            color: #f87171;
-            padding: 4px;
-            font-weight: bold;
-            width: 80px;
-            margin: 0 auto;
-            text-transform: uppercase;
+        .pay-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+            margin: 4px 0;
+        }
+        .pay-ref {
             font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+            padding: 0 24px 24px;
+            line-height: 1.6;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+            padding: 0 24px 28px;
+        }
+        .btn-home {
+            flex: 1;
+            padding: 12px;
+            background: var(--navy);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-home:hover { background: #0d4a7a; color: #fff; }
+        .btn-print {
+            flex: 1;
+            padding: 12px;
+            background: #f4f6f9;
+            color: var(--navy);
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-print:hover { background: #e2e8f0; }
+
+        @media (max-width: 480px) {
+            .page-wrap { padding: 16px 10px 40px; }
+            .receipt { border-radius: 10px; }
+            .price-amount { font-size: 26px; }
+            .action-btns { flex-direction: column; }
+        }
+
+        @media print {
+            .gs-mini-nav, .action-btns { display: none !important; }
+            body { background: #fff; }
+            .page-wrap { padding: 0; }
+            .receipt { box-shadow: none; border: none; max-width: 100%; }
         }
     </style>
 </head>
 <body>
 
-<div class="receipt">
-    <div class="side-decoration"></div>
+<nav class="gs-mini-nav">
+    <a href="{% url 'index' %}">
+        <i class="bi bi-arrow-left-short" style="font-size:20px;"></i>
+        <img src="{% static 'images/FF.png' %}" alt="Gadget Soko" style="height:34px;">
+    </a>
+    <span class="secure-label">
+        <i class="bi bi-receipt"></i> Order Receipt
+    </span>
+</nav>
 
-    <div class="header">
-        <div class="stamp">
-            {% if order.payment_status == "Paid" %}PAID{% else %}PENDING{% endif %}
+<div class="page-wrap">
+    <div class="receipt">
+
+        <div class="side-decoration"></div>
+
+        <!-- ── Header ── -->
+        <div class="receipt-header">
+            <div class="stamp {% if order.payment_status == 'Paid' %}paid{% endif %}">
+                {% if order.payment_status == 'Paid' %}
+                    PAID
+                {% elif order.payment_method == 'pod' %}
+                    PAY ON DELIVERY
+                {% else %}
+                    AWAITING PAYMENT
+                {% endif %}
+            </div>
+            <div class="success-icon">
+                <i class="bi bi-check-lg"></i>
+            </div>
+            <h2>Order Confirmed!</h2>
+            <p>Order #GSK-{{ order.id }} has been registered.</p>
         </div>
-        <div class="success-icon">✔</div>
-        <h2>Order Confirmed!</h2>
-        <p>Order #GSK-{{ order.id }} has been registered.</p>
-    </div>
 
-    <table class="info-table">
-        <tr class="info-row"><td class="label">Customer</td><td class="value">{{ order.name }}</td></tr>
-        <tr class="info-row"><td class="label">Phone</td><td class="value">{{ order.phone }}</td></tr>
-        <tr class="info-row"><td class="label">Destination</td><td class="value">{{ order.destination }}</td></tr>
-        <tr class="info-row"><td class="label">Placed On</td><td class="value">{{ order.created_at|date:"M d, H:i" }}</td></tr>
-        
-        {% for item in order.items.all %}
-        <tr class="info-row">
-            <td class="label">{{ item.product.name }} x {{ item.quantity }}</td>
-            <td class="value">KES {{ item.subtotal }}</td>
-        </tr>
-        {% endfor %}
-        
-        <tr class="info-row">
-            <td class="label">Shipping Fee</td>
-            <td class="value">KES {{ order.shipping_fee }}</td>
-        </tr>
-    </table>
+        <!-- ── Info rows ── -->
+        <table class="info-table">
+            <tr class="info-row">
+                <td class="label">Customer</td>
+                <td class="value">{{ order.name }}</td>
+            </tr>
+            <tr class="info-row">
+                <td class="label">Phone</td>
+                <!-- strip leading 254 → display as 07xx xxx xxx -->
+                <td class="value">
+                    {% with ph=order.phone %}
+                        {% if ph|slice:":3" == "254" %}
+                            0{{ ph|slice:"3:" }}
+                        {% else %}
+                            {{ ph }}
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+            <tr class="info-row">
+                <td class="label">Destination</td>
+                <td class="value">{{ order.destination }}</td>
+            </tr>
+            <tr class="info-row">
+                <td class="label">Payment</td>
+                <td class="value">
+                    {% if order.payment_method == 'mpesa' %}
+                        M-Pesa
+                    {% elif order.payment_method == 'equity' %}
+                        Equity Bank
+                    {% elif order.payment_method == 'pod' %}
+                        Pay on Delivery
+                    {% else %}
+                        {{ order.payment_method }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="info-row">
+                <td class="label">Placed On</td>
+                <td class="value">{{ order.created_at|date:"M d, Y · H:i" }}</td>
+            </tr>
 
-    <div class="price-section">
-        <div class="price-label">Total Amount Due</div>
-        <div class="price-amount">KES {{ order.total }}</div>
-    </div>
+            <!-- Items -->
+            {% for item in order.items.all %}
+            <tr class="info-row">
+                <td class="label">{{ item.product.name }} &times; {{ item.quantity }}</td>
+                <td class="value">KES {{ item.subtotal|floatformat:0 }}</td>
+            </tr>
+            {% endfor %}
 
-    <div class="payment-instructions">
-        {% if order.payment_method == 'mpesa' %}
-            <div class="instr-title">M-Pesa Express (STK)</div>
-            <div class="pay-details">
-                <span class="pay-value">ORDER</span>
-                <span class="pay-ref">OrderID: {{ order.id }}</span>
+            <tr class="info-row">
+                <td class="label">Shipping Fee</td>
+                <td class="value">KES {{ order.shipping_fee|floatformat:0 }}</td>
+            </tr>
+        </table>
+
+        <div class="tear-line">
+            <div class="tear-circle left"></div>
+            <div class="tear-circle right"></div>
+        </div>
+
+        <!-- ── Total ── -->
+        <div class="price-section">
+            <div class="price-label">
+                {% if order.payment_method == 'pod' %}Amount to Pay on Delivery{% else %}Total Amount Due{% endif %}
             </div>
-        {% else %}
-            <div class="instr-title">Cash on Delivery</div>
-            <div class="pay-details">
-                <span class="pay-value">KES {{ order.total }}</span>
-                <span class="pay-ref">Pay upon arrival</span>
-            </div>
-        {% endif %}
-    </div>
-    
-    <div style="text-align: center; font-size: 10px; color: #9ca3af; padding-bottom: 20px;">
-        Thank you for choosing Gadget Soko Kenya!
+            <span class="price-amount">KES {{ order.total|floatformat:0 }}</span>
+        </div>
+
+        <!-- ── Payment instructions ── -->
+        <div class="payment-instructions">
+            {% if order.payment_method == 'mpesa' %}
+                <div class="instr-title">
+                    <i class="bi bi-phone-fill" style="color:var(--primary)"></i>
+                    M-Pesa Payment Instructions
+                </div>
+                <div class="pay-details">
+                    <span class="pay-ref">An STK push has been sent to</span>
+                    <span class="pay-value">
+                        {% with ph=order.phone %}
+                            {% if ph|slice:":3" == "254" %}0{{ ph|slice:"3:" }}{% else %}{{ ph }}{% endif %}
+                        {% endwith %}
+                    </span>
+                    <span class="pay-ref">If it didn't arrive, use Paybill:</span>
+                    <span class="pay-value" style="font-size:18px;">247247</span>
+                    <span class="pay-ref">Account No: <strong style="color:#fff;">1160181275454</strong></span>
+                    <span class="pay-ref" style="margin-top:6px;display:block;">
+                        Reference: <strong style="color:#fff;">GSK{{ order.id }}</strong>
+                    </span>
+                </div>
+
+            {% elif order.payment_method == 'equity' %}
+                <div class="instr-title">
+                    <i class="bi bi-bank" style="color:var(--primary)"></i>
+                    Equity Bank Transfer
+                </div>
+                <div class="pay-details">
+                    <span class="pay-ref">Account Name</span>
+                    <span class="pay-value" style="font-size:16px;">MIKE OMONDI OUMA</span>
+                    <span class="pay-ref">Paybill: <strong style="color:#fff;">247247</strong></span>
+                    <span class="pay-value" style="font-size:18px;">1160181275454</span>
+                    <span class="pay-ref">
+                        Use reference: <strong style="color:#fff;">GSK{{ order.id }}</strong>
+                    </span>
+                </div>
+
+            {% elif order.payment_method == 'pod' %}
+                <div class="instr-title">
+                    <i class="bi bi-truck" style="color:var(--primary)"></i>
+                    Pay on Delivery
+                </div>
+                <div class="pay-details">
+                    <span class="pay-ref">Prepare exact amount on arrival</span>
+                    <span class="pay-value">KES {{ order.total|floatformat:0 }}</span>
+                    <span class="pay-ref">Order #GSK-{{ order.id }}</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="receipt-footer">
+            Thank you for choosing <strong>Gadget Soko Kenya!</strong><br>
+            For support: <strong>0759 829 235</strong> &nbsp;|&nbsp; gadgetsoko.com
+        </div>
+
+        <div class="action-btns">
+            <a href="{% url 'index' %}" class="btn-home">
+                <i class="bi bi-house-fill"></i> Back to Home
+            </a>
+            <button class="btn-print" onclick="window.print()">
+                <i class="bi bi-printer-fill"></i> Print Receipt
+            </button>
+        </div>
+
     </div>
 </div>
 

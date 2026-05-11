@@ -1,0 +1,840 @@
+{% extends 'base_site.html' %}
+{% load static %}
+
+{% block title %}Edit Profile | Gadget Soko{% endblock %}
+
+{% block extra_head %}
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jost:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+<style>
+    /* ── FONT VARIABLES ── */
+    :root {
+        --font-heading: 'Jost', sans-serif;       /* card headers, buttons, nav */
+        --font-body:    'Open Sans', sans-serif;  /* body text, inputs, paragraphs */
+        --font-serif:   'Inria Serif', serif;     /* page title, modal heading */
+        --font-ui:      'Inter', sans-serif;      /* labels, hints, small UI text */
+    }
+
+    /* ── PAGE LAYOUT ── */
+    .profile-wrapper {
+        max-width: 860px;
+        margin: 28px auto 60px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        font-family: var(--font-body);
+    }
+
+    /* ── CARD BASE ── */
+    .prof-card {
+        background: var(--white);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+    .prof-card-header {
+        padding: 16px 22px;
+        background: var(--bg-light);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .prof-card-header i  { color: var(--primary); font-size: 16px; }
+    .prof-card-header h3 {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--navy);
+        margin: 0;
+        font-family: var(--font-heading);
+        letter-spacing: 0.3px;
+    }
+    .prof-card-body { padding: 24px 22px; }
+
+    /* ── AVATAR SECTION ── */
+    .avatar-section {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        flex-wrap: wrap;
+    }
+    .avatar-ring {
+        width: 90px; height: 90px;
+        border-radius: 50%;
+        border: 3px solid var(--primary);
+        padding: 3px;
+        flex-shrink: 0;
+        position: relative;
+        cursor: pointer;
+    }
+    .avatar-ring img,
+    .avatar-ring .avatar-initials {
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+    }
+    .avatar-ring .avatar-initials {
+        background: linear-gradient(135deg, var(--primary), #ff8c00);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        font-weight: 700;
+        color: #fff;
+        font-family: var(--font-serif);
+        font-style: italic;
+        text-transform: uppercase;
+    }
+    .avatar-ring .avatar-edit-overlay {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.25s;
+        font-size: 20px;
+        color: #fff;
+    }
+    .avatar-ring:hover .avatar-edit-overlay { opacity: 1; }
+    #avatarInput { display: none; }
+
+    .avatar-info small {
+        display: block;
+        color: var(--text-muted);
+        font-size: 12px;
+        margin-top: 4px;
+        font-family: var(--font-ui);
+    }
+    .avatar-info .user-display-name {
+        display: block;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--navy);
+        font-family: var(--font-heading);
+        letter-spacing: 0.2px;
+    }
+    .avatar-info .btn-change-avatar {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg-light);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: var(--font-heading);
+        color: var(--navy);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .avatar-info .btn-change-avatar:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+    /* ── FORM FIELDS ── */
+    .form-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    @media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
+
+    .field-group { display: flex; flex-direction: column; gap: 5px; }
+    .field-group label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #555;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-family: var(--font-ui);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+    .field-group label i { color: var(--primary); font-size: 11px; }
+
+    .field-group input,
+    .field-group select,
+    .field-group textarea {
+        padding: 10px 12px;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-family: var(--font-body);
+        color: var(--text-main);
+        background: #fff;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(244,51,12,0.1);
+    }
+    .field-group textarea { resize: vertical; min-height: 70px; }
+
+    /* Username live-check */
+    .username-wrapper { position: relative; }
+    .username-wrapper input { padding-right: 36px; }
+    .username-status {
+        position: absolute;
+        right: 11px; top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px; line-height: 1;
+    }
+    .username-hint {
+        font-size: 11px;
+        margin-top: 3px;
+        font-weight: 600;
+        font-family: var(--font-ui);
+    }
+    .hint-ok       { color: var(--success); }
+    .hint-taken    { color: #e53935; }
+    .hint-checking { color: var(--text-muted); }
+
+    /* Location toggle */
+    .loc-toggle {
+        display: flex;
+        gap: 8px;
+        background: #eee;
+        border-radius: 12px;
+        padding: 5px;
+        margin-bottom: 16px;
+    }
+    .loc-btn {
+        flex: 1;
+        padding: 9px 8px;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: var(--font-heading);
+        color: #777;
+        background: transparent;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.25s;
+    }
+    .loc-btn.active {
+        background: #fff;
+        color: var(--primary);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .loc-section { display: none; }
+    .loc-section.show { display: block; }
+
+    /* ── SAVE BUTTON ── */
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 12px 28px;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: var(--font-heading);
+        letter-spacing: 0.4px;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-top: 6px;
+    }
+    .btn-save:hover { background: var(--primary-hover); box-shadow: 0 4px 14px rgba(244,51,12,0.35); }
+
+    /* ── PASSWORD SECTION ── */
+    .pw-field-wrap { position: relative; }
+    .pw-field-wrap input { padding-right: 42px; }
+    .pw-toggle {
+        position: absolute;
+        right: 11px; top: 50%;
+        transform: translateY(-50%);
+        background: none; border: none;
+        color: var(--text-muted);
+        font-size: 15px; cursor: pointer; padding: 0;
+    }
+    .pw-strength { margin-top: 5px; height: 4px; border-radius: 4px; background: #eee; overflow: hidden; }
+    .pw-strength-bar { height: 100%; border-radius: 4px; width: 0; transition: width 0.3s, background 0.3s; }
+
+    /* ── DANGER ZONE ── */
+    .danger-card .prof-card-header { background: #fff5f5; border-bottom-color: #fecaca; }
+    .danger-card .prof-card-header h3 { color: #c0392b; }
+    .danger-card .prof-card-header i  { color: #e53935; }
+
+    .delete-warning {
+        background: #fff5f5;
+        border: 1px solid #fecaca;
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        font-size: 13px;
+        font-family: var(--font-body);
+        color: #7f1d1d;
+        margin-bottom: 16px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    .delete-warning i { font-size: 16px; color: #e53935; flex-shrink: 0; margin-top: 1px; }
+
+    .btn-delete {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #e53935;
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 11px 24px;
+        font-size: 13px;
+        font-weight: 700;
+        font-family: var(--font-heading);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .btn-delete:hover { background: #c62828; }
+
+    /* ── DELETE CONFIRM MODAL ── */
+    .modal-backdrop {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 8000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(3px);
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-box {
+        background: #fff;
+        border-radius: var(--radius-md);
+        padding: 32px 28px;
+        max-width: 420px;
+        width: 90%;
+        box-shadow: var(--shadow-md);
+        text-align: center;
+        font-family: var(--font-body);
+    }
+    .modal-box .modal-icon { font-size: 44px; color: #e53935; margin-bottom: 14px; }
+    .modal-box h4 {
+        font-family: var(--font-serif);
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--navy);
+        margin-bottom: 8px;
+    }
+    .modal-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.6; }
+    .modal-box .confirm-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1.5px solid #fca5a5;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        font-family: var(--font-ui);
+        text-align: center;
+        outline: none;
+        margin-bottom: 18px;
+        color: #c62828;
+        box-sizing: border-box;
+    }
+    .modal-box .confirm-input:focus { border-color: #e53935; box-shadow: 0 0 0 3px rgba(229,57,53,0.15); }
+    .modal-btn-row { display: flex; gap: 10px; }
+    .btn-cancel {
+        flex: 1; padding: 11px;
+        background: var(--bg-light); color: var(--text-main);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px; font-weight: 700;
+        font-family: var(--font-heading);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .btn-cancel:hover { background: var(--border); }
+
+    /* ── PAGE HEADER ── */
+    .profile-page-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 4px;
+    }
+    .profile-page-header .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
+        font-family: var(--font-ui);
+        transition: color 0.2s;
+    }
+    .profile-page-header .back-btn:hover { color: var(--primary); }
+    .profile-page-header h1 {
+        font-family: var(--font-serif);
+        font-size: 24px;
+        font-weight: 700;
+        font-style: italic;
+        color: var(--navy);
+        margin: 0;
+    }
+
+    /* ── LOCATION LABEL ── */
+    .loc-label {
+        font-size: 13px;
+        font-weight: 700;
+        font-family: var(--font-heading);
+        color: var(--navy);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .loc-label span {
+        font-weight: 400;
+        color: var(--text-muted);
+        font-size: 12px;
+        font-family: var(--font-ui);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="profile-page-header">
+        <a href="{% url 'index' %}" class="back-btn">
+            <i class="bi bi-arrow-left-short" style="font-size:18px;"></i>Back
+        </a>
+        <h1><i class="bi bi-person-circle" style="color:var(--primary);font-size:22px;font-style:normal;"></i> My Profile</h1>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         CARD 1 — AVATAR + BASIC DETAILS
+    ════════════════════════════════════ -->
+    <div class="prof-card">
+        <div class="prof-card-header">
+            <i class="bi bi-person-fill"></i>
+            <h3>Personal Information</h3>
+        </div>
+        <div class="prof-card-body">
+            <form method="POST" enctype="multipart/form-data" action="{% url 'edit_profile' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_profile">
+                <input type="hidden" name="region" id="region-hidden" value="{{ profile.region|default:'nairobi' }}">
+
+                <!-- Avatar -->
+                <div class="avatar-section" style="margin-bottom:24px;">
+                    <div class="avatar-ring" onclick="document.getElementById('avatarInput').click()">
+                        {% with av=profile.get_avatar_url %}
+                        {% if av %}
+                            <img id="avatarPreview" src="{{ av }}"
+                                 alt="{{ request.user.username }}"
+                                 onerror="this.style.display='none';document.getElementById('avatarInitials').style.display='flex';">
+                            <div id="avatarInitials" class="avatar-initials" style="display:none;">
+                                {{ request.user.username|slice:":1" }}
+                            </div>
+                        {% else %}
+                            <img id="avatarPreview" style="display:none;" alt="">
+                            <div id="avatarInitials" class="avatar-initials">
+                                {{ request.user.username|slice:":1" }}
+                            </div>
+                        {% endif %}
+                        {% endwith %}
+                        <div class="avatar-edit-overlay"><i class="bi bi-camera-fill"></i></div>
+                    </div>
+                    <div class="avatar-info">
+                        <span class="user-display-name">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </span>
+                        <small>{{ request.user.email }}</small>
+                        <small style="margin-top:6px;">JPG, PNG or WebP &bull; max 2 MB</small>
+                        <label for="avatarInput" class="btn-change-avatar" style="margin-top:10px;">
+                            <i class="bi bi-upload"></i> Change Photo
+                        </label>
+                    </div>
+                    <input type="file" name="avatar" id="avatarInput" accept="image/*">
+                </div>
+
+                <!-- Name row -->
+                <div class="form-grid-2" style="margin-bottom:16px;">
+                    <div class="field-group">
+                        <label><i class="bi bi-person"></i> First Name</label>
+                        <input type="text" name="first_name" value="{{ request.user.first_name }}" placeholder="First name">
+                    </div>
+                    <div class="field-group">
+                        <label><i class="bi bi-person"></i> Last Name</label>
+                        <input type="text" name="last_name" value="{{ request.user.last_name }}" placeholder="Last name">
+                    </div>
+                </div>
+
+                <!-- Username + Email row -->
+                <div class="form-grid-2" style="margin-bottom:16px;">
+                    <div class="field-group">
+                        <label><i class="bi bi-at"></i> Username</label>
+                        <div class="username-wrapper">
+                            <input type="text" name="username" id="usernameInput"
+                                   value="{{ request.user.username }}"
+                                   placeholder="username"
+                                   autocomplete="off">
+                            <span class="username-status" id="usernameStatus"></span>
+                        </div>
+                        <span class="username-hint" id="usernameHint"></span>
+                    </div>
+                    <div class="field-group">
+                        <label><i class="bi bi-envelope"></i> Email Address</label>
+                        <input type="email" name="email" value="{{ request.user.email }}" placeholder="you@email.com">
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div class="field-group" style="margin-bottom:22px;max-width:320px;">
+                    <label><i class="bi bi-phone"></i> Phone Number</label>
+                    <input type="tel" name="phone" value="{{ profile.phone|default:'' }}"
+                           placeholder="0712 345 678" maxlength="15">
+                </div>
+
+                <!-- ── LOCATION ── -->
+                <p class="loc-label">
+                    <i class="bi bi-geo-alt-fill" style="color:var(--primary);"></i>
+                    Delivery Location <span>(used to autofill checkout)</span>
+                </p>
+
+                <div class="loc-toggle">
+                    <button type="button" class="loc-btn {% if profile.region == 'nairobi' or not profile.region %}active{% endif %}"
+                            id="locBtnNairobi" onclick="setRegion('nairobi')">
+                        <i class="bi bi-geo-alt-fill"></i> Nairobi
+                    </button>
+                    <button type="button" class="loc-btn {% if profile.region == 'outside' %}active{% endif %}"
+                            id="locBtnOutside" onclick="setRegion('outside')">
+                        <i class="bi bi-truck"></i> Upcountry
+                    </button>
+                </div>
+
+                <!-- Nairobi area -->
+                <div id="nairobiSection" class="loc-section {% if profile.region == 'nairobi' or not profile.region %}show{% endif %}">
+                    <div class="field-group" style="max-width:320px;">
+                        <label><i class="bi bi-map"></i> Nearest Estate / Area</label>
+                        <select name="nairobi_area">
+                            {% for area in nairobi_areas %}
+                            <option value="{{ area }}" {% if profile.nairobi_area == area %}selected{% endif %}>{{ area }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Upcountry -->
+                <div id="outsideSection" class="loc-section {% if profile.region == 'outside' %}show{% endif %}">
+                    <div class="form-grid-2" style="max-width:640px;">
+                        <div class="field-group">
+                            <label><i class="bi bi-map-fill"></i> County</label>
+                            <select name="upcountry_county" id="countySelect" onchange="populateTowns()">
+                                <option value="">-- Select County --</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label><i class="bi bi-pin-map"></i> Town / Sub-County</label>
+                            <select name="upcountry_town" id="townSelect">
+                                <option value="">-- Select County First --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address notes -->
+                <div class="field-group" style="margin-top:14px;">
+                    <label><i class="bi bi-building"></i> Address Notes / Landmark</label>
+                    <textarea name="address_notes" placeholder="Building, floor, landmark...">{{ profile.address_notes|default:'' }}</textarea>
+                </div>
+
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-check2-circle"></i> Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         CARD 2 — CHANGE PASSWORD
+    ════════════════════════════════════ -->
+    <div class="prof-card">
+        <div class="prof-card-header">
+            <i class="bi bi-shield-lock-fill"></i>
+            <h3>Change Password</h3>
+        </div>
+        <div class="prof-card-body">
+            <form method="POST" action="{% url 'edit_profile' %}" style="max-width:420px;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="change_password">
+
+                <div class="field-group" style="margin-bottom:14px;">
+                    <label><i class="bi bi-lock"></i> Current Password</label>
+                    <div class="pw-field-wrap">
+                        <input type="password" name="old_password" id="oldPw" placeholder="Enter current password" required>
+                        <button type="button" class="pw-toggle" onclick="togglePw('oldPw',this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="field-group" style="margin-bottom:14px;">
+                    <label><i class="bi bi-lock-fill"></i> New Password</label>
+                    <div class="pw-field-wrap">
+                        <input type="password" name="new_password1" id="newPw" placeholder="At least 6 characters"
+                               oninput="checkStrength(this.value)" required>
+                        <button type="button" class="pw-toggle" onclick="togglePw('newPw',this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="pw-strength"><div class="pw-strength-bar" id="pwBar"></div></div>
+                </div>
+
+                <div class="field-group" style="margin-bottom:18px;">
+                    <label><i class="bi bi-lock-fill"></i> Confirm New Password</label>
+                    <div class="pw-field-wrap">
+                        <input type="password" name="new_password2" id="newPw2" placeholder="Repeat new password" required>
+                        <button type="button" class="pw-toggle" onclick="togglePw('newPw2',this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-shield-check"></i> Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         CARD 3 — DANGER ZONE
+    ════════════════════════════════════ -->
+    <div class="prof-card danger-card">
+        <div class="prof-card-header">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <h3>Danger Zone</h3>
+        </div>
+        <div class="prof-card-body">
+            <div class="delete-warning">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <div>
+                    <strong>Permanently delete your account.</strong>
+                    This will remove all your orders, cart items, and profile data from Gadget Soko.
+                    <strong>This action cannot be undone.</strong>
+                </div>
+            </div>
+            <button type="button" class="btn-delete" onclick="openDeleteModal()">
+                <i class="bi bi-trash3-fill"></i> Delete My Account
+            </button>
+        </div>
+    </div>
+
+</div><!-- /profile-wrapper -->
+
+<!-- ═══ DELETE CONFIRM MODAL ═══ -->
+<div class="modal-backdrop" id="deleteModal">
+    <div class="modal-box">
+        <div class="modal-icon"><i class="bi bi-exclamation-octagon-fill"></i></div>
+        <h4>Delete Account?</h4>
+        <p>
+            This will <strong>permanently delete</strong> your account and all associated data.<br>
+            Type your username <strong style="color:var(--navy);">{{ request.user.username }}</strong> to confirm.
+        </p>
+        <form method="POST" action="{% url 'edit_profile' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_account">
+            <input type="text" name="confirm_delete" class="confirm-input"
+                   placeholder="Type your username here" autocomplete="off" id="deleteConfirmInput">
+            <div class="modal-btn-row">
+                <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button type="submit" class="btn-delete" style="flex:1;">
+                    <i class="bi bi-trash3-fill"></i> Delete Permanently
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Kenya Counties & Towns ──
+const kenyaData = {
+    "Baringo":["Kabarnet","Eldama Ravine","Marigat","Mogotio","Kabartonjo"],
+    "Bomet":["Bomet Town","Sotik","Konoin","Chepalungu","Longisa"],
+    "Bungoma":["Bungoma Town","Webuye","Kimilili","Chwele","Sirisia","Kapsokwony"],
+    "Busia":["Busia Town","Malaba","Nambale","Port Victoria","Butula"],
+    "Elgeyo-Marakwet":["Iten","Kapsowar","Chebiemit","Flax"],
+    "Embu":["Embu Town","Runyenjes","Chuka","Manyatta","Siakago"],
+    "Garissa":["Garissa Town","Dadaab","Masalani","Modogashe"],
+    "Homa Bay":["Homa Bay Town","Mbita","Oyugis","Ndhiwa","Kendu Bay"],
+    "Isiolo":["Isiolo Town","Garba Tulla","Merti"],
+    "Kajiado":["Ngong","Kitengela","Kajiado Town","Namanga","Isinya","Rongai","Kiserian"],
+    "Kakamega":["Kakamega Town","Mumias","Butere","Lumakanda","Malava","Khayega"],
+    "Kericho":["Kericho Town","Litein","Kipkelion","Londiani"],
+    "Kiambu":["Thika","Kiambu Town","Ruiru","Limuru","Githunguri","Kikuyu","Karuri","Juja"],
+    "Kilifi":["Kilifi Town","Malindi","Mtwapa","Mariakani","Watamu","Kaloleni"],
+    "Kirinyaga":["Kerugoya","Kutus","Mwea","Sagana","Kianyaga"],
+    "Kisii":["Kisii Town","Ogembo","Suneka","Nyamache","Tabaka"],
+    "Kisumu":["Kisumu City","Ahero","Maseno","Kombewa","Muhoroni"],
+    "Kitui":["Kitui Town","Mwingi","Mutomo","Kyuso"],
+    "Kwale":["Ukunda (Diani)","Kwale Town","Msambweni","Lunga Lunga","Kinago"],
+    "Laikipia":["Nanyuki","Nyahururu","Rumuruti","Dol Dol"],
+    "Lamu":["Lamu Town","Mpeketoni","Faza"],
+    "Machakos":["Machakos Town","Athi River","Syokimau","Kangundo","Tala","Matuu"],
+    "Makueni":["Wote","Makindu","Mtito Andei","Emali","Kibwezi"],
+    "Mandera":["Mandera Town","El Wak","Rhamu"],
+    "Marsabit":["Marsabit Town","Moyale","Laisamis"],
+    "Meru":["Meru Town","Maua","Nkubu","Timau"],
+    "Migori":["Migori Town","Rongo","Awendo","Isebania","Kehancha"],
+    "Mombasa":["Mombasa Island","Nyali","Likoni","Bamburi","Changamwe","Jomvu","Kisauni"],
+    "Murang'a":["Murang'a Town","Kenol","Kangema","Kandara","Maragua"],
+    "Nakuru":["Nakuru City","Naivasha","Gilgil","Molo","Bahati","Mai Mahiu","Njoro","Salgaa"],
+    "Nandi":["Kapsabet","Nandi Hills","Kapkangani","Kobujoi"],
+    "Narok":["Narok Town","Kilgoris","Mulot"],
+    "Nyamira":["Nyamira Town","Keroka","Nyansiongo"],
+    "Nyandarua":["Ol Kalou","Njabini","Engineer","Miharati"],
+    "Nyeri":["Nyeri Town","Karatina","Othaya","Mukurweini","Naro Moru"],
+    "Samburu":["Maralal","Baragoi","Wamba"],
+    "Siaya":["Siaya Town","Bondo","Ugunja","Yala","Usenge"],
+    "Taita-Taveta":["Voi","Taveta","Wundanyi","Mwatate"],
+    "Tana River":["Hola","Garsen","Madogo"],
+    "Tharaka-Nithi":["Chuka","Marimanti","Chogoria"],
+    "Trans-Nzoia":["Kitale","Kiminini","Endebess"],
+    "Turkana":["Lodwar","Kakuma","Lokichogio"],
+    "Uasin Gishu":["Eldoret City","Burnt Forest","Turbo","Ziwa"],
+    "Vihiga":["Mbale","Chavakali","Luanda","Hamisi"],
+    "Wajir":["Wajir Town","Habaswein","Buna"],
+    "West Pokot":["Kapenguria","Sigor","Makutano"]
+};
+
+const savedCounty = "{{ profile.upcountry_county|default:'' }}";
+const savedTown   = "{{ profile.upcountry_town|default:'' }}";
+
+function initCounties() {
+    const s = document.getElementById('countySelect');
+    if (!s) return;
+    Object.keys(kenyaData).sort().forEach(c => {
+        const opt = new Option(c, c);
+        if (c === savedCounty) opt.selected = true;
+        s.add(opt);
+    });
+    if (savedCounty) populateTowns();
+}
+
+function populateTowns() {
+    const county = document.getElementById('countySelect').value;
+    const ts = document.getElementById('townSelect');
+    ts.innerHTML = '<option value="">-- Select Town --</option>';
+    ts.disabled = !county;
+    if (county) {
+        kenyaData[county].forEach(t => {
+            const opt = new Option(t, t);
+            if (t === savedTown) opt.selected = true;
+            ts.add(opt);
+        });
+    }
+}
+
+function setRegion(loc) {
+    document.getElementById('region-hidden').value = loc;
+    document.getElementById('locBtnNairobi').classList.toggle('active', loc === 'nairobi');
+    document.getElementById('locBtnOutside').classList.toggle('active', loc === 'outside');
+    document.getElementById('nairobiSection').classList.toggle('show', loc === 'nairobi');
+    document.getElementById('outsideSection').classList.toggle('show', loc === 'outside');
+}
+
+// ── Avatar preview ──
+document.getElementById('avatarInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('Image must be under 2 MB.'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+        const preview  = document.getElementById('avatarPreview');
+        const initials = document.getElementById('avatarInitials');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        if (initials) initials.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+});
+
+// ── Username live-check ──
+let usernameTimer;
+const currentUsername = "{{ request.user.username }}";
+
+document.getElementById('usernameInput').addEventListener('input', function() {
+    clearTimeout(usernameTimer);
+    const val    = this.value.trim();
+    const hint   = document.getElementById('usernameHint');
+    const status = document.getElementById('usernameStatus');
+    if (!val || val === currentUsername) { hint.textContent = ''; status.textContent = ''; return; }
+    hint.className   = 'username-hint hint-checking';
+    hint.textContent = 'Checking…';
+    status.textContent = '⏳';
+    usernameTimer = setTimeout(() => {
+        fetch(`{% url 'check_username' %}?username=${encodeURIComponent(val)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.available) {
+                    hint.className = 'username-hint hint-ok';
+                    hint.textContent = '✓ ' + data.message;
+                    status.textContent = '✅';
+                } else {
+                    hint.className = 'username-hint hint-taken';
+                    hint.textContent = '✗ ' + data.message;
+                    status.textContent = '❌';
+                }
+            })
+            .catch(() => { hint.textContent = ''; status.textContent = ''; });
+    }, 500);
+});
+
+// ── Password strength ──
+function checkStrength(pw) {
+    const bar = document.getElementById('pwBar');
+    if (!bar) return;
+    let score = 0;
+    if (pw.length >= 6)  score++;
+    if (pw.length >= 10) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const colors = ['#e53935','#f57c00','#f9a825','#43a047','#00a650'];
+    bar.style.width      = (score * 20) + '%';
+    bar.style.background = colors[score - 1] || '#eee';
+}
+
+// ── Password visibility toggle ──
+function togglePw(id, btn) {
+    const input = document.getElementById(id);
+    const icon  = btn.querySelector('i');
+    if (input.type === 'password') { input.type = 'text';     icon.className = 'bi bi-eye-slash'; }
+    else                           { input.type = 'password'; icon.className = 'bi bi-eye'; }
+}
+
+// ── Delete modal ──
+function openDeleteModal()  { document.getElementById('deleteModal').classList.add('show'); }
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); }
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+});
+
+document.addEventListener('DOMContentLoaded', initCounties);
+</script>
+{% endblock %}

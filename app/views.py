@@ -38,7 +38,7 @@ from xhtml2pdf import pisa
 
 from .models import (
     Product, Category, ProductImage, CartItem, Order, OrderItem,
-    SiteSettings, Brand, ProductView, UserActivity, EmailOTP, SignupOTP
+    SiteSettings, Brand, ProductView, UserActivity, EmailOTP, SignupOTP,UserProfile
 )
 from .forms import SignupForm
 
@@ -91,7 +91,7 @@ def _email_wrapper(inner_html: str) -> str:
           <!-- LOGO -->
           <tr>
             <td align="center" style="padding:40px 0 20px 0;border-bottom:2px solid #f4330c;">
-              <img src="https://gadgetsoko.com/static/images/tab.png"
+              <img src="https://gadgetsoko.com/static/images/android-chrome-512x512.png"
                    alt="Gadget Soko" width="140"
                    style="display:block;border:0;">
             </td>
@@ -256,7 +256,7 @@ def send_order_confirmation_email(order, name: str, to_email: str,
         f"Download Receipt:\n{receipt_url}\n\n"
         f"Thank you for shopping with us!"
     )
-    _send_html_email(f"Order Confirmed — Gadget Soko #{order.id}", to_email, html, plain)
+    _send_html_email(f"Order Confirmed * Gadget Soko #{order.id}", to_email, html, plain)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -728,10 +728,17 @@ def get_cart(request):
 # ═══════════════════════════════════════════════════════════
 # CHECKOUT
 # ═══════════════════════════════════════════════════════════
-
 @login_required
 def check(request):
     config, _ = SiteSettings.objects.get_or_create(id=1)
+
+    # ── Fetch (or create) the user's profile for autofill ──
+    try:
+        user_profile = request.user.profile
+    except Exception:
+        from .models import UserProfile
+        user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
     direct_product_id = request.session.get('direct_product')
 
     if direct_product_id:
@@ -831,12 +838,8 @@ def check(request):
                     product.save()
 
                     # ── Resolve product image URL for email ──
-                    # Model has: image = ImageField(upload_to='products/')
-                    # product.image.url already returns /media/products/xxx.jpg
-                    # We just prepend the domain — never double-prefix
                     img_url = None
 
-                    # First try the ProductImage related set (if it exists)
                     try:
                         first_pi = product.images.first()
                         if first_pi and first_pi.image:
@@ -844,7 +847,6 @@ def check(request):
                     except Exception:
                         pass
 
-                    # Fall back to the main image field on the Product model
                     if not img_url:
                         try:
                             if product.image and product.image.name:
@@ -852,7 +854,6 @@ def check(request):
                         except Exception:
                             pass
 
-                    # Last resort: a placeholder that actually loads
                     if not img_url:
                         img_url = "https://via.placeholder.com/52x52?text=No+Image"
 
@@ -860,20 +861,17 @@ def check(request):
 
                     items_html_rows += (
                         f"<tr>"
-                        # ── Image cell ──
                         f"<td style='padding:8px 10px;border-bottom:1px solid #e2e8f0;"
                         f"width:68px;vertical-align:middle;'>"
                         f"<img src='{img_url}' alt='' width='52' height='52' "
                         f"style='border-radius:6px;object-fit:cover;display:block;"
                         f"border:1px solid #e2e8f0;'>"
                         f"</td>"
-                        # ── Name + qty cell ──
                         f"<td style='padding:8px 14px;color:#1e293b;font-size:13px;"
                         f"border-bottom:1px solid #e2e8f0;vertical-align:middle;'>"
                         f"<strong>{product.name}</strong><br>"
                         f"<span style='color:#64748b;font-size:12px;'>Qty: {item.quantity}</span>"
                         f"</td>"
-                        # ── Price cell ──
                         f"<td style='padding:8px 14px;color:#1e293b;font-size:13px;"
                         f"border-bottom:1px solid #e2e8f0;text-align:right;"
                         f"vertical-align:middle;white-space:nowrap;font-weight:600;'>"
@@ -944,8 +942,9 @@ def check(request):
         'subtotal': subtotal,
         'cart_items': cart_items,
         'config': config,
-        'shipping_nairobi': config.shipping_fee_nairobi,   # KES 200
-        'max_shipping': SHIPPING_OUTSIDE,                  # KES 500
+        'shipping_nairobi': config.shipping_fee_nairobi,
+        'max_shipping': SHIPPING_OUTSIDE,
+        'user_profile': user_profile,          # ← added
     })
 
 
@@ -1555,12 +1554,12 @@ def market_product(request):
     products = Product.objects.all().order_by('-id')
 
     if request.method == "POST":
-        subject = request.POST.get("subject", "").strip()
-        headline = request.POST.get("headline", "").strip()
+        subject      = request.POST.get("subject", "").strip()
+        headline     = request.POST.get("headline", "").strip()
         body_message = request.POST.get("body_message", "").strip()
-        cta_text = request.POST.get("cta_text", "Shop Now").strip()
-        cta_url = request.POST.get("cta_url", "https://gadgetsoko.com").strip()
-        product_ids = request.POST.getlist("product_ids")
+        cta_text     = request.POST.get("cta_text", "Shop Now").strip()
+        cta_url      = request.POST.get("cta_url", "https://gadgetsoko.com").strip()
+        product_ids  = request.POST.getlist("product_ids")
 
         if not subject or not headline:
             messages.error(request, "Subject and headline are required.")
@@ -1574,116 +1573,155 @@ def market_product(request):
             messages.error(request, "No registered customers found.")
             return redirect("market_product")
 
-        selected_products = []
-        if product_ids:
-            selected_products = Product.objects.filter(id__in=product_ids)
+        # ── Correct protocol behind Nginx reverse proxy ──
+        # Nginx terminates SSL and forwards plain HTTP to Gunicorn,
+        # so request.is_secure() is False even on https://gadgetsoko.com
+        # HTTP_X_FORWARDED_PROTO is set by Nginx and is the reliable source.
+        forwarded_proto = request.META.get('HTTP_X_FORWARDED_PROTO', '').strip()
+        if forwarded_proto in ('https', 'http'):
+            protocol = forwarded_proto
+        elif request.is_secure():
+            protocol = 'https'
+        else:
+            host = request.get_host()
+            protocol = 'https' if any(
+                d in host for d in ('gadgetsoko.com', 'onrender.com', 'vercel.app')
+            ) else 'http'
 
-        protocol = 'https' if request.is_secure() else 'http'
-        domain = request.get_host()
+        # Strip port from domain — wrong in production email links
+        raw_host = request.get_host()
+        domain   = raw_host.split(':')[0] if ':' in raw_host else raw_host
         base_url = f"{protocol}://{domain}"
 
-        products_html = ""
-        if selected_products:
-            products_html += """
-            <tr>
-              <td style="padding: 0 20px 30px 20px;">
-                <table border="0" cellpadding="0" cellspacing="0" width="100%"
-                       style="border-top: 2px solid #f4330c;">
-                  <tr style="background-color: #0b3a63;">
-                    <td style="padding: 10px 10px; color: #ffffff; font-size: 12px;
-                               font-weight: bold; text-transform: uppercase;
-                               letter-spacing: 1px; width: 68px;">Photo</td>
-                    <td style="padding: 10px 14px; color: #ffffff; font-size: 12px;
-                               font-weight: bold; text-transform: uppercase;
-                               letter-spacing: 1px;">Product</td>
-                    <td style="padding: 10px 14px; color: #ffffff; font-size: 12px;
-                               font-weight: bold; text-transform: uppercase;
-                               letter-spacing: 1px; text-align: right;">Price</td>
-                  </tr>
-            """
+        # ── Resolve selected products ──
+        selected_products = []
+        if product_ids:
+            selected_products = list(
+                Product.objects.filter(id__in=product_ids).select_related('category')
+            )
 
-            for product in selected_products:
-                img_url = None
+        # ── Build product rows HTML ──
+        rows_html = ""
+        for product in selected_products:
+            # Safe image URL
+            img_url = None
+            try:
+                first_pi = product.images.first()
+                if first_pi and first_pi.image and first_pi.image.name:
+                    img_url = base_url + first_pi.image.url
+            except Exception:
+                logger.warning("ProductImage resolve failed — product %s", product.id)
+            if not img_url:
                 try:
-                    first_pi = product.images.first()
-                    if first_pi and first_pi.image:
-                        img_url = base_url + first_pi.image.url
+                    if product.image and product.image.name:
+                        img_url = base_url + product.image.url
                 except Exception:
-                    pass
-                if not img_url:
-                    try:
-                        if product.image and product.image.name:
-                            img_url = base_url + product.image.url
-                    except Exception:
-                        pass
-                if not img_url:
-                    img_url = "https://via.placeholder.com/52x52?text=No+Image"
+                    logger.warning("Main image resolve failed — product %s", product.id)
+            if not img_url:
+                img_url = "https://via.placeholder.com/52x52?text=No+Image"
 
+            # Safe product URL
+            try:
                 product_url = base_url + product.get_absolute_url()
+            except Exception:
+                product_url = f"{base_url}/products/{product.id}/"
+                logger.warning("get_absolute_url() failed — product %s", product.id)
 
-                price_cell = f"KES {int(product.final_price):,}"
-                if product.discount and product.discount > 0 and product.is_discount_active:
-                    price_cell = (
-                        f"<span style='text-decoration:line-through;color:#94a3b8;"
-                        f"font-size:11px;'>KES {int(product.price):,}</span><br>"
-                        f"<span style='color:#f4330c;font-weight:bold;'>"
-                        f"KES {int(product.final_price):,}</span><br>"
-                        f"<span style='background:#f4330c;color:white;padding:2px 6px;"
-                        f"font-size:10px;border-radius:3px;'>{int(product.discount)}% OFF</span>"
-                    )
+            # Safe category name
+            try:
+                category_name = product.category.name
+            except Exception:
+                category_name = "Uncategorized"
 
-                products_html += f"""
-                  <tr style="background-color: #f8fafc;">
-                    <td style="padding: 10px 10px; border-bottom: 1px solid #e2e8f0;
-                               vertical-align: middle;">
-                      <a href="{product_url}">
-                        <img src="{img_url}" alt="" width="52" height="52"
-                             style="border-radius:6px;object-fit:cover;display:block;
-                                    border:1px solid #e2e8f0;">
-                      </a>
-                    </td>
-                    <td style="padding: 10px 14px; color: #1e293b; font-size: 13px;
-                               border-bottom: 1px solid #e2e8f0; vertical-align: middle;">
-                      <a href="{product_url}"
-                         style="color:#0b3a63;font-weight:bold;text-decoration:none;">
-                        {product.name}
-                      </a><br>
-                      <span style="color:#64748b;font-size:12px;">
-                        {product.category.name}
-                      </span>
-                    </td>
-                    <td style="padding: 10px 14px; font-size: 13px;
-                               border-bottom: 1px solid #e2e8f0; text-align: right;
-                               vertical-align: middle;">
-                      {price_cell}
-                    </td>
+            # Safe discount check
+            try:
+                has_discount = bool(
+                    product.discount and product.discount > 0 and product.is_discount_active
+                )
+            except AttributeError:
+                has_discount = bool(product.discount and product.discount > 0)
+
+            # Safe final price
+            try:
+                final_price = product.final_price
+            except AttributeError:
+                final_price = product.price
+
+            if has_discount:
+                price_cell = (
+                    f"<span style='text-decoration:line-through;color:#94a3b8;"
+                    f"font-size:11px;'>KES {int(product.price):,}</span><br>"
+                    f"<span style='color:#f4330c;font-weight:bold;'>"
+                    f"KES {int(final_price):,}</span><br>"
+                    f"<span style='background:#f4330c;color:white;padding:2px 6px;"
+                    f"font-size:10px;border-radius:3px;'>"
+                    f"{int(product.discount)}% OFF</span>"
+                )
+            else:
+                price_cell = f"KES {int(final_price):,}"
+
+            rows_html += (
+                f"<tr style='background-color:#f8fafc;'>"
+                f"<td style='padding:10px;border-bottom:1px solid #e2e8f0;"
+                f"vertical-align:middle;width:68px;'>"
+                f"<a href='{product_url}'>"
+                f"<img src='{img_url}' alt='' width='52' height='52' "
+                f"style='border-radius:6px;object-fit:cover;display:block;"
+                f"border:1px solid #e2e8f0;'></a></td>"
+                f"<td style='padding:10px 14px;color:#1e293b;font-size:13px;"
+                f"border-bottom:1px solid #e2e8f0;vertical-align:middle;'>"
+                f"<a href='{product_url}' style='color:#0b3a63;font-weight:bold;"
+                f"text-decoration:none;'>{product.name}</a><br>"
+                f"<span style='color:#64748b;font-size:12px;'>{category_name}</span></td>"
+                f"<td style='padding:10px 14px;font-size:13px;"
+                f"border-bottom:1px solid #e2e8f0;text-align:right;"
+                f"vertical-align:middle;'>{price_cell}</td>"
+                f"</tr>"
+            )
+
+        products_html = ""
+        if rows_html:
+            products_html = f"""
+            <tr>
+              <td style="padding:0 20px 30px 20px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                       style="border-top:2px solid #f4330c;">
+                  <tr style="background-color:#0b3a63;">
+                    <td style="padding:10px;color:#fff;font-size:12px;font-weight:bold;
+                               text-transform:uppercase;letter-spacing:1px;width:68px;">
+                      Photo</td>
+                    <td style="padding:10px 14px;color:#fff;font-size:12px;font-weight:bold;
+                               text-transform:uppercase;letter-spacing:1px;">Product</td>
+                    <td style="padding:10px 14px;color:#fff;font-size:12px;font-weight:bold;
+                               text-transform:uppercase;letter-spacing:1px;text-align:right;">
+                      Price</td>
                   </tr>
-                """
-
-            products_html += "</table></td></tr>"
+                  {rows_html}
+                </table>
+              </td>
+            </tr>"""
 
         inner = f"""
         <tr>
-          <td style="padding: 50px 20px; text-align: center;">
-            <h2 style="color: #0b3a63; font-size: 24px; margin: 0 0 10px 0;
-                       font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">
+          <td style="padding:50px 20px;text-align:center;">
+            <h2 style="color:#0b3a63;font-size:24px;margin:0 0 10px 0;
+                       font-weight:bold;text-transform:uppercase;letter-spacing:2px;">
               {headline}
             </h2>
-            <p style="color: #1e293b; font-size: 16px; line-height: 26px; margin: 0 0 35px 0;">
+            <p style="color:#1e293b;font-size:16px;line-height:26px;margin:0 0 35px 0;">
               {body_message}
             </p>
             <a href="{cta_url}"
-               style="background-color: #f4330c; color: #ffffff; padding: 18px 45px;
-                      text-decoration: none; font-size: 13px; font-weight: bold;
-                      display: inline-block; text-transform: uppercase; letter-spacing: 2px;">
+               style="background-color:#f4330c;color:#ffffff;padding:18px 45px;
+                      text-decoration:none;font-size:13px;font-weight:bold;
+                      display:inline-block;text-transform:uppercase;letter-spacing:2px;">
               {cta_text}
             </a>
           </td>
         </tr>
-        {products_html}
-        """
+        {products_html}"""
 
-        html = _email_wrapper(inner)
+        html  = _email_wrapper(inner)
         plain = (
             f"{headline}\n\n{body_message}\n\n"
             + (
@@ -1691,36 +1729,190 @@ def market_product(request):
                     f"- {p.name} | KES {int(p.final_price):,}"
                     + (f" ({int(p.discount)}% OFF)" if p.discount and p.is_discount_active else "")
                     for p in selected_products
-                )
+                ) + "\n\n"
                 if selected_products else ""
             )
-            + f"\n\nShop now: {cta_url}"
+            + f"Shop now: {cta_url}"
         )
 
-        sent_count = 0
+        # ── Send — each user fully isolated; one failure never stops the rest ──
+        sent_count   = 0
         failed_count = 0
         for user in users:
             try:
                 _send_html_email(subject, user.email, html, plain)
                 sent_count += 1
             except Exception:
-                logger.exception("Failed to send marketing email to %s", user.email)
                 failed_count += 1
+                logger.exception(
+                    "Marketing email failed — user %s (%s)", user.id, user.email
+                )
 
-        messages.success(
-            request,
-            f"Marketing email sent to {sent_count} customer(s)."
-            + (f" {failed_count} failed." if failed_count else "")
+        logger.info(
+            "Marketing blast done. Sent: %d  Failed: %d  Subject: %s",
+            sent_count, failed_count, subject
         )
+
+        result_msg = f"Marketing email sent to {sent_count} customer(s)."
+        if failed_count:
+            result_msg += f" {failed_count} failed — check django.log for details."
+        messages.success(request, result_msg)
         return redirect("market_product")
 
+    # ── GET ──
     total_users = User.objects.filter(is_active=True).count()
-    email_users = User.objects.filter(
-        is_active=True, email__isnull=False
-    ).exclude(email="").count()
-
+    email_users = (
+        User.objects.filter(is_active=True, email__isnull=False).exclude(email="").count()
+    )
     return render(request, "market_product.html", {
-        "products": products,
+        "products":    products,
         "total_users": total_users,
         "email_users": email_users,
+    }) 
+
+# ─────────────────────────────────────────────────────────────────
+# ADD THESE VIEWS TO YOUR views.py
+# Also add  UserProfile  to your .models import at the top:
+#   from .models import (..., UserProfile)
+# ─────────────────────────────────────────────────────────────────
+import os
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash, logout
+from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+
+# Add UserProfile to your existing models import, e.g.:
+# from .models import (..., UserProfile)
+
+NAIROBI_AREAS = [
+    "CBD - Town",
+    "Westlands",
+    "Eastlands",
+    "Roysambu",
+    "Langata",
+    "Karen",
+    "Kasarani",
+    "Embakasi",
+    "Kibera",
+    "Dagoretti",
+    "Ruaraka",
+    "Makadara",
+    "Pumwani",
+]
+
+
+@login_required
+def edit_profile(request):
+    """Full profile-edit view: avatar, name, username, email, phone,
+       location (mirrors checkout), password change, account deletion."""
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        # ── 1. Save profile details ──────────────────────────────
+        if action == 'save_profile':
+            first_name = request.POST.get('first_name', '').strip()
+            last_name  = request.POST.get('last_name', '').strip()
+            new_username = request.POST.get('username', '').strip()
+            new_email  = request.POST.get('email', '').strip()
+            phone      = request.POST.get('phone', '').strip()
+            region     = request.POST.get('region', 'nairobi')
+            nairobi_area     = request.POST.get('nairobi_area', '').strip()
+            upcountry_county = request.POST.get('upcountry_county', '').strip()
+            upcountry_town   = request.POST.get('upcountry_town', '').strip()
+            address_notes    = request.POST.get('address_notes', '').strip()
+
+            # Avatar upload
+            if 'avatar' in request.FILES:
+                # Delete old file to save storage
+                if profile.avatar and profile.avatar.name:
+                    try:
+                        old_path = profile.avatar.path
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    except Exception:
+                        pass
+                profile.avatar = request.FILES['avatar']
+
+            # Username uniqueness check
+            if new_username and new_username != request.user.username:
+                if User.objects.filter(username=new_username).exclude(pk=request.user.pk).exists():
+                    messages.error(request, "That username is already taken.")
+                    return redirect('edit_profile')
+                request.user.username = new_username
+
+            # Email uniqueness check
+            if new_email and new_email != request.user.email:
+                if User.objects.filter(email=new_email).exclude(pk=request.user.pk).exists():
+                    messages.error(request, "An account with that email already exists.")
+                    return redirect('edit_profile')
+                request.user.email = new_email
+
+            request.user.first_name = first_name
+            request.user.last_name  = last_name
+            request.user.save()
+
+            profile.phone            = phone
+            profile.region           = region
+            profile.nairobi_area     = nairobi_area
+            profile.upcountry_county = upcountry_county
+            profile.upcountry_town   = upcountry_town
+            profile.address_notes    = address_notes
+            profile.save()
+
+            messages.success(request, "Profile updated successfully!")
+            return redirect('edit_profile')
+
+        # ── 2. Change password ───────────────────────────────────
+        elif action == 'change_password':
+            old_pw  = request.POST.get('old_password', '')
+            new_pw  = request.POST.get('new_password1', '')
+            new_pw2 = request.POST.get('new_password2', '')
+
+            if not request.user.check_password(old_pw):
+                messages.error(request, "Current password is incorrect.")
+            elif new_pw != new_pw2:
+                messages.error(request, "New passwords do not match.")
+            elif len(new_pw) < 6:
+                messages.error(request, "Password must be at least 6 characters.")
+            else:
+                request.user.set_password(new_pw)
+                request.user.save()
+                update_session_auth_hash(request, request.user)   # keep session alive
+                messages.success(request, "Password changed successfully!")
+            return redirect('edit_profile')
+
+        # ── 3. Delete account ────────────────────────────────────
+        elif action == 'delete_account':
+            confirm = request.POST.get('confirm_delete', '').strip()
+            if confirm != request.user.username:
+                messages.error(request, "Username did not match. Account not deleted.")
+                return redirect('edit_profile')
+            user = request.user
+            logout(request)
+            user.delete()
+            messages.success(request, "Your account has been permanently deleted.")
+            return redirect('index')
+
+    return render(request, 'edit_profile.html', {
+        'profile': profile,
+        'nairobi_areas': NAIROBI_AREAS,
+    })
+
+
+@login_required
+def check_username(request):
+    """AJAX endpoint — returns {available: true/false}"""
+    username = request.GET.get('username', '').strip()
+    if not username:
+        return JsonResponse({'available': False, 'message': 'Enter a username'})
+    if username == request.user.username:
+        return JsonResponse({'available': True, 'message': 'That is your current username'})
+    exists = User.objects.filter(username=username).exists()
+    return JsonResponse({
+        'available': not exists,
+        'message': 'Available!' if not exists else 'Already taken',
     })

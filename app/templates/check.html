@@ -6,81 +6,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | Gadget Soko Kenya</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- ── FONTS: matched to edit_profile.html ── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jost:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
     <style>
+        /* ── FONT VARIABLES (matched to edit_profile) ── */
         :root {
-            --primary: #ff5a2c;
+            --font-heading: 'Jost', sans-serif;
+            --font-body:    'Open Sans', sans-serif;
+            --font-serif:   'Inria Serif', serif;
+            --font-ui:      'Inter', sans-serif;
+
+            --primary: #f4330c;
+            --primary-hover: #d73d1f;
             --primary-light: #fff4f0;
             --secondary: #111;
+            --navy: #0b3a63;
             --bg: #f4f6f9;
             --border: #e1e1e1;
             --text-muted: #6c757d;
             --card-shadow: 0 4px 16px rgba(0,0,0,0.07);
+            --radius: 14px;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background: var(--bg);
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: var(--font-body);   /* changed */
             color: #333;
             font-size: 15px;
             line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ── Mini Navbar ── */
+        .gs-mini-nav {
+            background: var(--primary);
+            padding: 10px 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(238,77,45,0.3);
+        }
+        .gs-mini-nav a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--font-heading);   /* changed */
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+        .gs-mini-nav a:hover { opacity: 1; }
+        .gs-mini-nav .nav-logo img { height: 34px; }
+        .gs-mini-nav .secure-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--font-ui);   /* changed */
         }
 
         /* ── Layout ── */
         .checkout-wrapper {
             width: 94%;
             max-width: 1100px;
-            margin: 24px auto;
+            margin: 20px auto 40px;
             display: grid;
             grid-template-columns: 1.5fr 1fr;
-            gap: 24px;
+            gap: 20px;
             align-items: start;
         }
 
         @media (max-width: 860px) {
             .checkout-wrapper {
                 grid-template-columns: 1fr;
-                margin: 16px auto;
+                margin: 14px auto 30px;
                 width: 96%;
+                gap: 16px;
             }
         }
 
         /* ── Card ── */
         .card {
             background: #fff;
-            padding: 28px;
-            border-radius: 16px;
+            padding: 24px;
+            border-radius: var(--radius);
             box-shadow: var(--card-shadow);
+            border: none;
         }
 
-        @media (max-width: 576px) {
-            .card { padding: 18px; border-radius: 12px; }
+        @media (max-width: 480px) {
+            .card { padding: 16px; border-radius: 12px; }
         }
 
         /* ── Headings ── */
         .card-title {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 700;
+            font-family: var(--font-heading);   /* changed */
             color: var(--secondary);
             display: flex;
             align-items: center;
             gap: 9px;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
         }
-
         .card-title i { color: var(--primary); font-size: 1.1rem; }
 
         .section-title {
             font-size: 1rem;
             font-weight: 700;
+            font-family: var(--font-heading);   /* changed */
             color: var(--secondary);
             display: flex;
             align-items: center;
             gap: 8px;
-            margin: 24px 0 14px;
+            margin: 22px 0 12px;
         }
-
         .section-title i { color: var(--primary); }
 
         /* ── Location Picker ── */
@@ -90,17 +144,18 @@
             background: #eee;
             padding: 5px;
             border-radius: 12px;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
         }
 
         .loc-btn {
             flex: 1;
-            padding: 11px 8px;
+            padding: 10px 8px;
             border: none;
             border-radius: 9px;
             cursor: pointer;
             font-weight: 600;
             font-size: 13px;
+            font-family: var(--font-heading);   /* changed */
             color: #777;
             background: transparent;
             display: flex;
@@ -108,8 +163,8 @@
             justify-content: center;
             gap: 6px;
             transition: all 0.25s;
+            white-space: nowrap;
         }
-
         .loc-btn.active {
             background: #fff;
             color: var(--primary);
@@ -117,24 +172,29 @@
         }
 
         /* ── Form Elements ── */
-        .form-group { margin-bottom: 16px; }
+        .form-group { margin-bottom: 14px; }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 14px;
         }
 
         @media (max-width: 480px) {
-            .form-row { grid-template-columns: 1fr; gap: 0; }
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .form-row .form-group { margin-bottom: 14px; }
         }
 
         label.field-label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
+            font-family: var(--font-ui);   /* changed */
             color: #555;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         input[type="text"],
@@ -143,11 +203,11 @@
         select,
         textarea {
             width: 100%;
-            padding: 11px 13px;
+            padding: 10px 12px;
             border: 1.5px solid var(--border);
             border-radius: 9px;
             font-size: 14px;
-            font-family: inherit;
+            font-family: var(--font-body);   /* changed */
             color: #333;
             background: #fff;
             outline: none;
@@ -158,7 +218,7 @@
 
         input:focus, select:focus, textarea:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255,90,44,0.1);
+            box-shadow: 0 0 0 3px rgba(244,51,12,0.1);
         }
 
         select {
@@ -169,8 +229,7 @@
         }
 
         select:disabled { background-color: #f8f8f8; color: #aaa; cursor: not-allowed; }
-
-        textarea { resize: vertical; min-height: 72px; }
+        textarea { resize: vertical; min-height: 68px; }
 
         /* ── Payment Grid ── */
         .payment-grid {
@@ -188,15 +247,15 @@
         .pay-opt {
             border: 2px solid #ebebeb;
             border-radius: 12px;
-            padding: 14px 8px;
+            padding: 12px 6px;
             text-align: center;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 7px;
-            min-height: 95px;
+            gap: 6px;
+            min-height: 90px;
             background: #fafafa;
             position: relative;
             transition: all 0.22s;
@@ -217,46 +276,47 @@
         .pay-opt.selected { border-color: var(--primary); background: var(--primary-light); }
 
         .pay-opt .pay-label {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
+            font-family: var(--font-heading);   /* changed */
             color: #444;
         }
 
         .pay-opt .pay-img {
-            max-height: 26px;
-            max-width: 80px;
+            max-height: 24px;
+            max-width: 72px;
             object-fit: contain;
         }
 
-        .equity-svg { width: 38px; height: 38px; }
+        .equity-svg { width: 34px; height: 34px; }
 
         .pay-opt .pod-icon {
-            font-size: 24px;
+            font-size: 22px;
             color: var(--primary);
         }
 
         /* ── Manual Payment Box ── */
         .manual-box {
             display: none;
-            margin-top: 14px;
-            padding: 14px 16px;
+            margin-top: 12px;
+            padding: 12px 14px;
             border-radius: 10px;
             background: #fffbeb;
             border: 1px dashed #f0c040;
             font-size: 13px;
+            font-family: var(--font-ui);   /* changed */
             line-height: 1.7;
         }
-
         .manual-box strong { color: #555; }
 
         /* ── Agreements ── */
-        .agreements { margin-top: 22px; }
+        .agreements { margin-top: 20px; }
 
         .check-row {
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             cursor: pointer;
         }
 
@@ -273,16 +333,22 @@
             box-shadow: none;
         }
 
-        .check-row span { font-size: 13px; color: #555; line-height: 1.5; }
+        .check-row span {
+            font-size: 13px;
+            font-family: var(--font-body);   /* changed */
+            color: #555;
+            line-height: 1.5;
+        }
 
         /* ── Submit Button ── */
         .btn-submit {
             width: 100%;
-            padding: 16px;
+            padding: 15px;
             border: none;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
+            font-family: var(--font-heading);   /* changed */
             cursor: not-allowed;
             margin-top: 6px;
             background: #ccc;
@@ -297,10 +363,9 @@
         .btn-submit.ready {
             background: var(--primary);
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(255,90,44,0.35);
+            box-shadow: 0 4px 14px rgba(244,51,12,0.35);
         }
-
-        .btn-submit.ready:hover { background: #e84e24; }
+        .btn-submit.ready:hover { background: var(--primary-hover); }
 
         /* ── Order Summary ── */
         .summary-item {
@@ -308,14 +373,13 @@
             align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid #f5f5f5;
-            gap: 12px;
+            gap: 10px;
         }
-
         .summary-item:last-of-type { border-bottom: none; }
 
         .summary-item .item-thumb {
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 48px;
             border-radius: 8px;
             object-fit: cover;
             flex-shrink: 0;
@@ -326,7 +390,8 @@
 
         .item-info .item-name {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
+            font-family: var(--font-heading);   /* changed */
             color: #222;
             white-space: nowrap;
             overflow: hidden;
@@ -334,50 +399,58 @@
         }
 
         .item-info .item-meta {
-            font-size: 12px;
+            font-size: 11px;
+            font-family: var(--font-ui);   /* changed */
             color: var(--text-muted);
             margin-top: 2px;
         }
 
         .item-price {
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
+            font-family: var(--font-heading);   /* changed */
             white-space: nowrap;
             flex-shrink: 0;
         }
 
-        .summary-divider { border: none; border-top: 2px solid #f0f0f0; margin: 12px 0; }
+        .summary-divider { border: none; border-top: 2px solid #f0f0f0; margin: 10px 0; }
 
-        /* ── Shipping badge ── */
+        /* ── Shipping rows ── */
         .shipping-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0 4px;
+            padding: 7px 0 3px;
+            flex-wrap: wrap;
+            gap: 4px;
         }
 
         .shipping-row .label {
             font-size: 13px;
+            font-family: var(--font-ui);   /* changed */
             color: #555;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
+            flex-wrap: wrap;
         }
 
         .shipping-row .shipping-fee-val {
             font-size: 14px;
             font-weight: 700;
-            color: #0b3a63;
+            font-family: var(--font-heading);   /* changed */
+            color: var(--navy);
         }
 
         .shipping-badge {
-            font-size: 11px;
+            font-size: 10px;
             background: var(--primary-light);
             color: var(--primary);
             border-radius: 20px;
-            padding: 2px 8px;
+            padding: 2px 7px;
             font-weight: 600;
-            margin-left: 6px;
+            font-family: var(--font-ui);   /* changed */
+            margin-left: 4px;
         }
 
         .summary-total {
@@ -389,23 +462,35 @@
             margin-top: 6px;
         }
 
-        .summary-total .label { font-size: 15px; font-weight: 600; color: #444; }
+        .summary-total .label {
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--font-heading);   /* changed */
+            color: #444;
+        }
 
         .summary-total .amount {
-            font-size: 21px;
+            font-size: 20px;
             font-weight: 800;
+            font-family: var(--font-heading);   /* changed */
             color: var(--primary);
         }
 
         .secure-note {
             text-align: center;
             font-size: 11px;
+            font-family: var(--font-ui);   /* changed */
             color: #bbb;
-            margin-top: 18px;
+            margin-top: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 5px;
+        }
+
+        /* ── Order summary sticks on desktop ── */
+        @media (min-width: 861px) {
+            .summary-col { position: sticky; top: 70px; }
         }
 
         /* ── Utility ── */
@@ -414,12 +499,24 @@
         small.hint {
             display: block;
             font-size: 11px;
+            font-family: var(--font-ui);   /* changed */
             color: var(--text-muted);
-            margin-top: 5px;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body>
+
+<!-- Mini Nav -->
+<nav class="gs-mini-nav">
+    <a href="{% url 'index' %}" class="nav-logo">
+        <i class="bi bi-arrow-left-short" style="font-size:20px;"></i>
+        <img src="{% static 'images/FF.png' %}" alt="Gadget Soko">
+    </a>
+    <span class="secure-label">
+        <i class="bi bi-shield-lock-fill"></i> Secure Checkout
+    </span>
+</nav>
 
 <div class="checkout-wrapper">
 
@@ -470,6 +567,7 @@
                            placeholder="0712345678"
                            pattern="^0\d{9}$"
                            maxlength="10"
+                           value="{{ user_profile.phone|default:'' }}"
                            required>
                 </div>
                 <div class="form-group">
@@ -489,19 +587,21 @@
                         <i class="bi bi-map"></i> Nearest Estate / Area
                     </label>
                     <select name="nairobi_area">
-                        <option value="CBD">CBD / Town</option>
-                        <option value="Westlands">Westlands</option>
-                        <option value="Eastlands">Eastlands</option>
-                        <option value="Roysambu">Roysambu</option>
-                        <option value="Langata">Langata</option>
-                        <option value="Karen">Karen</option>
-                        <option value="Kasarani">Kasarani</option>
-                        <option value="Embakasi">Embakasi</option>
-                        <option value="Kibera">Kibera</option>
-                        <option value="Dagoretti">Dagoretti</option>
-                        <option value="Ruaraka">Ruaraka</option>
-                        <option value="Makadara">Makadara</option>
-                        <option value="Pumwani">Pumwani</option>
+                        {% with saved_area=user_profile.nairobi_area|default:'' %}
+                        <option value="CBD"      {% if saved_area == 'CBD'      %}selected{% endif %}>CBD / Town</option>
+                        <option value="Westlands"{% if saved_area == 'Westlands'%}selected{% endif %}>Westlands</option>
+                        <option value="Eastlands"{% if saved_area == 'Eastlands'%}selected{% endif %}>Eastlands</option>
+                        <option value="Roysambu" {% if saved_area == 'Roysambu' %}selected{% endif %}>Roysambu</option>
+                        <option value="Langata"  {% if saved_area == 'Langata'  %}selected{% endif %}>Langata</option>
+                        <option value="Karen"    {% if saved_area == 'Karen'    %}selected{% endif %}>Karen</option>
+                        <option value="Kasarani" {% if saved_area == 'Kasarani' %}selected{% endif %}>Kasarani</option>
+                        <option value="Embakasi" {% if saved_area == 'Embakasi' %}selected{% endif %}>Embakasi</option>
+                        <option value="Kibera"   {% if saved_area == 'Kibera'   %}selected{% endif %}>Kibera</option>
+                        <option value="Dagoretti"{% if saved_area == 'Dagoretti'%}selected{% endif %}>Dagoretti</option>
+                        <option value="Ruaraka"  {% if saved_area == 'Ruaraka'  %}selected{% endif %}>Ruaraka</option>
+                        <option value="Makadara" {% if saved_area == 'Makadara' %}selected{% endif %}>Makadara</option>
+                        <option value="Pumwani"  {% if saved_area == 'Pumwani'  %}selected{% endif %}>Pumwani</option>
+                        {% endwith %}
                     </select>
                 </div>
             </div>
@@ -535,7 +635,7 @@
                     <i class="bi bi-building"></i> Detailed Address / Instructions
                 </label>
                 <textarea name="address" rows="2"
-                          placeholder="Building name, Floor, Landmark..."></textarea>
+                          placeholder="Building name, Floor, Landmark...">{{ user_profile.address_notes|default:'' }}</textarea>
             </div>
 
             <!-- Payment Methods -->
@@ -612,7 +712,7 @@
     </div>
 
     <!-- ═══ RIGHT COLUMN: Order Summary ═══ -->
-    <div class="card">
+    <div class="card summary-col">
         <h3 class="card-title">
             <i class="bi bi-receipt"></i> Order Summary
         </h3>
@@ -671,11 +771,17 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     /* ── Shipping constants from Django context ── */
     const subtotal        = parseFloat("{{ subtotal|default:0 }}");
     const shippingNairobi = parseFloat("{{ shipping_nairobi|default:200 }}");
     const shippingOutside = parseFloat("{{ max_shipping|default:500 }}");
+
+    /* ── Profile-saved location for autofill ── */
+    const profileRegion  = "{{ user_profile.region|default:'nairobi'|escapejs }}";
+    const profileCounty  = "{{ user_profile.upcountry_county|default:''|escapejs }}";
+    const profileTown    = "{{ user_profile.upcountry_town|default:''|escapejs }}";
 
     /* ── Phone input: numbers only, max 10 digits ── */
     document.getElementById('phone-input').addEventListener('input', function () {
@@ -734,15 +840,27 @@
 
     function initCounties() {
         const s = document.getElementById('county-select');
-        Object.keys(kenyaData).sort().forEach(c => s.add(new Option(c, c)));
+        Object.keys(kenyaData).sort().forEach(c => {
+            const opt = new Option(c, c);
+            if (c === profileCounty) opt.selected = true;
+            s.add(opt);
+        });
+        /* If a county was saved, pre-populate towns and restore saved town */
+        if (profileCounty) populateTowns(true);
     }
 
-    function populateTowns() {
+    function populateTowns(restoreSelection) {
         const county = document.getElementById('county-select').value;
         const ts = document.getElementById('town-select');
         ts.innerHTML = '<option value="">-- Select Town --</option>';
         ts.disabled = !county;
-        if (county) kenyaData[county].forEach(t => ts.add(new Option(t, t)));
+        if (county) {
+            kenyaData[county].forEach(t => {
+                const opt = new Option(t, t);
+                if (restoreSelection && t === profileTown) opt.selected = true;
+                ts.add(opt);
+            });
+        }
     }
 
     function updateLocation(loc) {
@@ -754,11 +872,11 @@
         document.getElementById('outside-fields').classList.toggle('hidden', isNairobi);
         document.getElementById('region-input').value = loc;
 
-        // POD only available within Nairobi
+        /* POD only available within Nairobi */
         const pod = document.getElementById('pod-option');
         pod.style.display = isNairobi ? 'flex' : 'none';
 
-        // If POD was selected and user switches to upcountry, fall back to M-Pesa
+        /* If POD was selected and user switches to upcountry, fall back to M-Pesa */
         const checked = document.querySelector('input[name="payment_method"]:checked');
         if (!isNairobi && checked && checked.value === 'pod') {
             selectPay(document.querySelectorAll('.pay-opt')[0], 'mpesa');
@@ -770,19 +888,15 @@
     function updateTotals(shipping, isNairobi) {
         const total = subtotal + shipping;
 
-        // Badge
         document.getElementById('shipping-location-badge').innerText =
             isNairobi ? 'Within Nairobi' : 'Upcountry';
 
-        // Shipping fee display
         document.getElementById('shipping-fee-display').innerText =
             'KES ' + shipping.toLocaleString();
 
-        // Grand total
         document.getElementById('grand-total-val').innerText =
             'KES ' + total.toLocaleString();
 
-        // Button total
         document.getElementById('btn-total-val').innerText =
             total.toLocaleString();
     }
@@ -805,7 +919,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         initCounties();
-        updateLocation('nairobi');   // sets totals on page load too
+        /* Restore saved region — user can still change it */
+        updateLocation(profileRegion || 'nairobi');
     });
 </script>
 </body>

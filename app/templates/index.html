@@ -1,4 +1,3 @@
-
 {% extends 'base_site.html' %}
 {% load static %}
 
@@ -56,10 +55,15 @@
         --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
+    /* ── FIX: prevent ANY horizontal overflow from this page ── */
+    html, body {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
     body {
         background-color: var(--bg-body);
         font-family: 'Inter', sans-serif;
-        overflow-x: hidden;
     }
 
     /* ── GLOBAL MOBILE SEARCH BAR ── */
@@ -79,30 +83,37 @@
     /* ── BANNER SLIDER ── */
     .banner-wrapper {
         width: 100%;
+        /* FIX: use max-width + clip so it never exceeds viewport */
+        max-width: 100vw;
         height: 400px;
         border-radius: 7px;
-        overflow: hidden;      /* clips the sliding track */
+        overflow: hidden;
         position: relative;
         background: #000;
         cursor: grab;
         user-select: none;
+        /* FIX: ensure it sits within the page flow, no bleed */
+        box-sizing: border-box;
     }
 
     .banner-wrapper:active { cursor: grabbing; }
 
-    /* The track holds all images in a row */
     #bannerTrack {
         display: flex;
         height: 100%;
         transition: transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
         will-change: transform;
+        /* FIX: never wider than wrapper */
+        width: 100%;
     }
 
-    /* Each slide */
     .banner-slide {
         flex-shrink: 0;
         width: 100%;
         height: 100%;
+        /* FIX: each slide exactly viewport-width, no overflow */
+        min-width: 0;
+        max-width: 100%;
     }
 
     .banner-slide img {
@@ -111,10 +122,8 @@
         object-fit: cover;
         display: block;
         pointer-events: none;
-        border-radius: 0;
     }
 
-    /* Prev / Next arrow buttons */
     .banner-arrow {
         position: absolute;
         top: 50%;
@@ -138,7 +147,6 @@
     .banner-arrow.prev { left: 14px; }
     .banner-arrow.next { right: 14px; }
 
-    /* Dot indicators */
     .banner-dots {
         position: absolute;
         bottom: 12px;
@@ -170,7 +178,11 @@
         .banner-arrow { width: 30px; height: 30px; font-size: 12px; }
     }
 
-    .gs-main { padding: 0 5% 50px; }
+    .gs-main {
+        padding: 0 5% 50px;
+        /* FIX: clip content inside main too */
+        overflow-x: hidden;
+    }
 
     .product-grid {
         display: grid;
@@ -190,6 +202,7 @@
         display: flex;
         flex-direction: column;
         height: 100%;
+        cursor: pointer;
     }
 
     .product-card:hover {
@@ -197,7 +210,25 @@
         box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     }
 
-    /* ── IMAGE CONTAINER FIX ── */
+    /* card-link covers the whole card except action buttons */
+    .card-link {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: block;
+    }
+
+    /* action buttons must sit above the card-link overlay */
+    .product-actions {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* badge stack also above overlay */
+    .badge-stack {
+        z-index: 2;
+    }
+
     .img-container {
         width: 100%;
         height: 220px;
@@ -220,26 +251,26 @@
     .product-card:hover .img-container img { transform: scale(1.08); }
 
     /* ── BRAND CAROUSEL ── */
-    /* FIX: proper responsive behaviour — no overflow clipping on sides */
     .brand-carousel-wrapper {
         position: relative;
-        /* Removed overflow:hidden — was cutting ovals on left/right edge */
         margin-bottom: 40px;
-        padding: 18px 0;
+        /* FIX: remove extra vertical padding that was creating dead space */
+        padding: 4px 0 8px;
         cursor: grab;
-        /* FIX: ensure it never causes horizontal scroll on the page */
         max-width: 100%;
+        overflow: hidden; /* FIX: clip ovals that bleed sideways */
     }
 
     .brand-carousel-track {
         display: flex;
-        gap: 14px; /* FIX: tighter gap on mobile naturally */
+        gap: 14px;
         overflow-x: auto;
-        overflow-y: visible; /* FIX: allow float animation to breathe */
+        overflow-y: visible;
         scroll-behavior: smooth;
         scrollbar-width: none;
         -ms-overflow-style: none;
-        padding: 12px 4px 18px;
+        /* FIX: tighter vertical padding — was causing big empty gap */
+        padding: 6px 4px 10px;
         user-select: none;
         -webkit-overflow-scrolling: touch;
     }
@@ -256,7 +287,6 @@
         justify-content: center;
         padding: 8px 14px;
         text-decoration: none;
-        /* FIX: responsive sizing — smaller on mobile */
         width: clamp(80px, 18vw, 120px);
         height: clamp(44px, 10vw, 60px);
         transition: transform 0.35s var(--spring), border-color 0.25s;
@@ -290,7 +320,7 @@
         position: absolute;
         top: 8px;
         left: 8px;
-        z-index: 10;
+        z-index: 3;
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -435,35 +465,49 @@
     #live-toast.active { bottom: 30px; }
 
     /* ── AI CHAT LAUNCHER ── */
-    /* FIX: visibility controlled by JS via .chat-hidden class */
     #ai-chat-launcher {
         position: fixed;
         bottom: 30px;
         right: 30px;
-        width: 65px;
-        height: 65px;
+        /* FIX: smaller on mobile via clamp */
+        width: clamp(44px, 10vw, 65px);
+        height: clamp(44px, 10vw, 65px);
         background: var(--gs-navy);
         color: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 28px;
+        /* FIX: icon size scales too */
+        font-size: clamp(18px, 4vw, 28px);
         cursor: pointer;
         z-index: 10000;
         box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        /* smooth hide/show */
         transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
         opacity: 1;
         visibility: visible;
         transform: scale(1);
     }
 
-    /* FIX: hidden state — fully invisible, not clickable */
+    /* FIX: on small screens move it slightly inward so it doesn't clip */
+    @media (max-width: 480px) {
+        #ai-chat-launcher {
+            bottom: 16px;
+            right: 16px;
+        }
+        #chat-window {
+            right: 10px !important;
+            bottom: 75px !important;
+            width: calc(100vw - 20px) !important;
+            max-width: 340px;
+        }
+    }
+
     #ai-chat-launcher.chat-hidden {
         opacity: 0;
         visibility: hidden;
         transform: scale(0.8);
+        pointer-events: none;
     }
 
     #chat-window {
@@ -533,7 +577,6 @@
         <div class="banner-slide"><img src="{% static 'images/photo5.png' %}"   alt="Gadget Soko"></div>
         <div class="banner-slide"><img src="{% static 'images/f.png' %}"        alt="Gadget Soko"></div>
         <div class="banner-slide"><img src="{% static 'images/G.png' %}"        alt="Gadget Soko"></div>
-       
     </div>
 
     <button class="banner-arrow prev d-none" id="bannerPrev" aria-label="Previous">
@@ -550,8 +593,8 @@
 <div class="gs-main">
 
     <!-- BRAND SHOWCASE -->
-    <section id="brand-showcase" style="margin-bottom: 40px;">
-        <h2 style="font-weight: 900; font-size: 14px; color: #888; margin-bottom: 16px;margin-top: 20px; letter-spacing: 1px;">
+    <section id="brand-showcase" style="margin-bottom: 20px;">
+        <h2 style="font-weight: 900; font-size: 14px; color: #888; margin-bottom: 10px; margin-top: 20px; letter-spacing: 1px;">
             OFFICIAL PARTNER BRANDS
         </h2>
 
@@ -568,7 +611,6 @@
                     </a>
                 {% endfor %}
 
-                <!-- DUPLICATE FOR LONG SCROLL -->
                 {% for brand in brands %}
                     <a href="{% url 'products' %}?brand={{ brand.id }}" class="brand-oval">
                         {% if brand.logo %}
@@ -593,6 +635,7 @@
         <div class="product-grid">
             {% for product in quick_sales %}
             <div class="product-card">
+                <a href="{% url 'product_detail' product.id %}" class="card-link" aria-label="View {{ product.name }}"></a>
 
                 <div class="badge-stack">
                     {% if product.discount > 0 %}
@@ -608,39 +651,18 @@
 
                 <div class="img-container">
                     {% if product.stock <= 0 %}
-<div style="
-    position:absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:rgba(0,0,0,0.5);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:5;
-">
-    <span style="
-        color:white;
-        font-weight:900;
-        border:3px solid white;
-        padding:8px 20px;
-        border-radius:10px;
-        font-size:14px;
-        letter-spacing:2px;
-        transform:rotate(-10deg);
-    ">
-        OUT OF STOCK
-    </span>
-</div>
-{% endif %}
-    <a href="{% url 'product_detail' product.id %}">
-        <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
-    </a>
-</div>
+                    <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:5;">
+                        <span style="color:white;font-weight:900;border:3px solid white;padding:8px 20px;border-radius:10px;font-size:14px;letter-spacing:2px;transform:rotate(-10deg);">OUT OF STOCK</span>
+                    </div>
+                    {% endif %}
+                    <a href="{% url 'product_detail' product.id %}">
+                        <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
+                    </a>
+                </div>
 
                 <div class="product-info">
                     {% if product.brand %}<div class="brand-text">{{ product.brand.name }}</div>{% endif %}
                     <h3 class="p-title">{{ product.name }}</h3>
-
                     <div class="price-box">
                         <span class="current-price">KES {{ product.discounted_price|floatformat:0 }}</span>
                         <span class="old-price">KES {{ product.price|floatformat:0 }}</span>
@@ -648,19 +670,18 @@
                 </div>
 
                 <div class="product-actions">
-                    <a href="{% url 'product_detail' product.id %}" class="btn-action-view">
+                    <a href="{% url 'product_detail' product.id %}" class="btn-action-view" style="position:relative;z-index:3;">
                         <i class="fa fa-eye"></i> VIEW
                     </a>
                     <button class="btn-action-add"
-    onclick="addToCart({{ product.id }}, this)"
-    {% if product.stock <= 0 %}disabled style="background:#999; cursor:not-allowed; opacity:0.6;"{% endif %}>
-
-    {% if product.stock <= 0 %}
-        <i class="fa fa-ban"></i> OUT
-    {% else %}
-        <i class="fa fa-cart-plus"></i> ADD
-    {% endif %}
-</button>
+                        onclick="addToCart({{ product.id }}, this)"
+                        {% if product.stock <= 0 %}disabled style="background:#999; cursor:not-allowed; opacity:0.6;"{% endif %}>
+                        {% if product.stock <= 0 %}
+                            <i class="fa fa-ban"></i> OUT
+                        {% else %}
+                            <i class="fa fa-cart-plus"></i> ADD
+                        {% endif %}
+                    </button>
                 </div>
 
             </div>
@@ -675,6 +696,7 @@
         <div class="product-grid">
             {% for product in featured_products %}
             <div class="product-card">
+                <a href="{% url 'product_detail' product.id %}" class="card-link" aria-label="View {{ product.name }}"></a>
 
                 {% if product.discount > 0 and product.is_discount_active %}
                 <div class="badge-stack">
@@ -683,15 +705,14 @@
                 {% endif %}
 
                 <div class="img-container">
-    <a href="{% url 'product_detail' product.id %}">
-        <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
-    </a>
-</div>
+                    <a href="{% url 'product_detail' product.id %}">
+                        <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'images/default.png' %}{% endif %}" alt="{{ product.name }}">
+                    </a>
+                </div>
 
                 <div class="product-info">
                     {% if product.brand %}<div class="brand-text">{{ product.brand.name }}</div>{% endif %}
                     <h3 class="p-title">{{ product.name }}</h3>
-
                     <div class="price-box">
                         <span class="current-price">KES {{ product.discounted_price|floatformat:0 }}</span>
                         {% if product.discount > 0 %}
@@ -701,19 +722,18 @@
                 </div>
 
                 <div class="product-actions">
-                    <a href="{% url 'product_detail' product.id %}" class="btn-action-view">
+                    <a href="{% url 'product_detail' product.id %}" class="btn-action-view" style="position:relative;z-index:3;">
                         <i class="fa fa-eye"></i> VIEW
                     </a>
-                   <button class="btn-action-add"
-    onclick="addToCart({{ product.id }}, this)"
-    {% if product.stock <= 0 %}disabled style="background:#999; cursor:not-allowed; opacity:0.6;"{% endif %}>
-
-    {% if product.stock <= 0 %}
-        <i class="fa fa-ban"></i> OUT
-    {% else %}
-        <i class="fa fa-cart-plus"></i> ADD
-    {% endif %}
-</button>
+                    <button class="btn-action-add"
+                        onclick="addToCart({{ product.id }}, this)"
+                        {% if product.stock <= 0 %}disabled style="background:#999; cursor:not-allowed; opacity:0.6;"{% endif %}>
+                        {% if product.stock <= 0 %}
+                            <i class="fa fa-ban"></i> OUT
+                        {% else %}
+                            <i class="fa fa-cart-plus"></i> ADD
+                        {% endif %}
+                    </button>
                 </div>
 
             </div>
@@ -722,25 +742,21 @@
 
         {% if featured_products.has_other_pages %}
         <div class="pagination-container">
-
             {% if featured_products.has_previous %}
                 <a href="?page={{ featured_products.previous_page_number }}" class="page-box">
                     <i class="fa fa-chevron-left"></i>
                 </a>
             {% endif %}
-
             {% for num in featured_products.paginator.page_range %}
                 <a href="?page={{ num }}" class="page-box {% if featured_products.number == num %}active{% endif %}">
                     {{ num }}
                 </a>
             {% endfor %}
-
             {% if featured_products.has_next %}
                 <a href="?page={{ featured_products.next_page_number }}" class="page-box">
                     <i class="fa fa-chevron-right"></i>
                 </a>
             {% endif %}
-
         </div>
         {% endif %}
     </section>
@@ -757,12 +773,10 @@
                 <h4 style="font-weight: 800; color: var(--gs-navy);"><i class="fa fa-map-marker-alt" style="color:var(--gs-orange)"></i> Location</h4>
                 <p style="font-size: 13px; color: #666;">CBD, Laxmi Plaza shop number 5. We deliver country-wide across all 47 counties.</p>
             </div>
-
             <div style="padding: 20px; border: 1px solid #eee; border-radius: 15px;">
                 <h4 style="font-weight: 800; color: var(--gs-navy);"><i class="fa fa-credit-card" style="color:var(--gs-orange)"></i> Payments</h4>
                 <p style="font-size: 13px; color: #666;">M-Pesa Till 5280343, Bank Transfers, and POD within Nairobi.</p>
             </div>
-
             <div style="padding: 20px; border: 1px solid #eee; border-radius: 15px;">
                 <h4 style="font-weight: 800; color: var(--gs-navy);"><i class="fa fa-truck" style="color:var(--gs-orange)"></i> Shipping</h4>
                 <p style="font-size: 13px; color: #666;">Fees depend on weight and distance. Calculated at checkout with zero hidden costs.</p>
@@ -782,7 +796,8 @@
         <div style="font-size:11px; color:var(--gs-orange); font-weight:700;" id="t-item"></div>
     </div>
 </div>
-<!-- FIX: footer sentinel — IntersectionObserver watches this to hide/show the chat button -->
+
+<!-- FIX: sentinel placed HERE — just before the closing of main content, above footer -->
 <div id="footer-sentinel" style="height: 1px; width: 100%;"></div>
 
 <div id="ai-chat-launcher" onclick="toggleChat()">
@@ -813,14 +828,13 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const chatWindow = document.getElementById("chat-window");
     const chatInput = document.getElementById("chatInput");
     const chatBody = document.getElementById("chatBody");
 
-    // hide chat by default
     chatWindow.style.display = "none";
 
     window.toggleChat = function () {
@@ -831,7 +845,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const message = chatInput.value.trim();
         if (!message) return;
 
-        // User message
         chatBody.innerHTML += `
             <div style="background:var(--gs-navy); color:white; padding:10px 15px; border-radius:15px 15px 0 15px; align-self:flex-end; font-size:12px;">
                 ${message}
@@ -841,7 +854,6 @@ document.addEventListener("DOMContentLoaded", function () {
         chatInput.value = "";
         chatBody.scrollTop = chatBody.scrollHeight;
 
-        // Typing indicator
         chatBody.innerHTML += `
             <div id="typing" style="background:#eee; padding:10px 15px; border-radius:15px 15px 15px 0; align-self:flex-start; font-size:12px;">
                 SokoBot is typing...
@@ -867,7 +879,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     ${data.reply}
                 </div>
             `;
-
             chatBody.scrollTop = chatBody.scrollHeight;
         })
         .catch(() => {
@@ -882,213 +893,205 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Enter key support
     chatInput.addEventListener("keypress", function(e) {
-        if (e.key === "Enter") {
-            sendMsg();
-        }
+        if (e.key === "Enter") sendMsg();
     });
+
+    // ── FIX: IntersectionObserver on the footer element itself ──
+    // The sentinel is placed just before footer in the DOM.
+    // We observe the actual footer so hide/show is reliable.
+    const chatLauncher = document.getElementById('ai-chat-launcher');
+    const sentinel = document.getElementById('footer-sentinel');
+
+    if ('IntersectionObserver' in window && sentinel) {
+        const footerObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // sentinel visible = user near/at footer
+                    chatLauncher.classList.add('chat-hidden');
+                    chatWindow.style.display = 'none';
+                } else {
+                    // scrolled back up
+                    chatLauncher.classList.remove('chat-hidden');
+                }
+            });
+        }, { threshold: 0 });
+
+        footerObserver.observe(sentinel);
+    }
 
 });
 
-    // ---------------- FLASH SALE TIMERS ----------------
-    setInterval(function() {
-        $('.timer-badge').each(function() {
-            const expiryStr = $(this).data('expiry');
-            if (!expiryStr) return;
+// ---------------- FLASH SALE TIMERS ----------------
+setInterval(function() {
+    $('.timer-badge').each(function() {
+        const expiryStr = $(this).data('expiry');
+        if (!expiryStr) return;
 
-            const expiry = new Date(expiryStr).getTime();
-            const now = new Date().getTime();
-            const diff = expiry - now;
+        const expiry = new Date(expiryStr).getTime();
+        const now = new Date().getTime();
+        const diff = expiry - now;
 
-            if (diff <= 0) {
-                $(this).html('<i class="fa fa-clock"></i> <span class="cd-text">EXPIRED</span>');
-                return;
-            }
-
-            const h = Math.floor(diff / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-            $(this).find('.cd-text').text(`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`);
-        });
-    }, 1000);
-
-
-
-    // ---------------- BANNER SWIPE SLIDER ----------------
-    (function () {
-        const track    = document.getElementById('bannerTrack');
-        const slider   = document.getElementById('bannerSlider');
-        const dotsWrap = document.getElementById('bannerDots');
-        const slides   = track.querySelectorAll('.banner-slide');
-        const total    = slides.length;
-        let current    = 0;
-        let autoTimer;
-
-        // Build dot buttons
-        slides.forEach((_, i) => {
-            const d = document.createElement('button');
-            d.className = 'banner-dot' + (i === 0 ? ' active' : '');
-            d.setAttribute('aria-label', 'Go to slide ' + (i + 1));
-            d.addEventListener('click', () => goTo(i));
-            dotsWrap.appendChild(d);
-        });
-
-        function getDots() { return dotsWrap.querySelectorAll('.banner-dot'); }
-
-        function goTo(idx) {
-            current = (idx + total) % total;
-            track.style.transform = `translateX(-${current * 100}%)`;
-            getDots().forEach((d, i) => d.classList.toggle('active', i === current));
+        if (diff <= 0) {
+            $(this).html('<i class="fa fa-clock"></i> <span class="cd-text">EXPIRED</span>');
+            return;
         }
 
-        function next() { goTo(current + 1); }
-        function prev() { goTo(current - 1); }
+        const h = Math.floor(diff / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-        document.getElementById('bannerNext').addEventListener('click', () => { next(); resetAuto(); });
-        document.getElementById('bannerPrev').addEventListener('click', () => { prev(); resetAuto(); });
-
-        // Auto-advance every 6 s
-        function startAuto() { autoTimer = setInterval(next, 6000); }
-        function resetAuto() { clearInterval(autoTimer); startAuto(); }
-        startAuto();
-
-        // ── Touch / mouse swipe ──
-        let dragStartX = 0, dragDelta = 0, dragging = false;
-
-        function onDragStart(x) {
-            dragStartX = x;
-            dragDelta  = 0;
-            dragging   = true;
-            // disable CSS transition while dragging for 1:1 feel
-            track.style.transition = 'none';
-            clearInterval(autoTimer);
-        }
-
-        function onDragMove(x) {
-            if (!dragging) return;
-            dragDelta = x - dragStartX;
-            // Shift track with finger — clamped so it doesn't over-pull
-            const base = current * 100;
-            const pct  = (dragDelta / slider.offsetWidth) * 100;
-            track.style.transform = `translateX(calc(-${base}% + ${dragDelta}px))`;
-        }
-
-        function onDragEnd() {
-            if (!dragging) return;
-            dragging = false;
-            // Re-enable transition
-            track.style.transition = '';
-            const threshold = slider.offsetWidth * 0.2;  // 20% of width to commit swipe
-            if (dragDelta < -threshold) next();
-            else if (dragDelta > threshold) prev();
-            else goTo(current);  // snap back
-            startAuto();
-        }
-
-        // Mouse
-        slider.addEventListener('mousedown',  e => onDragStart(e.clientX));
-        window.addEventListener('mousemove',  e => onDragMove(e.clientX));
-        window.addEventListener('mouseup',    ()  => onDragEnd());
-
-        // Touch
-        slider.addEventListener('touchstart', e => onDragStart(e.touches[0].clientX), { passive: true });
-        slider.addEventListener('touchmove',  e => onDragMove(e.touches[0].clientX),  { passive: true });
-        slider.addEventListener('touchend',   ()  => onDragEnd());
-    })();
+        $(this).find('.cd-text').text(`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`);
+    });
+}, 1000);
 
 
-    // ---------------- BRAND ROPE AUTO MOVE LEFT/RIGHT ----------------
-    const track = document.getElementById("brandTrack");
+// ---------------- BANNER SWIPE SLIDER ----------------
+(function () {
+    const track    = document.getElementById('bannerTrack');
+    const slider   = document.getElementById('bannerSlider');
+    const dotsWrap = document.getElementById('bannerDots');
+    const slides   = track.querySelectorAll('.banner-slide');
+    const total    = slides.length;
+    let current    = 0;
+    let autoTimer;
 
-    let direction = 1;
-    let speed = 2;
-    let isDragging = false;
-    let resumeTimer;
+    slides.forEach((_, i) => {
+        const d = document.createElement('button');
+        d.className = 'banner-dot' + (i === 0 ? ' active' : '');
+        d.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+        d.addEventListener('click', () => goTo(i));
+        dotsWrap.appendChild(d);
+    });
 
-    function ropeMove() {
-        if (!isDragging) {
-            track.scrollLeft += speed * direction;
+    function getDots() { return dotsWrap.querySelectorAll('.banner-dot'); }
 
-            if (track.scrollLeft + track.clientWidth >= track.scrollWidth - 5) {
-                direction = -1;
-            }
-
-            if (track.scrollLeft <= 0) {
-                direction = 1;
-            }
-        }
-
-        requestAnimationFrame(ropeMove);
+    function goTo(idx) {
+        current = (idx + total) % total;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        getDots().forEach((d, i) => d.classList.toggle('active', i === current));
     }
-    ropeMove();
+
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    document.getElementById('bannerNext').addEventListener('click', () => { next(); resetAuto(); });
+    document.getElementById('bannerPrev').addEventListener('click', () => { prev(); resetAuto(); });
+
+    function startAuto() { autoTimer = setInterval(next, 6000); }
+    function resetAuto() { clearInterval(autoTimer); startAuto(); }
+    startAuto();
+
+    let dragStartX = 0, dragDelta = 0, dragging = false;
+
+    function onDragStart(x) {
+        dragStartX = x;
+        dragDelta  = 0;
+        dragging   = true;
+        track.style.transition = 'none';
+        clearInterval(autoTimer);
+    }
+
+    function onDragMove(x) {
+        if (!dragging) return;
+        dragDelta = x - dragStartX;
+        const base = current * 100;
+        track.style.transform = `translateX(calc(-${base}% + ${dragDelta}px))`;
+    }
+
+    function onDragEnd() {
+        if (!dragging) return;
+        dragging = false;
+        track.style.transition = '';
+        const threshold = slider.offsetWidth * 0.2;
+        if (dragDelta < -threshold) next();
+        else if (dragDelta > threshold) prev();
+        else goTo(current);
+        startAuto();
+    }
+
+    slider.addEventListener('mousedown',  e => onDragStart(e.clientX));
+    window.addEventListener('mousemove',  e => onDragMove(e.clientX));
+    window.addEventListener('mouseup',    ()  => onDragEnd());
+
+    slider.addEventListener('touchstart', e => onDragStart(e.touches[0].clientX), { passive: true });
+    slider.addEventListener('touchmove',  e => onDragMove(e.touches[0].clientX),  { passive: true });
+    slider.addEventListener('touchend',   ()  => onDragEnd());
+})();
 
 
-    // ---------------- USER DRAG SCROLL ----------------
-    let startX, startScroll;
+// ---------------- BRAND ROPE AUTO SCROLL ----------------
+const track = document.getElementById("brandTrack");
 
-    track.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        clearTimeout(resumeTimer);
+let direction = 1;
+let speed = 2;
+let isDragging = false;
+let resumeTimer;
 
-        startX = e.pageX;
-        startScroll = track.scrollLeft;
-        track.style.cursor = "grabbing";
-    });
+function ropeMove() {
+    if (!isDragging) {
+        track.scrollLeft += speed * direction;
+        if (track.scrollLeft + track.clientWidth >= track.scrollWidth - 5) direction = -1;
+        if (track.scrollLeft <= 0) direction = 1;
+    }
+    requestAnimationFrame(ropeMove);
+}
+ropeMove();
 
-    window.addEventListener("mouseup", () => {
-        track.style.cursor = "grab";
+let startX, startScroll;
 
-        resumeTimer = setTimeout(() => {
-            isDragging = false;
-        }, 2000);
-    });
+track.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    clearTimeout(resumeTimer);
+    startX = e.pageX;
+    startScroll = track.scrollLeft;
+    track.style.cursor = "grabbing";
+});
 
-    track.addEventListener("mousemove", (e) => {
-        if (!isDragging) return;
+window.addEventListener("mouseup", () => {
+    track.style.cursor = "grab";
+    resumeTimer = setTimeout(() => { isDragging = false; }, 2000);
+});
 
-        const walk = (e.pageX - startX) * 1.5;
-        track.scrollLeft = startScroll - walk;
-    });
+track.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    const walk = (e.pageX - startX) * 1.5;
+    track.scrollLeft = startScroll - walk;
+});
 
+track.addEventListener("touchstart", (e) => {
+    isDragging = true;
+    clearTimeout(resumeTimer);
+    startX = e.touches[0].pageX;
+    startScroll = track.scrollLeft;
+}, { passive: true });
 
-    // ---------------- MOBILE TOUCH SUPPORT ----------------
-    track.addEventListener("touchstart", (e) => {
-        isDragging = true;
-        clearTimeout(resumeTimer);
+track.addEventListener("touchmove", (e) => {
+    if (!isDragging) return;
+    const walk = (e.touches[0].pageX - startX) * 1.5;
+    track.scrollLeft = startScroll - walk;
+}, { passive: true });
 
-        startX = e.touches[0].pageX;
-        startScroll = track.scrollLeft;
-    }, { passive: true });
-
-    track.addEventListener("touchmove", (e) => {
-        if (!isDragging) return;
-
-        const walk = (e.touches[0].pageX - startX) * 1.5;
-        track.scrollLeft = startScroll - walk;
-    }, { passive: true });
-
-    track.addEventListener("touchend", () => {
-        resumeTimer = setTimeout(() => {
-            isDragging = false;
-        }, 2000);
-    });
+track.addEventListener("touchend", () => {
+    resumeTimer = setTimeout(() => { isDragging = false; }, 2000);
+});
 
 
-    function addToCart(productId, btn) {
+// ---------------- ADD TO CART ----------------
+function addToCart(productId, btn) {
     const $btn = $(btn);
     const originalContent = $btn.html();
 
     $btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
-fetch(`/add-to-cart/${productId}/`, {
-    method: "POST",
-    headers: {
-        "X-CSRFToken": "{{ csrf_token }}",
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({})
-})
+
+    fetch(`/add-to-cart/${productId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+    })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
@@ -1096,7 +1099,6 @@ fetch(`/add-to-cart/${productId}/`, {
                 .css('background-color', 'var(--gs-green)')
                 .css('border-color', 'var(--gs-green)');
 
-            // update badge if you have it
             const badge = document.getElementById("cart-badge");
             if (badge) badge.innerText = data.cart_count;
 
@@ -1108,9 +1110,7 @@ fetch(`/add-to-cart/${productId}/`, {
             }, 2000);
 
         } else {
-            // ✅ show backend message (out of stock)
             alert(data.message);
-
             $btn.html(originalContent)
                 .prop('disabled', false)
                 .css('background-color', 'var(--gs-orange)')
@@ -1119,7 +1119,6 @@ fetch(`/add-to-cart/${productId}/`, {
     })
     .catch(() => {
         alert("Something went wrong. Try again.");
-
         $btn.html(originalContent)
             .prop('disabled', false)
             .css('background-color', 'var(--gs-orange)')
@@ -1127,31 +1126,6 @@ fetch(`/add-to-cart/${productId}/`, {
     });
 }
 
-    // ---------------- FIX: HIDE CHAT BUTTON AT FOOTER ----------------
-    // We place a sentinel div just before the footer and watch it with IntersectionObserver.
-    // When the sentinel enters the viewport the user is at the footer — we hide the chat button.
-    const chatLauncher = document.getElementById('ai-chat-launcher');
-    const chatWindow = document.getElementById('chat-window');
-    const sentinel = document.getElementById('footer-sentinel');
-
-    if ('IntersectionObserver' in window && sentinel) {
-        const footerObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    // User reached the footer — hide button and close window
-                    chatLauncher.classList.add('chat-hidden');
-                    chatWindow.style.display = 'none';
-                } else {
-                    // User scrolled back up — show button
-                    chatLauncher.classList.remove('chat-hidden');
-                }
-            });
-        }, {
-            threshold: 0.1
-        });
-
-        footerObserver.observe(sentinel);
-    }
 </script>
 
 {% endblock %}

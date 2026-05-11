@@ -250,3 +250,49 @@ class SignupOTP(models.Model):
 
     def __str__(self):
         return self.email
+    
+# ─────────────────────────────────────────────────────────────────
+# ADD THIS TO THE BOTTOM OF YOUR models.py
+# ─────────────────────────────────────────────────────────────────
+
+from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+class UserProfile(models.Model):
+    user            = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    avatar          = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    phone           = models.CharField(max_length=15, blank=True, null=True)
+    # mirrors checkout fields so they can autofill
+    region          = models.CharField(
+        max_length=20,
+        choices=[('nairobi', 'Nairobi'), ('outside', 'Upcountry')],
+        default='nairobi'
+    )
+    nairobi_area    = models.CharField(max_length=100, blank=True, null=True)
+    upcountry_county= models.CharField(max_length=100, blank=True, null=True)
+    upcountry_town  = models.CharField(max_length=100, blank=True, null=True)
+    address_notes   = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"
+
+    def get_avatar_url(self):
+        """Safe URL — falls back to None so template can use initials instead."""
+        try:
+            if self.avatar and self.avatar.name:
+                return self.avatar.url
+        except Exception:
+            pass
+        return None
+
+
+# Auto-create / auto-save profile whenever a User is saved
+@receiver(post_save, sender=User)
+def create_or_save_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
+    else:
+        UserProfile.objects.get_or_create(user=instance)
