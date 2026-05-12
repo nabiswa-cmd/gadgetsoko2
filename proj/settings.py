@@ -41,7 +41,11 @@ CSRF_TRUSTED_ORIGINS = [
     'https://127.0.0.1:8000',
     'https://187.127.164.196',
     'http://187.127.164.196',
+    'https://accounts.google.com',
 ]
+
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
 
 # ---------------------------------------------------------------------------
 # APPLICATION
@@ -171,12 +175,21 @@ GOOGLE_CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 # GOOGLE OAUTH
 # ---------------------------------------------------------------------------
 SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_AUTO_SIGNUP = True
+LOGIN_REDIRECT_URL = '/index/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/index/'
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
         'AUTH_PARAMS': {
             'access_type': 'online',
             'prompt': 'select_account',
-        }
+        },
+        'OAUTH_PKCE_ENABLED': True,
     }
 }
 

@@ -2312,3 +2312,48 @@ def cancel_order(request, order_id):
     else:
         messages.error(request, "This order can no longer be cancelled.")
     return redirect('my_orders')
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login, authenticate
+from allauth.socialaccount.models import SocialLogin
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from django.shortcuts import redirect
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from django.conf import settings
+
+@csrf_exempt
+def google_onetap_callback(request):
+    if request.method == 'POST':
+        credential = request.POST.get('credential')
+        if credential:
+            try:
+                idinfo = id_token.verify_oauth2_token(
+                    credential,
+                    google_requests.Request(),
+                    settings.GOOGLE_CLIENT_ID
+                )
+                email = idinfo.get('email')
+                from django.contrib.auth.models import User
+                from allauth.socialaccount.models import SocialAccount
+                try:
+                    social = SocialAccount.objects.get(
+                        provider='google', uid=idinfo['sub']
+                    )
+                    user = social.user
+                except SocialAccount.DoesNotExist:
+                    user, created = User.objects.get_or_create(
+                        email=email,
+                        defaults={'username': email.split('@')[0]}
+                    )
+                    if created:
+                        SocialAccount.objects.create(
+                            user=user, provider='google', uid=idinfo['sub']
+                        )
+                user.backend = 'django.contrib.auth.backends.ModelBackend'
+                login(request, user)
+                return redirect('index')
+            except Exception:
+                pass
+    return redirect('userlog')

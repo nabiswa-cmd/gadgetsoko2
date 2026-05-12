@@ -82,4 +82,5 @@ urlpatterns = [
 
     path('dashboard/customers/<int:pk>/',        customer_detail,     name='customer_detail'),
     path('dashboard/customers/<int:pk>/email/',  send_customer_email, name='send_customer_email'),
+    path('accounts/google/onetap/', views.google_onetap_callback, name='google_onetap'),
 ]
