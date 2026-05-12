@@ -1,54 +1,254 @@
-{% extends "baseadmin.html" %}
+{% extends 'baseadmin.html' %}
+{% load static %}
 
 {% block title %}Customers | Gadget Soko{% endblock %}
 {% block header %}Customers{% endblock %}
 
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<style>
+* { font-family: 'Jost', sans-serif; }
+
+.pg-head {
+    display: flex; align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 26px; flex-wrap: wrap; gap: 14px;
+}
+.pg-head h1 {
+    font-size: 1.6rem; font-weight: 600; color: #111;
+    margin: 0; letter-spacing: -0.4px;
+}
+.pg-head h1 small {
+    font-size: 0.85rem; font-weight: 400;
+    color: #aaa; margin-left: 10px; letter-spacing: 0;
+}
+.toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.search-box {
+    display: flex; align-items: center; background: white;
+    border-bottom: 2px solid #ddd; padding: 8px 12px; gap: 8px;
+    transition: border-color 0.2s;
+}
+.search-box:focus-within { border-color: var(--primary-color); }
+.search-box input {
+    border: none; outline: none; font-family: 'Jost', sans-serif;
+    font-size: 0.9rem; color: #333; width: 200px; background: transparent;
+}
+.search-box i { color: #bbb; }
+.filter-select {
+    background: white; border: none; border-bottom: 2px solid #ddd;
+    padding: 8px 12px; font-family: 'Jost', sans-serif;
+    font-size: 0.9rem; color: #555; cursor: pointer; outline: none;
+}
+
+.stats-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 22px; }
+.stat-card {
+    background: white; padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px;
+    border-top: 3px solid #111;
+}
+.stat-icon {
+    width: 40px; height: 40px; background: #f4f4f4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: #555; flex-shrink: 0;
+}
+.stat-icon.orange { background: #fff0eb; color: var(--primary-color); }
+.stat-icon.green  { background: #edfaf4; color: #16a34a; }
+.stat-icon.blue   { background: #eff4ff; color: #3b6ff6; }
+.stat-info p  { margin: 0; font-size: 0.72rem; font-weight: 500; color: #999; text-transform: uppercase; letter-spacing: 0.7px; }
+.stat-info h3 { margin: 3px 0 0; font-size: 1.6rem; font-weight: 700; color: #111; }
+
+.table-wrap { background: white; }
+table { width: 100%; border-collapse: collapse; }
+thead { border-bottom: 2px solid #111; }
+th {
+    padding: 12px 16px; text-align: left;
+    font-size: 0.68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; color: #999;
+}
+td { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; color: #444; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.1s; cursor: pointer; }
+tbody tr:hover td { background: #faf9f8; }
+
+.user-cell { display: flex; align-items: center; gap: 13px; }
+.av { width: 44px; height: 44px; flex-shrink: 0; overflow: hidden; background: #eee; display: flex; align-items: center; justify-content: center; }
+.av img { width: 100%; height: 100%; object-fit: cover; }
+.av-letter { width: 44px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; font-weight: 700; color: white; }
+.ac-1,.ac-9,.ac-17,.ac-25  { background: #ff5a2c; }
+.ac-2,.ac-10,.ac-18,.ac-26 { background: #3b6ff6; }
+.ac-3,.ac-11,.ac-19,.ac-27 { background: #16a34a; }
+.ac-4,.ac-12,.ac-20,.ac-28 { background: #d97706; }
+.ac-5,.ac-13,.ac-21,.ac-29 { background: #7c3aed; }
+.ac-6,.ac-14,.ac-22,.ac-30 { background: #db2777; }
+.ac-7,.ac-15,.ac-23,.ac-31 { background: #0891b2; }
+.ac-8,.ac-16,.ac-24,.ac-32 { background: #65a30d; }
+
+.u-name { font-weight: 600; color: #111; font-size: 0.92rem; }
+.u-handle { font-size: 0.75rem; color: #bbb; margin-top: 1px; }
+
+.badge { font-size: 0.7rem; font-weight: 600; padding: 3px 9px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Jost', sans-serif; }
+.badge-nbi { background: #edfaf4; color: #16a34a; }
+.badge-up  { background: #eff4ff; color: #3b6ff6; }
+.badge-unk { background: #f4f4f4; color: #888; }
+
+.order-chip { display: inline-flex; align-items: center; gap: 5px; background: #fff0eb; color: var(--primary-color); padding: 4px 10px; font-size: 0.8rem; font-weight: 600; }
+
+.view-link {
+    color: #111; font-size: 0.82rem; font-weight: 600;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    border-bottom: 1.5px solid #111; padding-bottom: 1px; transition: color 0.15s;
+}
+.view-link:hover { color: var(--primary-color); border-color: var(--primary-color); }
+
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-state i { font-size: 2.5rem; color: #ddd; display: block; margin-bottom: 12px; }
+.empty-state p { color: #aaa; font-size: 0.9rem; }
+
+.pag-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-top: 1px solid #f0f0f0; font-size: 0.82rem; color: #999; }
+.pag-btns { display: flex; gap: 4px; }
+.pag-btn { width: 32px; height: 32px; border: 1px solid #e5e5e5; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.82rem; color: #555; text-decoration: none; font-family: 'Jost', sans-serif; transition: all 0.12s; }
+.pag-btn:hover { background: #111; color: white; border-color: #111; }
+.pag-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+
+@media (max-width: 768px) {
+    .stats-strip { grid-template-columns: 1fr; }
+    th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) { display: none; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-{% load static %}
-    
-    <link rel="stylesheet" href="{% static 'css/customers.css' %}">
 
-<div class="container">
-    <h1>Customer Orders</h1>
+<div class="pg-head">
+    <h1>All Customers <small>{{ customers.paginator.count }} registered</small></h1>
+    <div class="toolbar">
+        <div class="search-box">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search name or email…">
+        </div>
+        <select class="filter-select" id="regionFilter">
+            <option value="">All Regions</option>
+            <option value="nairobi">Nairobi</option>
+            <option value="upcountry">Upcountry</option>
+        </select>
+    </div>
+</div>
 
-    <table>
+<div class="stats-strip">
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fa fa-users"></i></div>
+        <div class="stat-info"><p>Total Customers</p><h3>{{ total_customers }}</h3></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fa fa-user-check"></i></div>
+        <div class="stat-info"><p>Have Ordered</p><h3>{{ customers_with_orders }}</h3></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fa fa-user-plus"></i></div>
+        <div class="stat-info"><p>New This Month</p><h3>{{ new_this_month }}</h3></div>
+    </div>
+</div>
+
+<div class="table-wrap">
+    {% if customers %}
+    <table id="custTable">
         <thead>
             <tr>
-                <th>Customer Name</th>
-                <th>Username</th>
+                <th>#</th>
+                <th>Customer</th>
                 <th>Email</th>
-                <th>Items Ordered</th>
-                <th>Date of Order</th>
-                <th>Status</th>
-                <th>Amount Paid</th>
-                <th>Destination</th>
+                <th>Phone</th>
+                <th>Region</th>
+                <th>Orders</th>
+                <th>Joined</th>
+                <th></th>
             </tr>
         </thead>
-
         <tbody>
-{% for order in orders %}
-<tr>
-    <td>{{ order.name }}</td>
-    <td>{{ order.user.username }}</td>
-    <td>{{ order.email }}</td>
-
-    <td>
-        <ul>
-            {% for item in order.items.all %}
-                <li>{{ item.product.name }} x {{ item.quantity }}</li>
+            {% for c in customers %}
+            <tr onclick="window.location='{% url 'customer_detail' c.pk %}'">
+                <td style="color:#ccc; font-size:0.78rem;">{{ forloop.counter }}</td>
+                <td>
+                    <div class="user-cell">
+                        {% if c.profile.get_avatar_url %}
+                            <div class="av"><img src="{{ c.profile.get_avatar_url }}" alt="{{ c.username }}"></div>
+                        {% else %}
+                            <div class="av-letter ac-{{ forloop.counter0|add:1 }}">{{ c.username|slice:":1"|upper }}</div>
+                        {% endif %}
+                        <div>
+                            <div class="u-name">{{ c.get_full_name|default:c.username }}</div>
+                            <div class="u-handle">@{{ c.username }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ c.email|default:"—" }}</td>
+                <td>{{ c.profile.phone|default:"—" }}</td>
+                <td>
+                    {% if c.profile.region == "nairobi" %}
+                        <span class="badge badge-nbi">Nairobi</span>
+                    {% elif c.profile.region == "outside" %}
+                        <span class="badge badge-up">Upcountry</span>
+                    {% else %}
+                        <span class="badge badge-unk">—</span>
+                    {% endif %}
+                </td>
+                <td><span class="order-chip"><i class="fa fa-box" style="font-size:0.68rem;"></i> {{ c.order_set.count }}</span></td>
+                <td style="color:#bbb; font-size:0.82rem;">{{ c.date_joined|date:"d M Y" }}</td>
+                <td>
+                    <a href="{% url 'customer_detail' c.pk %}" class="view-link" onclick="event.stopPropagation()">
+                        View <i class="fa fa-arrow-right" style="font-size:0.68rem;"></i>
+                    </a>
+                </td>
+            </tr>
             {% endfor %}
-        </ul>
-    </td>
-
-    <td>{{ order.created_at }}</td>
-    <td>{{ order.status }}</td>
-    <td>KES {{ order.total }}</td>
-    <td>{{ order.destination }}</td>
-</tr>
-{% endfor %}
-</tbody>
-
-        
+        </tbody>
     </table>
+
+    {% if customers.has_other_pages %}
+    <div class="pag-bar">
+        <span>Page {{ customers.number }} of {{ customers.paginator.num_pages }}</span>
+        <div class="pag-btns">
+            {% if customers.has_previous %}
+                <a href="?page={{ customers.previous_page_number }}" class="pag-btn"><i class="fa fa-chevron-left" style="font-size:0.7rem;"></i></a>
+            {% endif %}
+            {% for i in customers.paginator.page_range %}
+                <a href="?page={{ i }}" class="pag-btn {% if customers.number == i %}active{% endif %}">{{ i }}</a>
+            {% endfor %}
+            {% if customers.has_next %}
+                <a href="?page={{ customers.next_page_number }}" class="pag-btn"><i class="fa fa-chevron-right" style="font-size:0.7rem;"></i></a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <i class="fa fa-users"></i>
+        <p>No customers yet.</p>
+    </div>
+    {% endif %}
 </div>
-{%endblock%}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const searchInput  = document.getElementById('searchInput');
+const regionFilter = document.getElementById('regionFilter');
+const rows = document.querySelectorAll('#custTable tbody tr');
+function doFilter() {
+    const q = searchInput.value.toLowerCase();
+    const r = regionFilter.value.toLowerCase();
+    rows.forEach(row => {
+        const txt = row.innerText.toLowerCase();
+        const badge = row.querySelector('.badge');
+        const bt = badge ? badge.textContent.trim().toLowerCase() : '';
+        row.style.display = (!q || txt.includes(q)) && (!r || bt.includes(r)) ? '' : 'none';
+    });
+}
+searchInput.addEventListener('input', doFilter);
+regionFilter.addEventListener('change', doFilter);
+</script>
+{% endblock %}

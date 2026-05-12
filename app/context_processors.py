@@ -11,3 +11,21 @@ def cart_count(request):
         count = result['total'] or 0
 
     return {'cart_count': count}
+
+from .models import Order
+
+def active_orders(request):
+    if request.user.is_authenticated:
+        count = Order.objects.filter(
+            user=request.user
+        ).exclude(status__in=['Delivered', 'Cancelled']).count()
+        return {'active_order_count': count}
+    return {'active_order_count': 0}
+
+
+from django.conf import settings
+
+def google_settings(request):
+    return {
+        'GOOGLE_CLIENT_ID': settings.GOOGLE_CLIENT_ID
+    }

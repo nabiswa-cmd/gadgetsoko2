@@ -1,0 +1,95 @@
+
+<div class="order-card">
+
+  {# ── HEADER ── #}
+  <div class="order-card-header">
+    <div class="order-meta">
+      <span class="order-id">Order #{{ order.id }}</span>
+      <span class="order-date">
+        <i class="bi bi-calendar3"></i>
+        {{ order.created_at|date:"d M Y, g:i A" }}
+      </span>
+    </div>
+    <span class="status-pill {{ display_status }}">
+      <span class="dot"></span>
+      {{ display_label }}
+    </span>
+  </div>
+
+  {# ── PROGRESS TRACK (3 customer-visible steps) ── #}
+  <div class="order-progress">
+
+    {# Step 1: Processing #}
+    <div class="progress-step
+      {% if display_status == 'processing' %}active
+      {% elif display_status != 'cancelled' %}done{% endif %}">
+      <div class="step-icon"><i class="bi bi-gear-fill"></i></div>
+      <span class="step-label">Processing</span>
+    </div>
+
+    {# Step 2: Shipped #}
+    <div class="progress-step
+      {% if display_status == 'shipped' %}active
+      {% elif display_status == 'delivered' %}done{% endif %}">
+      <div class="step-icon"><i class="bi bi-truck"></i></div>
+      <span class="step-label">Shipped</span>
+    </div>
+
+    {# Step 3: Delivered #}
+    <div class="progress-step
+      {% if display_status == 'delivered' %}done{% endif %}">
+      <div class="step-icon"><i class="bi bi-house-check-fill"></i></div>
+      <span class="step-label">Delivered</span>
+    </div>
+
+  </div>
+
+  {# ── ITEMS ── #}
+  <div class="order-items">
+    {% for item in order.items.all %}
+    <div class="order-item-row">
+      {% if item.product.images.first %}
+        <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}"
+             onerror="this.src='https://via.placeholder.com/48?text=Img'">
+      {% elif item.product.image %}
+        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+             onerror="this.src='https://via.placeholder.com/48?text=Img'">
+      {% else %}
+        <img src="https://via.placeholder.com/48?text=Img" alt="">
+      {% endif %}
+      <span class="order-item-name">{{ item.product.name }}</span>
+      <span class="order-item-qty">× {{ item.quantity }}</span>
+      <span class="order-item-price">KES {{ item.get_total|floatformat:0 }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# ── FOOTER ── #}
+  <div class="order-card-footer">
+    <div class="order-total">
+      Total: <span>KES {{ order.total|floatformat:0 }}</span>
+    </div>
+
+    {# Cancel button logic #}
+    {% if display_status == 'cancelled' %}
+      <button class="btn-cancel-order" disabled>
+        <i class="bi bi-x-circle lock-icon"></i> Cancelled
+      </button>
+    {% elif display_status == 'delivered' %}
+      <button class="btn-cancel-order" disabled>
+        <i class="bi bi-check-circle lock-icon"></i> Delivered
+      </button>
+    {% elif display_status == 'shipped' %}
+      <button class="btn-cancel-order" disabled title="Order is already on its way">
+        <i class="bi bi-lock-fill lock-icon"></i> Cannot Cancel
+      </button>
+    {% else %}
+      {# Processing — cancel is allowed #}
+      <button class="btn-cancel-order"
+              onclick="openCancelModal('{{ order.id }}', 'Order #{{ order.id }}')">
+        <i class="bi bi-x-circle"></i> Cancel Order
+      </button>
+    {% endif %}
+
+  </div>
+</div>

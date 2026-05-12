@@ -90,6 +90,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'app.context_processors.cart_count',
+                'app.context_processors.active_orders',
+                'app.context_processors.google_settings',
             ],
         },
     },

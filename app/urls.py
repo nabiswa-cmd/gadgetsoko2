@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from app import views  # replace with your actual app name
-
+from .views import customer_detail, send_customer_email
 urlpatterns = [
     
 
@@ -75,4 +75,11 @@ urlpatterns = [
     path('admin-panel/market-product/', views.market_product, name='market_product'),
     path('profile/edit/', views.edit_profile,     name='edit_profile'),
     path('profile/check-username/', views.check_username,  name='check_username'),
+
+    path('my-orders/',              views.my_orders,    name='my_orders'),
+    path('cancel-order/<int:order_id>/', views.cancel_order, name='cancel_order'),
+  
+
+    path('dashboard/customers/<int:pk>/',        customer_detail,     name='customer_detail'),
+    path('dashboard/customers/<int:pk>/email/',  send_customer_email, name='send_customer_email'),
 ]

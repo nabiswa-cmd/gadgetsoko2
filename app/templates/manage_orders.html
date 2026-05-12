@@ -1,151 +1,545 @@
 {% extends "baseadmin.html" %}
-
-{% block title %}Manage Orders| Gadget Soko{% endblock %}
-{% block header %}Manage Orders{% endblock %}
-{% block content %}
 {% load static %}
-    <title></title>
 
-    <style>
-        body {
-            font-family: Arial;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
+{% block title %}Manage Orders | Gadget Soko{% endblock %}
+{% block header %}Manage Orders{% endblock %}
 
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            
-        }
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { font-family: 'Jost', sans-serif; box-sizing: border-box; }
 
-        h2 {
-            margin-bottom: 20px;
-        }
+/* ── TOOLBAR ── */
+.orders-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 26px; flex-wrap: wrap; gap: 12px;
+}
+.orders-toolbar h1 {
+    font-size: 1.5rem; font-weight: 700; color: #111; margin: 0;
+}
+.orders-toolbar h1 small {
+    font-size: 0.82rem; font-weight: 400; color: #aaa; margin-left: 8px;
+}
+.toolbar-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+.search-box {
+    display: flex; align-items: center;
+    background: #fff; border-bottom: 2px solid #ddd;
+    padding: 7px 12px; gap: 8px; transition: border-color 0.2s;
+}
+.search-box:focus-within { border-color: #111; }
+.search-box input {
+    border: none; outline: none; font-family: 'Jost', sans-serif;
+    font-size: 0.88rem; color: #333; width: 190px; background: transparent;
+}
+.search-box i { color: #ccc; font-size: 0.82rem; }
 
-        table th, table td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-            vertical-align: top;
-        }
+.filter-select {
+    background: #fff; border: none; border-bottom: 2px solid #ddd;
+    padding: 7px 10px; font-family: 'Jost', sans-serif;
+    font-size: 0.88rem; color: #555; cursor: pointer; outline: none;
+    transition: border-color 0.2s;
+}
+.filter-select:focus { border-color: #111; }
 
-        table th {
-            background: #0f4c81;
-            color: white;
-        }
+/* ── STATS STRIP ── */
+.stats-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin-bottom: 24px;
+}
+.stat-card {
+    background: #fff; padding: 16px 18px;
+    border-top: 3px solid #111;
+    display: flex; align-items: center; gap: 12px;
+}
+.stat-icon {
+    width: 38px; height: 38px; background: #f4f4f4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; color: #777; flex-shrink: 0;
+}
+.stat-icon.orange { background: #fff0eb; color: #ff5a2c; }
+.stat-icon.green  { background: #edfaf4; color: #16a34a; }
+.stat-icon.blue   { background: #eff4ff; color: #3b6ff6; }
+.stat-icon.amber  { background: #fffbeb; color: #d97706; }
+.stat-info p  { margin: 0; font-size: 0.68rem; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.7px; }
+.stat-info h3 { margin: 2px 0 0; font-size: 1.4rem; font-weight: 800; color: #111; }
 
-        .status {
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: white;
-            font-size: 12px;
-        }
+/* ── DAY GROUP ── */
+.day-group { margin-bottom: 32px; }
 
-        .pending { background: orange; }
-        .processing { background: purple; }
-        .shipped { background: blue; }
-        .delivered { background: green; }
+.day-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+}
+.day-label {
+    font-size: 0.68rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: #111; white-space: nowrap;
+}
+.day-count {
+    font-size: 0.68rem; font-weight: 600; color: #fff;
+    background: #111; padding: 2px 8px;
+}
+.day-line { flex: 1; height: 1px; background: #ebebeb; }
 
-        .btn {
-            padding: 6px 10px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+/* ── ORDER CARD ── */
+.order-card {
+    background: #fff;
+    border-top: 2px solid #111;
+    margin-bottom: 10px;
+    transition: box-shadow 0.15s;
+}
+.order-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
 
-        .btn-update {
-            background: #0f4c81;
-            color: white;
-        }
+/* Card header */
+.oc-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
+    user-select: none;
+}
+.oc-head:hover { background: #fafafa; }
 
-        select {
-            padding: 5px;
-        }
-    </style>
-</head>
+/* Customer cell */
+.cust-cell { display: flex; align-items: center; gap: 10px; }
+.cust-av {
+    width: 38px; height: 38px; flex-shrink: 0;
+    background: #111; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem; font-weight: 800; overflow: hidden;
+}
+.cust-av img { width: 100%; height: 100%; object-fit: cover; }
+.cust-name { font-size: 0.9rem; font-weight: 700; color: #111; }
+.cust-meta { font-size: 0.72rem; color: #aaa; margin-top: 1px; }
 
-<body>
+/* Order meta right side */
+.oc-meta-right {
+    display: flex; align-items: center; gap: 18px;
+    flex-wrap: wrap; justify-content: flex-end;
+}
+.oc-id     { font-size: 0.72rem; color: #bbb; font-weight: 600; }
+.oc-time   { font-size: 0.72rem; color: #bbb; }
+.oc-total  { font-size: 0.95rem; font-weight: 800; color: #111; }
+.oc-method { font-size: 0.68rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.7px; }
 
-<div class="container">
-    <h2>Manage Orders</h2>
+/* Status badge */
+.s-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.7px;
+    padding: 3px 9px;
+}
+.s-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+.s-Pending    { background: #fffbeb; color: #d97706; } .s-Pending .dot    { background: #d97706; }
+.s-STK_Sent   { background: #eff4ff; color: #3b6ff6; } .s-STK_Sent .dot   { background: #3b6ff6; }
+.s-Paid       { background: #edfaf4; color: #16a34a; } .s-Paid .dot       { background: #16a34a; }
+.s-Processing { background: #f5f0ff; color: #7c3aed; } .s-Processing .dot { background: #7c3aed; }
+.s-Shipped    { background: #eff4ff; color: #2563eb; } .s-Shipped .dot    { background: #2563eb; }
+.s-Delivered  { background: #edfaf4; color: #16a34a; } .s-Delivered .dot  { background: #16a34a; }
+.s-Failed     { background: #fff0f0; color: #dc2626; } .s-Failed .dot     { background: #dc2626; }
+.s-Confirmed  { background: #edfaf4; color: #16a34a; } .s-Confirmed .dot  { background: #16a34a; }
+.s-Cancelled  { background: #f4f4f4; color: #888;    } .s-Cancelled .dot  { background: #888; }
 
-    <table>
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Phone</th>
-                <th>Address</th>
-                <th>Items</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Payment</th>
-                <th>Date</th>
-                <th>Update</th>
-            </tr>
-        </thead>
+/* Chevron */
+.oc-chevron { color: #ccc; font-size: 0.72rem; transition: transform 0.2s; flex-shrink: 0; }
+.oc-chevron.open { transform: rotate(180deg); }
 
-        <tbody>
-            {% for order in orders %}
-            <tr>
-                <td>#{{ order.id }}</td>
-                <td>{{ order.name }}</td>
-                <td>{{ order.phone }}</td>
-                <td>{{ order.destination }}</td>
+/* Expand body */
+.oc-body { display: none; }
+.oc-body.open { display: block; }
 
-                <td>
-                    <ul>
-                        {% for item in order.items.all %}
-                            <li>{{ item.product.name }} x {{ item.quantity }}</li>
-                        {% endfor %}
-                    </ul>
-                </td>
+/* Items grid */
+.items-section { padding: 14px 16px; border-bottom: 1px solid #f5f5f5; }
+.items-grid {
+    display: flex; flex-wrap: wrap; gap: 10px;
+}
+.item-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: #fafafa; border: 1px solid #f0f0f0;
+    padding: 7px 10px; min-width: 0; max-width: 260px;
+}
+.item-chip-img {
+    width: 42px; height: 42px; object-fit: cover;
+    border: 1px solid #eee; flex-shrink: 0;
+}
+.item-chip-ph {
+    width: 42px; height: 42px; background: #eee;
+    border: 1px solid #e5e5e5; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.55rem; color: #bbb; text-align: center; line-height: 1.3;
+}
+.item-chip-info { min-width: 0; }
+.item-chip-name {
+    font-size: 0.78rem; font-weight: 600; color: #111;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 160px; display: block;
+}
+.item-chip-qty { font-size: 0.68rem; color: #aaa; margin-top: 2px; }
+.item-chip-price { font-size: 0.75rem; font-weight: 700; color: #111; white-space: nowrap; }
 
-                <td>KES {{ order.total }}</td>
+/* Order details row */
+.oc-details {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; border-bottom: 1px solid #f5f5f5;
+}
+.oc-detail-cell {
+    padding: 10px 16px; border-right: 1px solid #f5f5f5;
+    font-size: 0.78rem;
+}
+.oc-detail-cell:last-child { border-right: none; }
+.oc-detail-cell .lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #bbb; margin-bottom: 3px; }
+.oc-detail-cell .val { color: #333; font-weight: 500; }
 
-                <td>
-                    <span class="status 
-                        {% if order.status|lower == 'pending' %}pending{% endif %}
-                        {% if order.status|lower == 'processing' %}processing{% endif %}
-                        {% if order.status|lower == 'shipped' %}shipped{% endif %}
-                        {% if order.status|lower == 'delivered' %}delivered{% endif %}
-                    ">
-                        {{ order.status }}
-                    </span>
-                </td>
+/* Status update form */
+.oc-actions {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; flex-wrap: wrap;
+}
+.status-form { display: flex; align-items: center; gap: 8px; }
+.status-sel {
+    border: none; border-bottom: 1.5px solid #e5e5e5;
+    background: transparent; font-family: 'Jost', sans-serif;
+    font-size: 0.85rem; font-weight: 600; color: #333;
+    outline: none; cursor: pointer; padding: 4px 6px;
+    transition: border-color 0.15s;
+}
+.status-sel:focus { border-color: #111; }
+.btn-update {
+    padding: 6px 16px; background: #111; color: #fff;
+    border: none; font-family: 'Jost', sans-serif;
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    cursor: pointer; transition: background 0.15s;
+    display: none;
+}
+.btn-update:hover { background: #ff5a2c; }
+.btn-update.visible { display: inline-block; }
 
-                <td>{{ order.payment_status }}</td>
+/* Receipt chip */
+.receipt-chip {
+    font-size: 0.72rem; font-weight: 600; color: #16a34a;
+    background: #edfaf4; padding: 4px 10px;
+    display: inline-flex; align-items: center; gap: 5px;
+}
 
-                <td>{{ order.created_at|date:"M d, Y, h:i a" }}</td>
+/* ── EMPTY ── */
+.empty-state { text-align: center; padding: 60px 20px; background: #fff; border-top: 2px solid #111; }
+.empty-state i { font-size: 2.2rem; color: #e0e0e0; display: block; margin-bottom: 10px; }
+.empty-state p { font-size: 0.88rem; color: #bbb; }
 
-                <td>
-                    <form method="POST" action="{% url 'update_order_status' order.id %}">
-                        {% csrf_token %}
-                        <select name="status">
-                            <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>Pending</option>
-                            <option value="Processing" {% if order.status == "Processing" %}selected{% endif %}>Processing</option>
-                            <option value="Shipped" {% if order.status == "Shipped" %}selected{% endif %}>Shipped</option>
-                            <option value="Delivered" {% if order.status == "Delivered" %}selected{% endif %}>Delivered</option>
-                            <option value="Cancelled" {% if order.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
-                        </select>
-                        <button type="submit" class="btn btn-update">Update</button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="10">No orders found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+    .stats-strip { grid-template-columns: 1fr 1fr; }
+    .oc-head { grid-template-columns: auto 1fr; }
+    .oc-meta-right { display: none; }
+    .oc-details { grid-template-columns: 1fr; }
+    .oc-detail-cell { border-right: none; border-bottom: 1px solid #f5f5f5; }
+}
+@media (max-width: 480px) {
+    .stats-strip { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- TOOLBAR -->
+<div class="orders-toolbar">
+    <h1>Orders <small id="visibleCount">{{ total_orders }} total</small></h1>
+    <div class="toolbar-right">
+        <div class="search-box">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search name, phone, ID…">
+        </div>
+        <select class="filter-select" id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="STK_Sent">STK Sent</option>
+            <option value="Paid">Paid</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Failed">Failed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+        <select class="filter-select" id="payFilter">
+            <option value="">All Payments</option>
+            <option value="mpesa">M-Pesa</option>
+            <option value="equity">Equity</option>
+            <option value="pod">Pay on Delivery</option>
+        </select>
+    </div>
 </div>
-{%endblock%}
+
+<!-- STATS -->
+<div class="stats-strip">
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fa fa-shopping-bag"></i></div>
+        <div class="stat-info"><p>Total Orders</p><h3>{{ total_orders }}</h3></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon amber"><i class="fa fa-clock"></i></div>
+        <div class="stat-info"><p>Pending</p><h3>{{ pending_count }}</h3></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fa fa-check-circle"></i></div>
+        <div class="stat-info"><p>Paid / Delivered</p><h3>{{ paid_count }}</h3></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fa fa-money-bill-wave"></i></div>
+        <div class="stat-info"><p>Revenue</p><h3>KES {{ total_revenue|floatformat:0 }}</h3></div>
+    </div>
+</div>
+
+<!-- ORDERS grouped by day -->
+<div id="ordersContainer">
+
+{% regroup orders by created_at|date:"Y-m-d" as orders_by_day %}
+
+{% if orders %}
+    {% for day_group in orders_by_day %}
+    <div class="day-group" data-day="{{ day_group.grouper }}">
+
+        <div class="day-header">
+            <span class="day-label">
+                {% with d=day_group.grouper %}
+                    {% now "Y-m-d" as today_str %}
+                    {% if d == today_str %}
+                        Today
+                    {% else %}
+                        {{ day_group.list.0.created_at|date:"l, d F Y" }}
+                    {% endif %}
+                {% endwith %}
+            </span>
+            <span class="day-count">{{ day_group.list|length }}</span>
+            <span class="day-line"></span>
+        </div>
+
+        {% for order in day_group.list %}
+        <div class="order-card" data-order-id="{{ order.id }}"
+             data-name="{{ order.name|lower }}"
+             data-phone="{{ order.phone }}"
+             data-status="{{ order.status }}"
+             data-payment="{{ order.payment_method|lower }}">
+
+            <!-- ── HEADER (clickable to expand) ── -->
+            <div class="oc-head" onclick="toggleOrder({{ order.id }})">
+
+                <!-- Customer -->
+                <div class="cust-cell">
+                    {% if order.user and order.user.profile.get_avatar_url %}
+                        <div class="cust-av">
+                            <img src="{{ order.user.profile.get_avatar_url }}"
+                                 alt="{{ order.name }}"
+                                 onerror="this.style.display='none';this.parentElement.textContent='{{ order.name|slice:':1'|upper }}'">
+                        </div>
+                    {% else %}
+                        <div class="cust-av">{{ order.name|slice:":1"|upper }}</div>
+                    {% endif %}
+                    <div>
+                        <div class="cust-name">{{ order.name }}</div>
+                        <div class="cust-meta">{{ order.phone }} &bull; {{ order.destination|truncatechars:30 }}</div>
+                    </div>
+                </div>
+
+                <!-- Right meta -->
+                <div class="oc-meta-right">
+                    <span class="oc-id">#{{ order.id }}</span>
+                    <span class="oc-time">{{ order.created_at|time:"H:i" }}</span>
+                    <span class="oc-method">{{ order.payment_method|upper }}</span>
+                    <span class="s-badge s-{{ order.status }}">
+                        <span class="dot"></span>{{ order.status }}
+                    </span>
+                    <span class="oc-total">KES {{ order.total|floatformat:0 }}</span>
+                </div>
+
+                <i class="fa fa-chevron-down oc-chevron" id="chev-{{ order.id }}"></i>
+            </div>
+
+            <!-- ── BODY (collapsed by default) ── -->
+            <div class="oc-body" id="body-{{ order.id }}">
+
+                <!-- Product thumbnails -->
+                <div class="items-section">
+                    <div class="items-grid">
+                        {% for item in order.items.all %}
+                        <div class="item-chip">
+                            {% with img=item.product.images.first %}
+                            {% if img %}
+                                <img class="item-chip-img" src="{{ img.image.url }}" alt="{{ item.product.name }}">
+                            {% elif item.product.image %}
+                                <img class="item-chip-img" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                                <div class="item-chip-ph">No<br>img</div>
+                            {% endif %}
+                            {% endwith %}
+                            <div class="item-chip-info">
+                                <span class="item-chip-name">{{ item.product.name }}</span>
+                                <span class="item-chip-qty">Qty: {{ item.quantity }}</span>
+                            </div>
+                            <span class="item-chip-price">KES {{ item.get_total|floatformat:0 }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Order details -->
+                <div class="oc-details">
+                    <div class="oc-detail-cell">
+                        <div class="lbl">Delivery Address</div>
+                        <div class="val">{{ order.destination|default:"—" }}</div>
+                    </div>
+                    <div class="oc-detail-cell">
+                        <div class="lbl">Payment</div>
+                        <div class="val">
+                            {{ order.payment_status }}
+                            {% if order.mpesa_receipt %}
+                                &nbsp;
+                                <span class="receipt-chip">
+                                    <i class="fa fa-check" style="font-size:0.6rem;"></i>
+                                    {{ order.mpesa_receipt }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="oc-detail-cell">
+                        <div class="lbl">Email</div>
+                        <div class="val">{{ order.email|default:"—" }}</div>
+                    </div>
+                    <div class="oc-detail-cell">
+                        <div class="lbl">Shipping Fee</div>
+                        <div class="val">KES {{ order.shipping_fee|floatformat:0 }}</div>
+                    </div>
+                </div>
+
+                <!-- Status update + actions -->
+                <div class="oc-actions">
+                    <form method="POST" action="{% url 'update_order_status' order.id %}"
+                          class="status-form"
+                          onsubmit="return confirm('Update order #{{ order.id }} status?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <select name="status" class="status-sel"
+                                onchange="toggleSaveBtn(this)">
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}"
+                                {% if order.status == val %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-update" id="save-{{ order.id }}">
+                            Save
+                        </button>
+                    </form>
+
+                    {% if order.user %}
+                    <a href="{% url 'customer_detail' order.user.pk %}"
+                       style="font-size:0.75rem;font-weight:700;color:#111;
+                              text-decoration:none;border-bottom:1.5px solid #111;
+                              padding-bottom:1px;margin-left:auto;">
+                        View Customer <i class="fa fa-arrow-right" style="font-size:0.6rem;"></i>
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div><!-- /oc-body -->
+        </div><!-- /order-card -->
+        {% endfor %}
+
+    </div><!-- /day-group -->
+    {% endfor %}
+
+{% else %}
+<div class="empty-state">
+    <i class="fa fa-inbox"></i>
+    <p>No orders yet.</p>
+</div>
+{% endif %}
+
+</div><!-- /ordersContainer -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Expand / collapse order ──
+function toggleOrder(id) {
+    const body = document.getElementById('body-' + id);
+    const chev = document.getElementById('chev-' + id);
+    body.classList.toggle('open');
+    chev.classList.toggle('open');
+}
+
+// ── Show Save button only when status changed ──
+function toggleSaveBtn(sel) {
+    const form  = sel.closest('.status-form');
+    const orderId = form.closest('.order-card').dataset.orderId;
+    const btn   = document.getElementById('save-' + orderId);
+    if (btn) btn.classList.add('visible');
+    // Update badge live
+    const badge = sel.closest('.order-card').querySelector('.s-badge');
+    if (badge) {
+        badge.className = 's-badge s-' + sel.value;
+        badge.innerHTML = '<span class="dot"></span>' + sel.value;
+    }
+    // Update card data attr for filter
+    sel.closest('.order-card').dataset.status = sel.value;
+}
+
+// ── Search + filter ──
+const searchInput  = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+const payFilter    = document.getElementById('payFilter');
+const countEl      = document.getElementById('visibleCount');
+
+function applyFilters() {
+    const q   = searchInput.value.toLowerCase().trim();
+    const st  = statusFilter.value.toLowerCase();
+    const pay = payFilter.value.toLowerCase();
+
+    let visible = 0;
+    document.querySelectorAll('.order-card').forEach(card => {
+        const name    = card.dataset.name    || '';
+        const phone   = card.dataset.phone   || '';
+        const orderId = card.dataset.orderId || '';
+        const status  = (card.dataset.status  || '').toLowerCase();
+        const payment = (card.dataset.payment || '').toLowerCase();
+
+        const matchQ   = !q   || name.includes(q) || phone.includes(q) || orderId.includes(q);
+        const matchSt  = !st  || status === st.toLowerCase();
+        const matchPay = !pay || payment.includes(pay);
+
+        const show = matchQ && matchSt && matchPay;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+
+    // Hide empty day groups
+    document.querySelectorAll('.day-group').forEach(dg => {
+        const anyVisible = [...dg.querySelectorAll('.order-card')]
+            .some(c => c.style.display !== 'none');
+        dg.style.display = anyVisible ? '' : 'none';
+    });
+
+    countEl.textContent = visible + ' shown';
+}
+
+searchInput.addEventListener('input', applyFilters);
+statusFilter.addEventListener('change', applyFilters);
+payFilter.addEventListener('change', applyFilters);
+
+// Auto-expand first order of today on load
+document.addEventListener('DOMContentLoaded', () => {
+    const first = document.querySelector('.order-card');
+    if (first) {
+        const id = first.dataset.orderId;
+        if (id) toggleOrder(id);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,403 @@
+{% extends 'base_site.html' %}   {# swap for your actual base template name #}
+{% block title %}My Orders | Gadget Soko{% endblock %}
+{% block extra_head %}
+<style>
+/* ── MY ORDERS PAGE ─────────────────────────────────────────── */
+.orders-page { max-width: 860px; margin: 0 auto; padding: 30px 0 60px; }
+
+.orders-heading {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.orders-heading .active-badge {
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-family: var(--font-ui);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    animation: pulseBadge 1.8s ease-in-out infinite;
+}
+@keyframes pulseBadge {
+    0%,100% { box-shadow: 0 0 0 0 rgba(244,51,12,0.35); }
+    50%      { box-shadow: 0 0 0 6px rgba(244,51,12,0); }
+}
+.orders-subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-family: var(--font-ui);
+    margin-bottom: 28px;
+}
+
+/* ── ORDER CARD ── */
+.order-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+.order-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+.order-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--bg-light);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.order-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.order-id {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--navy);
+}
+.order-date {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+}
+
+/* ── STATUS PILL (customer-simplified) ── */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 13px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+.status-pill.processing {
+    background: rgba(11,58,99,0.1);
+    color: var(--navy);
+    border: 1px solid rgba(11,58,99,0.2);
+}
+.status-pill.shipped {
+    background: rgba(243,156,18,0.12);
+    color: #b7770a;
+    border: 1px solid rgba(243,156,18,0.3);
+}
+.status-pill.delivered {
+    background: rgba(0,166,80,0.1);
+    color: #007a3d;
+    border: 1px solid rgba(0,166,80,0.25);
+}
+.status-pill.cancelled {
+    background: rgba(244,51,12,0.08);
+    color: var(--primary);
+    border: 1px solid rgba(244,51,12,0.2);
+}
+.status-pill .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.status-pill.processing .dot { background: var(--navy); animation: blink 1.4s ease-in-out infinite; }
+.status-pill.shipped    .dot { background: #f39c12; }
+.status-pill.delivered  .dot { background: #00a650; }
+.status-pill.cancelled  .dot { background: var(--primary); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── PROGRESS TRACK ── */
+.order-progress {
+    display: flex;
+    align-items: center;
+    padding: 18px 22px 10px;
+    gap: 0;
+}
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+}
+.progress-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 14px; left: calc(50% + 16px);
+    width: calc(100% - 32px);
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+}
+.progress-step.done:not(:last-child)::after { background: var(--primary); }
+
+.step-icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #aaa;
+    position: relative; z-index: 1;
+    transition: all 0.3s;
+}
+.progress-step.done  .step-icon { background: var(--primary); color: #fff; }
+.progress-step.active .step-icon {
+    background: #fff;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    animation: stepPulse 1.6s ease-in-out infinite;
+}
+@keyframes stepPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(244,51,12,0.4); }
+    50%      { box-shadow: 0 0 0 7px rgba(244,51,12,0); }
+}
+.step-label {
+    margin-top: 6px;
+    font-size: 0.68rem;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    color: #aaa;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.progress-step.done  .step-label { color: var(--primary); }
+.progress-step.active .step-label { color: var(--navy); font-weight: 700; }
+
+/* ── ITEMS LIST ── */
+.order-items { padding: 14px 22px; border-bottom: 1px solid var(--border); }
+.order-item-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f8fafc;
+}
+.order-item-row:last-child { border-bottom: none; }
+.order-item-row img {
+    width: 48px; height: 48px;
+    object-fit: cover; border-radius: 8px;
+    border: 1px solid var(--border); flex-shrink: 0;
+}
+.order-item-name {
+    flex: 1;
+    font-size: 0.85rem;
+    font-family: var(--font-body);
+    color: var(--text-main);
+    font-weight: 500;
+}
+.order-item-qty {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+}
+.order-item-price {
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: var(--navy);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* ── FOOTER ROW ── */
+.order-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px;
+    flex-wrap: wrap; gap: 10px;
+}
+.order-total {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--navy);
+}
+.order-total span { color: var(--primary); }
+
+/* ── CANCEL BUTTON ── */
+.btn-cancel-order {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: transparent;
+    border: 1.5px solid var(--primary);
+    color: var(--primary);
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.btn-cancel-order:hover:not(:disabled) {
+    background: var(--primary);
+    color: #fff;
+}
+.btn-cancel-order:disabled {
+    border-color: var(--border);
+    color: #bbb;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+.btn-cancel-order .lock-icon { font-size: 11px; }
+
+/* ── EMPTY STATE ── */
+.orders-empty {
+    text-align: center; padding: 80px 20px;
+    color: var(--text-muted);
+}
+.orders-empty i { font-size: 56px; color: var(--border); margin-bottom: 16px; }
+.orders-empty h3 {
+    font-family: var(--font-heading);
+    font-weight: 800; color: var(--navy); margin-bottom: 8px;
+}
+.orders-empty a {
+    display: inline-block; margin-top: 16px;
+    background: var(--primary); color: #fff;
+    padding: 11px 28px; border-radius: var(--radius-sm);
+    font-family: var(--font-heading); font-weight: 700;
+    font-size: 0.85rem; text-transform: uppercase;
+}
+
+/* ── MODAL CONFIRM ── */
+.cancel-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 8000;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.cancel-modal-overlay.open { display: flex; }
+.cancel-modal {
+    background: #fff; border-radius: 16px;
+    padding: 32px; width: 90%; max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: modalIn 0.25s ease;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+.cancel-modal h3 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem; font-weight: 900;
+    color: var(--navy); margin-bottom: 10px;
+}
+.cancel-modal p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 24px; }
+.cancel-modal-actions { display: flex; gap: 12px; }
+.modal-btn-confirm {
+    flex: 1; background: var(--primary); color: #fff;
+    border: none; padding: 11px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-heading); font-weight: 700;
+    font-size: 0.85rem; text-transform: uppercase; cursor: pointer;
+}
+.modal-btn-back {
+    flex: 1; background: var(--bg-light); color: var(--navy);
+    border: 1px solid var(--border); padding: 11px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-heading); font-weight: 700;
+    font-size: 0.85rem; text-transform: uppercase; cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .order-card-header { flex-direction: column; align-items: flex-start; }
+    .order-progress { padding: 14px 10px 6px; }
+    .step-label { font-size: 0.6rem; }
+    .order-card-footer { flex-direction: column; align-items: flex-start; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-page">
+
+    <h2 class="orders-heading">
+        <i class="bi bi-bag-check-fill" style="color:var(--primary);"></i>
+        My Orders
+        {% if active_count > 0 %}
+        <span class="active-badge">{{ active_count }} Active</span>
+        {% endif %}
+    </h2>
+    <p class="orders-subtitle">
+        Track your purchases and manage your orders below.
+    </p>
+
+    {% if not orders %}
+    <div class="orders-empty">
+        <i class="bi bi-bag-x"></i>
+        <h3>No orders yet</h3>
+        <p>Looks like you haven't placed any orders. Start shopping!</p>
+        <a href="{% url 'products' %}">Browse Products</a>
+    </div>
+
+    {% else %}
+
+    {% for order in orders %}
+
+    {# ── Determine simplified customer-facing status ── #}
+    {% if order.status == 'Cancelled' %}
+        {% with display_status='cancelled' display_label='Cancelled' %}
+        {% include 'partials/_order_card.html' %}
+        {% endwith %}
+    {% elif order.status == 'Delivered' %}
+        {% with display_status='delivered' display_label='Delivered' %}
+        {% include 'partials/_order_card.html' %}
+        {% endwith %}
+    {% elif order.status == 'Shipped' %}
+        {% with display_status='shipped' display_label='On the Way' %}
+        {% include 'partials/_order_card.html' %}
+        {% endwith %}
+    {% else %}
+        {# Pending / STK_Sent / Paid / Processing → shown as "Processing" #}
+        {% with display_status='processing' display_label='Processing' %}
+        {% include 'partials/_order_card.html' %}
+        {% endwith %}
+    {% endif %}
+
+    {% endfor %}
+    {% endif %}
+
+</div>
+
+{# ── CANCEL CONFIRMATION MODAL ── #}
+<div class="cancel-modal-overlay" id="cancelModal">
+    <div class="cancel-modal">
+        <h3>Cancel this order?</h3>
+        <p>Are you sure you want to cancel <strong id="modalOrderLabel"></strong>? This cannot be undone.</p>
+        <div class="cancel-modal-actions">
+            <button class="modal-btn-back" onclick="closeModal()">Go Back</button>
+            <form id="cancelForm" method="POST" style="flex:1;">
+                {% csrf_token %}
+                <button type="submit" class="modal-btn-confirm" style="width:100%;">
+                    Yes, Cancel
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openCancelModal(orderId, orderLabel) {
+    document.getElementById('cancelModal').classList.add('open');
+    document.getElementById('modalOrderLabel').textContent = orderLabel;
+    document.getElementById('cancelForm').action = '/cancel-order/' + orderId + '/';
+}
+function closeModal() {
+    document.getElementById('cancelModal').classList.remove('open');
+}
+document.getElementById('cancelModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+{% endblock %}

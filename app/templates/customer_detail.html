@@ -1,0 +1,609 @@
+{% extends 'baseadmin.html' %}
+{% load static %}
+
+{% block title %}{{ customer.username }} | Customer Detail{% endblock %}
+{% block header %}Customer Detail{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { font-family: 'Jost', sans-serif; box-sizing: border-box; }
+
+/* ── PAGE SHELL ── */
+.detail-wrap { max-width: 1200px; }
+
+.back-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 28px;
+}
+.back-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 0.82rem; font-weight: 600; color: #888;
+    text-decoration: none; transition: color 0.15s;
+    border-bottom: 1.5px solid transparent;
+}
+.back-btn:hover { color: #111; border-color: #111; }
+.back-sep { color: #ddd; font-size: 0.75rem; }
+.crumb-current { font-size: 0.82rem; color: #333; font-weight: 600; }
+
+/* ── TOP PROFILE STRIP ── */
+.profile-strip {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: center;
+    background: #fff;
+    padding: 22px 26px;
+    border-top: 3px solid #111;
+    margin-bottom: 22px;
+}
+.ps-avatar {
+    width: 64px; height: 64px;
+    background: #111;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 900; color: #fff;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.ps-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.ps-info h2 { font-size: 1.2rem; font-weight: 700; color: #111; margin: 0 0 3px 0; }
+.ps-info .ps-handle { font-size: 0.8rem; color: #aaa; font-weight: 400; }
+.ps-info .ps-meta {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    margin-top: 8px;
+}
+.ps-meta-item { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: #555; }
+.ps-meta-item i { color: #aaa; font-size: 0.75rem; }
+.ps-meta-item a { color: #555; text-decoration: none; border-bottom: 1px solid #ddd; }
+.ps-meta-item a:hover { color: #111; border-color: #111; }
+
+.ps-stats {
+    display: flex; gap: 28px; flex-shrink: 0;
+    border-left: 1px solid #f0f0f0; padding-left: 24px;
+}
+.ps-stat { text-align: center; }
+.ps-stat .num { font-size: 1.5rem; font-weight: 900; color: #111; line-height: 1; }
+.ps-stat .lbl { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #bbb; margin-top: 3px; }
+.ps-stat.highlight .num { color: var(--primary-color, #ff5a2c); }
+
+/* ── GRID LAYOUT ── */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+    align-items: start;
+}
+
+/* ── SECTION HEADERS ── */
+.sec-head {
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 2px solid #111;
+    padding-bottom: 10px; margin-bottom: 18px;
+}
+.sec-head h3 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #111; margin: 0; }
+.sec-head span { font-size: 0.72rem; color: #aaa; font-weight: 500; }
+
+/* ── ORDER DAYS ── */
+.order-day-group { margin-bottom: 28px; }
+.day-label {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.4px; color: #bbb; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+}
+.day-label::after { content: ''; flex: 1; height: 1px; background: #f0f0f0; }
+
+.order-card {
+    background: #fff;
+    border-top: 2px solid #111;
+    margin-bottom: 14px;
+}
+.order-card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    flex-wrap: wrap; gap: 8px;
+}
+.order-id { font-size: 0.78rem; font-weight: 700; color: #111; }
+.order-id small { font-weight: 400; color: #aaa; margin-left: 6px; }
+.order-meta-strip { display: flex; align-items: center; gap: 14px; }
+.order-method { font-size: 0.72rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.7px; }
+.order-total { font-size: 0.88rem; font-weight: 700; color: #111; }
+
+/* ── STATUS BADGE + FORM ── */
+.status-cell { display: flex; align-items: center; gap: 8px; }
+
+.s-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.s-Pending   .s-dot, .s-dot.Pending   { background: #f59e0b; }
+.s-STK_Sent  .s-dot, .s-dot.STK_Sent  { background: #3b82f6; }
+.s-Paid      .s-dot, .s-dot.Paid      { background: #16a34a; }
+.s-Confirmed .s-dot, .s-dot.Confirmed { background: #16a34a; }
+.s-Failed    .s-dot, .s-dot.Failed    { background: #dc2626; }
+
+.status-select {
+    border: none; border-bottom: 1.5px solid #e5e5e5;
+    background: transparent; font-family: 'Jost', sans-serif;
+    font-size: 0.82rem; font-weight: 600; color: #333;
+    outline: none; cursor: pointer; padding: 2px 4px;
+    transition: border-color 0.15s;
+}
+.status-select:focus { border-color: #111; }
+
+.btn-status-save {
+    font-size: 0.72rem; font-weight: 700; padding: 4px 12px;
+    background: #111; color: #fff; border: none; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    transition: background 0.15s;
+}
+.btn-status-save:hover { background: var(--primary-color, #ff5a2c); }
+
+/* ── ORDER ITEMS LIST ── */
+.order-items { padding: 0; }
+.order-item-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 16px;
+    border-bottom: 1px solid #f5f5f5;
+}
+.order-item-row:last-child { border-bottom: none; }
+.item-thumb {
+    width: 48px; height: 48px; flex-shrink: 0;
+    object-fit: cover; border: 1px solid #eee;
+}
+.item-thumb-placeholder {
+    width: 48px; height: 48px; flex-shrink: 0;
+    background: #f4f4f4; border: 1px solid #eee;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; color: #ccc; text-align: center; line-height: 1.3;
+}
+.item-text { flex: 1; min-width: 0; }
+.item-name { font-size: 0.88rem; font-weight: 600; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-qty  { font-size: 0.75rem; color: #aaa; margin-top: 2px; }
+.item-price { font-size: 0.88rem; font-weight: 700; color: #111; white-space: nowrap; flex-shrink: 0; }
+
+/* ── DESTINATION ROW ── */
+.order-dest {
+    padding: 10px 16px;
+    background: #fafafa;
+    font-size: 0.78rem; color: #777;
+    display: flex; align-items: flex-start; gap: 7px;
+    border-top: 1px solid #f0f0f0;
+}
+.order-dest i { color: #bbb; margin-top: 1px; flex-shrink: 0; }
+
+/* ── RIGHT PANEL ── */
+.right-panel { display: flex; flex-direction: column; gap: 18px; }
+
+/* ── INFO CARD ── */
+.info-card { background: #fff; padding: 20px; border-top: 2px solid #111; }
+.info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #f5f5f5; gap: 10px; }
+.info-row:last-child { border-bottom: none; }
+.info-lbl { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: #bbb; flex-shrink: 0; }
+.info-val { font-size: 0.85rem; color: #333; font-weight: 500; text-align: right; word-break: break-all; }
+.info-val a { color: #333; text-decoration: none; border-bottom: 1px solid #ddd; }
+.info-val a:hover { color: #111; }
+
+/* ── SEND EMAIL PANEL ── */
+.email-panel { background: #fff; padding: 20px; border-top: 2px solid #111; }
+.email-panel label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #999; margin-bottom: 5px; }
+.email-panel input,
+.email-panel textarea,
+.email-panel select {
+    width: 100%; border: none; border-bottom: 1.5px solid #e5e5e5;
+    padding: 8px 4px; font-family: 'Jost', sans-serif;
+    font-size: 0.88rem; color: #333; background: transparent;
+    outline: none; resize: vertical; transition: border-color 0.15s;
+    margin-bottom: 14px;
+}
+.email-panel input:focus,
+.email-panel textarea:focus,
+.email-panel select:focus { border-color: #111; }
+.email-panel textarea { min-height: 80px; }
+
+.char-hint { font-size: 0.68rem; color: #bbb; margin-top: -12px; margin-bottom: 14px; }
+
+.btn-send-email {
+    width: 100%; padding: 12px; background: #111; color: #fff;
+    border: none; font-family: 'Jost', sans-serif;
+    font-size: 0.82rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; cursor: pointer; transition: background 0.15s;
+}
+.btn-send-email:hover { background: var(--primary-color, #ff5a2c); }
+.btn-send-email:disabled { background: #ddd; color: #aaa; cursor: not-allowed; }
+
+/* Product picker in email */
+.prod-picker { margin-bottom: 14px; }
+.prod-pick-list {
+    max-height: 160px; overflow-y: auto;
+    border-bottom: 1.5px solid #e5e5e5;
+    margin-bottom: 4px;
+}
+.prod-pick-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 4px; border-bottom: 1px solid #f5f5f5; cursor: pointer;
+}
+.prod-pick-item:hover { background: #fafafa; }
+.prod-pick-item input[type="checkbox"] { accent-color: #111; flex-shrink: 0; }
+.prod-pick-img { width: 30px; height: 30px; object-fit: cover; border: 1px solid #eee; flex-shrink: 0; }
+.prod-pick-name { font-size: 0.78rem; color: #333; line-height: 1.3; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prod-pick-price { font-size: 0.72rem; font-weight: 700; color: #111; flex-shrink: 0; }
+
+/* ── EMPTY STATE ── */
+.empty-orders { text-align: center; padding: 50px 20px; background: #fff; border-top: 2px solid #111; }
+.empty-orders i { font-size: 2rem; color: #e0e0e0; display: block; margin-bottom: 10px; }
+.empty-orders p { font-size: 0.85rem; color: #bbb; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .profile-strip { grid-template-columns: auto 1fr; }
+    .ps-stats { display: none; }
+    .right-panel { order: -1; }
+}
+@media (max-width: 520px) {
+    .profile-strip { grid-template-columns: 1fr; text-align: center; }
+    .ps-avatar { margin: 0 auto; }
+    .ps-info .ps-meta { justify-content: center; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-wrap">
+
+    <!-- BREADCRUMB -->
+    <div class="back-row">
+        <a href="{% url 'customers' %}" class="back-btn">
+            <i class="fa fa-arrow-left" style="font-size:0.72rem;"></i> Customers
+        </a>
+        <span class="back-sep">›</span>
+        <span class="crumb-current">{{ customer.get_full_name|default:customer.username }}</span>
+    </div>
+
+    <!-- PROFILE STRIP -->
+    <div class="profile-strip">
+        <div class="ps-avatar">
+            {% if customer.profile.get_avatar_url %}
+                <img src="{{ customer.profile.get_avatar_url }}"
+                     alt="{{ customer.username }}"
+                     onerror="this.style.display='none';this.parentElement.textContent='{{ customer.username|slice:":1"|upper }}'">
+            {% else %}
+                {{ customer.username|slice:":1"|upper }}
+            {% endif %}
+        </div>
+
+        <div class="ps-info">
+            <h2>{{ customer.get_full_name|default:customer.username }}</h2>
+            <span class="ps-handle">@{{ customer.username }}</span>
+            <div class="ps-meta">
+                {% if customer.email %}
+                <span class="ps-meta-item">
+                    <i class="fa fa-envelope"></i>
+                    <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>
+                </span>
+                {% endif %}
+                {% if customer.profile.phone %}
+                <span class="ps-meta-item">
+                    <i class="fa fa-phone"></i> {{ customer.profile.phone }}
+                </span>
+                {% endif %}
+                <span class="ps-meta-item">
+                    <i class="fa fa-calendar"></i>
+                    Joined {{ customer.date_joined|date:"d M Y" }}
+                </span>
+                {% if customer.profile.region %}
+                <span class="ps-meta-item">
+                    <i class="fa fa-map-marker"></i>
+                    {% if customer.profile.region == 'nairobi' %}
+                        Nairobi{% if customer.profile.nairobi_area %} &mdash; {{ customer.profile.nairobi_area }}{% endif %}
+                    {% else %}
+                        Upcountry{% if customer.profile.upcountry_county %} &mdash; {{ customer.profile.upcountry_county }}{% if customer.profile.upcountry_town %}, {{ customer.profile.upcountry_town }}{% endif %}{% endif %}
+                    {% endif %}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="ps-stats">
+            <div class="ps-stat highlight">
+                <div class="num">{{ orders.count }}</div>
+                <div class="lbl">Orders</div>
+            </div>
+            <div class="ps-stat">
+                <div class="num">
+                    KES {{ orders.count|default:0 }}
+                    {# real total computed below via template tag or just show count #}
+                </div>
+                <div class="lbl">Spent</div>
+            </div>
+            <div class="ps-stat">
+                <div class="num">
+                    {{ customer.last_login|date:"d M"|default:"—" }}
+                </div>
+                <div class="lbl">Last Login</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="detail-grid">
+
+        <!-- ══════════════════════════════
+             LEFT: ORDERS grouped by day
+        ══════════════════════════════ -->
+        <div class="orders-col">
+            <div class="sec-head">
+                <h3>Order History</h3>
+                <span>{{ orders.count }} order{{ orders.count|pluralize }}</span>
+            </div>
+
+            {% if orders %}
+                {# Group by date using regroup #}
+                {% regroup orders by created_at|date:"Y-m-d" as orders_by_day %}
+
+                {% for day_group in orders_by_day %}
+                <div class="order-day-group">
+                    <div class="day-label">{{ day_group.grouper|date:"l, d F Y" }}</div>
+
+                    {% for order in day_group.list %}
+                    <div class="order-card">
+
+                        <!-- Order header -->
+                        <div class="order-card-head">
+                            <div>
+                                <span class="order-id">
+                                    Order #{{ order.id }}
+                                    <small>{{ order.created_at|time:"H:i" }}</small>
+                                </span>
+                            </div>
+
+                            <div class="order-meta-strip">
+                                <span class="order-method">{{ order.payment_method|upper }}</span>
+                                <span class="order-total">KES {{ order.total|floatformat:0 }}</span>
+
+                                <!-- Status update form -->
+                                <form method="POST" action="{% url 'update_order_status' order.id %}"
+                                      style="display:flex;align-items:center;gap:6px;"
+                                      onsubmit="return confirmStatusChange(this)">
+                                    {% csrf_token %}
+                                    <div class="status-cell">
+                                        <span class="s-dot {{ order.status }}"></span>
+                                        <select name="status" class="status-select"
+                                                onchange="this.closest('form').querySelector('.btn-status-save').style.display='inline-block'">
+                                            {% for val, label in status_choices %}
+                                            <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <input type="hidden" name="next" value="{% url 'customer_detail' customer.pk %}">
+                                    <button type="submit" class="btn-status-save"
+                                            style="display:none;">Save</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Items -->
+                        <div class="order-items">
+                            {% for item in order.items.all %}
+                            <div class="order-item-row">
+                                {% with img=item.product.images.first %}
+                                {% if img %}
+                                    <img class="item-thumb" src="{{ img.image.url }}" alt="{{ item.product.name }}">
+                                {% elif item.product.image %}
+                                    <img class="item-thumb" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                {% else %}
+                                    <div class="item-thumb-placeholder">No<br>Image</div>
+                                {% endif %}
+                                {% endwith %}
+
+                                <div class="item-text">
+                                    <div class="item-name">{{ item.product.name }}</div>
+                                    <div class="item-qty">Qty: {{ item.quantity }} &times; KES {{ item.price|floatformat:0 }}</div>
+                                </div>
+                                <div class="item-price">KES {{ item.get_total|floatformat:0 }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Destination + payment note -->
+                        <div class="order-dest">
+                            <i class="fa fa-map-marker-alt"></i>
+                            <span>
+                                {{ order.destination|default:"—" }}
+                                &nbsp;&bull;&nbsp;
+                                Payment: <strong>{{ order.payment_status }}</strong>
+                                {% if order.mpesa_receipt %}
+                                    &nbsp;&bull;&nbsp; Receipt: <strong>{{ order.mpesa_receipt }}</strong>
+                                {% endif %}
+                            </span>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+
+            {% else %}
+            <div class="empty-orders">
+                <i class="fa fa-box-open"></i>
+                <p>This customer has not placed any orders yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ══════════════════════════════
+             RIGHT PANEL
+        ══════════════════════════════ -->
+        <div class="right-panel">
+
+            <!-- Contact info card -->
+            <div class="info-card">
+                <div class="sec-head">
+                    <h3>Account Info</h3>
+                </div>
+                <div class="info-row">
+                    <span class="info-lbl">Username</span>
+                    <span class="info-val">@{{ customer.username }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-lbl">Email</span>
+                    <span class="info-val">
+                        <a href="mailto:{{ customer.email }}">{{ customer.email|default:"—" }}</a>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-lbl">Phone</span>
+                    <span class="info-val">{{ customer.profile.phone|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-lbl">Region</span>
+                    <span class="info-val">
+                        {% if customer.profile.region == 'nairobi' %}Nairobi
+                        {% elif customer.profile.region == 'outside' %}Upcountry
+                        {% else %}—{% endif %}
+                    </span>
+                </div>
+                {% if customer.profile.nairobi_area %}
+                <div class="info-row">
+                    <span class="info-lbl">Area</span>
+                    <span class="info-val">{{ customer.profile.nairobi_area }}</span>
+                </div>
+                {% endif %}
+                {% if customer.profile.upcountry_county %}
+                <div class="info-row">
+                    <span class="info-lbl">County</span>
+                    <span class="info-val">{{ customer.profile.upcountry_county }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-lbl">Town</span>
+                    <span class="info-val">{{ customer.profile.upcountry_town|default:"—" }}</span>
+                </div>
+                {% endif %}
+                {% if customer.profile.address_notes %}
+                <div class="info-row">
+                    <span class="info-lbl">Address</span>
+                    <span class="info-val">{{ customer.profile.address_notes }}</span>
+                </div>
+                {% endif %}
+                <div class="info-row">
+                    <span class="info-lbl">Joined</span>
+                    <span class="info-val">{{ customer.date_joined|date:"d M Y, H:i" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-lbl">Last Login</span>
+                    <span class="info-val">{{ customer.last_login|date:"d M Y, H:i"|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-lbl">Total Spent</span>
+                    <span class="info-val" style="font-weight:700;color:#111;">
+                        KES {{ total_spent|floatformat:0|default:"0" }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- ── SEND EMAIL TO CUSTOMER ── -->
+            <div class="email-panel">
+                <div class="sec-head">
+                    <h3>Send Email</h3>
+                    {% if customer.email %}
+                    <span>→ {{ customer.email }}</span>
+                    {% else %}
+                    <span style="color:#e53935;">No email on file</span>
+                    {% endif %}
+                </div>
+
+                {% if customer.email %}
+                <form method="POST" action="{% url 'send_customer_email' customer.pk %}" id="emailForm">
+                    {% csrf_token %}
+
+                    <label>Subject</label>
+                    <input type="text" name="subject" placeholder="e.g. Your order is on the way!" required
+                           maxlength="120" id="emailSubject">
+
+                    <label>Message</label>
+                    <textarea name="message" placeholder="Write your message to {{ customer.get_full_name|default:customer.username }}…"
+                              required id="emailBody" oninput="updateCharCount(this)"></textarea>
+                    <div class="char-hint" id="charCount">0 characters</div>
+
+                    <!-- Optional: attach products -->
+                    <label>Attach Products <span style="font-weight:400;text-transform:none;font-size:0.72rem;color:#bbb;">(optional)</span></label>
+                    <div class="prod-picker">
+                        <div class="prod-pick-list" id="prodPickList">
+                            {% for order in orders %}
+                                {% for item in order.items.all %}
+                                <label class="prod-pick-item">
+                                    <input type="checkbox" name="product_ids" value="{{ item.product.id }}">
+                                    {% with img=item.product.images.first %}
+                                    {% if img %}
+                                        <img class="prod-pick-img" src="{{ img.image.url }}" alt="">
+                                    {% elif item.product.image %}
+                                        <img class="prod-pick-img" src="{{ item.product.image.url }}" alt="">
+                                    {% else %}
+                                        <div class="prod-pick-img" style="background:#f4f4f4;border:1px solid #eee;"></div>
+                                    {% endif %}
+                                    {% endwith %}
+                                    <span class="prod-pick-name">{{ item.product.name }}</span>
+                                    <span class="prod-pick-price">KES {{ item.product.final_price|floatformat:0 }}</span>
+                                </label>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <label>CTA Button Text <span style="font-weight:400;text-transform:none;color:#bbb;">(optional)</span></label>
+                    <input type="text" name="cta_text" placeholder="e.g. View Your Order" maxlength="50">
+
+                    <label>CTA URL <span style="font-weight:400;text-transform:none;color:#bbb;">(optional)</span></label>
+                    <input type="url" name="cta_url" placeholder="https://gadgetsoko.com/…">
+
+                    <button type="submit" class="btn-send-email" id="sendBtn">
+                        <i class="fa fa-paper-plane" style="margin-right:6px;"></i>Send Email
+                    </button>
+                </form>
+                {% else %}
+                <p style="font-size:0.82rem;color:#bbb;text-align:center;padding:20px 0;">
+                    No email address on file for this customer.
+                </p>
+                {% endif %}
+            </div>
+
+        </div><!-- /right-panel -->
+    </div><!-- /detail-grid -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Status change confirm ──
+function confirmStatusChange(form) {
+    const sel = form.querySelector('select[name="status"]');
+    return confirm(`Change order status to "${sel.options[sel.selectedIndex].text}"?`);
+}
+
+// ── Show Save button when select changes ──
+document.querySelectorAll('.status-select').forEach(sel => {
+    sel.addEventListener('change', function () {
+        this.closest('form').querySelector('.btn-status-save').style.display = 'inline-block';
+        // Update dot colour live
+        const dot = this.closest('.status-cell').querySelector('.s-dot');
+        dot.className = 's-dot ' + this.value;
+    });
+});
+
+// ── Char counter ──
+function updateCharCount(el) {
+    const n = el.value.length;
+    document.getElementById('charCount').textContent = n + ' character' + (n !== 1 ? 's' : '');
+}
+
+// ── Send button loading state ──
+document.getElementById('emailForm')?.addEventListener('submit', function () {
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin" style="margin-right:6px;"></i>Sending…';
+});
+</script>
+{% endblock %}

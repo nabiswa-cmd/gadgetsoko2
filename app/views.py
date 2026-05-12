@@ -1247,10 +1247,30 @@ def delete_product(request, product_id):
 
 
 @staff_member_required
-def manage_orders(request):
-    orders = Order.objects.all().order_by('-id')
-    return render(request, 'manage_orders.html', {'orders': orders})
+# ── REPLACE your existing manage_orders view with this ──
 
+@staff_member_required
+def manage_orders(request):
+    orders = (
+        Order.objects
+        .select_related('user', 'user__profile')
+        .prefetch_related('items', 'items__product', 'items__product__images')
+        .order_by('-created_at')          # newest first
+    )
+
+    total_orders  = orders.count()
+    pending_count = orders.filter(status__in=['Pending', 'STK_Sent']).count()
+    paid_count    = orders.filter(status__in=['Paid', 'Delivered', 'Confirmed']).count()
+    total_revenue = orders.aggregate(t=Sum('total'))['t'] or 0
+
+    return render(request, 'manage_orders.html', {
+        'orders'        : orders,
+        'status_choices': Order.STATUS_CHOICES,
+        'total_orders'  : total_orders,
+        'pending_count' : pending_count,
+        'paid_count'    : paid_count,
+        'total_revenue' : total_revenue,
+    })
 
 @staff_member_required
 @require_POST
@@ -1549,7 +1569,111 @@ def auto_assign_brand_logo(sender, instance, **kwargs):
             logger.debug("Auto-assigned logo for brand '%s' → %s", instance.name, relative_path)
         else:
             logger.debug("No logo asset found for brand '%s' at %s", instance.name, absolute_path)
+
+import logging
+import threading
+from itertools import islice
+
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.contrib.auth import get_user_model
+from django.core.mail import get_connection, EmailMultiAlternatives
+
+from .models import Product
+
+logger = logging.getLogger(__name__)
+User = get_user_model()
+
+# ── Tuneable constants ─────────────────────────────────────────────────────────
+BATCH_SIZE   = 50   # recipients per SMTP transaction
+MAX_WORKERS  = 4    # parallel threads (keep ≤ your SMTP provider's connection limit)
+# ──────────────────────────────────────────────────────────────────────────────
+
 @staff_member_required
+def _chunked(iterable, size):
+    """Yield successive chunks of `size` from any iterable."""
+    it = iter(iterable)
+    while True:
+        chunk = list(islice(it, size))
+        if not chunk:
+            break
+        yield chunk
+
+@staff_member_required
+def _send_batch(subject, recipients, html, plain):
+    """
+    Open ONE SMTP connection and send to every address in `recipients`.
+    Returns (sent_count, failed_count).
+    """
+    sent = failed = 0
+    try:
+        connection = get_connection()          # uses EMAIL_* settings
+        connection.open()
+        for email_addr in recipients:
+            try:
+                msg = EmailMultiAlternatives(
+                    subject=subject,
+                    body=plain,
+                    from_email=None,           # falls back to DEFAULT_FROM_EMAIL
+                    to=[email_addr],
+                    connection=connection,     # ← reused connection, no re-handshake
+                )
+                msg.attach_alternative(html, "text/html")
+                msg.send()
+                sent += 1
+            except Exception:
+                failed += 1
+                logger.exception("Email failed → %s", email_addr)
+        connection.close()
+    except Exception:
+        logger.exception("Could not open SMTP connection for batch")
+        failed += len(recipients)
+    return sent, failed
+
+@staff_member_required
+def _blast_in_background(subject, all_emails, html, plain):
+    """
+    Split the full recipient list into BATCH_SIZE chunks and dispatch each
+    chunk on its own thread (up to MAX_WORKERS threads at a time).
+
+    Runs entirely outside the request/response cycle so Gunicorn never times out.
+    """
+    chunks = list(_chunked(all_emails, BATCH_SIZE))
+    total_sent = total_failed = 0
+    active_threads = []
+
+    results = []   # thread-safe accumulator (one entry per chunk)
+
+    def run_chunk(chunk, idx):
+        s, f = _send_batch(subject, chunk, html, plain)
+        results.append((s, f))
+        logger.info("Chunk %d done — sent: %d  failed: %d", idx, s, f)
+
+    for idx, chunk in enumerate(chunks):
+        t = threading.Thread(target=run_chunk, args=(chunk, idx), daemon=True)
+        active_threads.append(t)
+        t.start()
+
+        # Throttle: never exceed MAX_WORKERS concurrent threads
+        if len(active_threads) >= MAX_WORKERS:
+            for t in active_threads:
+                t.join()
+            active_threads = []
+
+    # Wait for any remaining threads
+    for t in active_threads:
+        t.join()
+
+    for s, f in results:
+        total_sent   += s
+        total_failed += f
+
+    logger.info(
+        "Marketing blast complete — sent: %d  failed: %d  subject: %s",
+        total_sent, total_failed, subject,
+    )
+@staff_member_required
+
 def market_product(request):
     products = Product.objects.all().order_by('-id')
 
@@ -1573,10 +1697,7 @@ def market_product(request):
             messages.error(request, "No registered customers found.")
             return redirect("market_product")
 
-        # ── Correct protocol behind Nginx reverse proxy ──
-        # Nginx terminates SSL and forwards plain HTTP to Gunicorn,
-        # so request.is_secure() is False even on https://gadgetsoko.com
-        # HTTP_X_FORWARDED_PROTO is set by Nginx and is the reliable source.
+        # ── Protocol detection (Nginx reverse-proxy aware) ────────────────────
         forwarded_proto = request.META.get('HTTP_X_FORWARDED_PROTO', '').strip()
         if forwarded_proto in ('https', 'http'):
             protocol = forwarded_proto
@@ -1588,22 +1709,19 @@ def market_product(request):
                 d in host for d in ('gadgetsoko.com', 'onrender.com', 'vercel.app')
             ) else 'http'
 
-        # Strip port from domain — wrong in production email links
         raw_host = request.get_host()
         domain   = raw_host.split(':')[0] if ':' in raw_host else raw_host
         base_url = f"{protocol}://{domain}"
 
-        # ── Resolve selected products ──
+        # ── Build product rows (unchanged from your original) ─────────────────
         selected_products = []
         if product_ids:
             selected_products = list(
                 Product.objects.filter(id__in=product_ids).select_related('category')
             )
 
-        # ── Build product rows HTML ──
         rows_html = ""
         for product in selected_products:
-            # Safe image URL
             img_url = None
             try:
                 first_pi = product.images.first()
@@ -1620,20 +1738,16 @@ def market_product(request):
             if not img_url:
                 img_url = "https://via.placeholder.com/52x52?text=No+Image"
 
-            # Safe product URL
             try:
                 product_url = base_url + product.get_absolute_url()
             except Exception:
                 product_url = f"{base_url}/products/{product.id}/"
-                logger.warning("get_absolute_url() failed — product %s", product.id)
 
-            # Safe category name
             try:
                 category_name = product.category.name
             except Exception:
                 category_name = "Uncategorized"
 
-            # Safe discount check
             try:
                 has_discount = bool(
                     product.discount and product.discount > 0 and product.is_discount_active
@@ -1641,7 +1755,6 @@ def market_product(request):
             except AttributeError:
                 has_discount = bool(product.discount and product.discount > 0)
 
-            # Safe final price
             try:
                 final_price = product.final_price
             except AttributeError:
@@ -1735,31 +1848,28 @@ def market_product(request):
             + f"Shop now: {cta_url}"
         )
 
-        # ── Send — each user fully isolated; one failure never stops the rest ──
-        sent_count   = 0
-        failed_count = 0
-        for user in users:
-            try:
-                _send_html_email(subject, user.email, html, plain)
-                sent_count += 1
-            except Exception:
-                failed_count += 1
-                logger.exception(
-                    "Marketing email failed — user %s (%s)", user.id, user.email
-                )
+        # ── Collect all email addresses BEFORE spawning the thread ────────────
+        # QuerySets are lazy; evaluate now so the thread never touches the DB
+        # through a potentially-closed request context.
+        all_emails = list(users.values_list('email', flat=True))
+        recipient_count = len(all_emails)
 
-        logger.info(
-            "Marketing blast done. Sent: %d  Failed: %d  Subject: %s",
-            sent_count, failed_count, subject
+        # ── Fire-and-forget: background thread — Gunicorn returns immediately ─
+        t = threading.Thread(
+            target=_blast_in_background,
+            args=(subject, all_emails, html, plain),
+            daemon=True,
         )
+        t.start()
 
-        result_msg = f"Marketing email sent to {sent_count} customer(s)."
-        if failed_count:
-            result_msg += f" {failed_count} failed — check django.log for details."
-        messages.success(request, result_msg)
+        messages.success(
+            request,
+            f"✅ Blast queued — sending to {recipient_count} customer(s) in the background. "
+            f"Check django.log for delivery results.",
+        )
         return redirect("market_product")
 
-    # ── GET ──
+    # ── GET ───────────────────────────────────────────────────────────────────
     total_users = User.objects.filter(is_active=True).count()
     email_users = (
         User.objects.filter(is_active=True, email__isnull=False).exclude(email="").count()
@@ -1768,8 +1878,7 @@ def market_product(request):
         "products":    products,
         "total_users": total_users,
         "email_users": email_users,
-    }) 
-
+    })
 # ─────────────────────────────────────────────────────────────────
 # ADD THESE VIEWS TO YOUR views.py
 # Also add  UserProfile  to your .models import at the top:
@@ -1916,3 +2025,290 @@ def check_username(request):
         'available': not exists,
         'message': 'Available!' if not exists else 'Already taken',
     })
+
+
+# views.py  — add this view (or merge into your existing admin views file)
+
+from django.contrib.auth.models    import User
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator          import Paginator
+from django.utils                   import timezone
+from django.shortcuts               import render, get_object_or_404
+
+from .models import Order   # adjust import to your app name
+
+
+def admin_required(view_func):
+    return login_required(user_passes_test(lambda u: u.is_staff)(view_func))
+
+
+@admin_required
+def customers(request):
+    qs = (
+        User.objects
+        .filter(is_staff=False)
+        .select_related('profile')
+        .prefetch_related('order_set')
+        .order_by('-date_joined')
+    )
+
+    # ── Stats ──────────────────────────────────────────────
+    total_customers      = qs.count()
+    customers_with_orders = qs.filter(order__isnull=False).distinct().count()
+
+    month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    new_this_month = qs.filter(date_joined__gte=month_start).count()
+
+    # ── Pagination ─────────────────────────────────────────
+    paginator  = Paginator(qs, 20)          # 20 per page
+    page_num   = request.GET.get('page', 1)
+    customers_page = paginator.get_page(page_num)
+
+    return render(request, 'customers.html', {
+        'customers'            : customers_page,
+        'total_customers'      : total_customers,
+        'customers_with_orders': customers_with_orders,
+        'new_this_month'       : new_this_month,
+    })
+
+
+@admin_required
+def customer_detail(request, pk):
+    """Optional detail view — link from the eye icon."""
+    customer = get_object_or_404(
+        User.objects.select_related('profile').prefetch_related('order_set'),
+        pk=pk, is_staff=False
+    )
+    orders = customer.order_set.order_by('-created_at')
+
+    return render(request, 'customer_detail.html', {
+        'customer': customer,
+        'orders'  : orders,
+    })
+
+
+# ─────────────────────────────────────────────────────────────────
+# ADD TO urls.py:
+#   path('admin/customers/<int:pk>/',       customer_detail,     name='customer_detail'),
+#   path('admin/customers/<int:pk>/email/', send_customer_email, name='send_customer_email'),
+#
+# REPLACE your existing update_order_status with the one at the bottom.
+# ─────────────────────────────────────────────────────────────────
+
+from django.db.models import Sum
+
+
+@staff_member_required
+def customer_detail(request, pk):
+    customer = get_object_or_404(
+        User.objects.select_related('profile')
+                    .prefetch_related('order_set__items__product__images'),
+        pk=pk, is_staff=False
+    )
+
+    orders = customer.order_set.prefetch_related(
+        'items', 'items__product', 'items__product__images'
+    ).order_by('-created_at')
+
+    total_spent  = orders.aggregate(t=Sum('total'))['t'] or 0
+    status_choices = Order.STATUS_CHOICES
+
+    return render(request, 'customer_detail.html', {
+        'customer'      : customer,
+        'orders'        : orders,
+        'total_spent'   : total_spent,
+        'status_choices': status_choices,
+    })
+
+
+@staff_member_required
+def send_customer_email(request, pk):
+    customer = get_object_or_404(User, pk=pk, is_staff=False)
+
+    if request.method != 'POST':
+        return redirect('customer_detail', pk=pk)
+
+    if not customer.email:
+        messages.error(request, "This customer has no email address on file.")
+        return redirect('customer_detail', pk=pk)
+
+    subject     = request.POST.get('subject', '').strip()
+    message_txt = request.POST.get('message', '').strip()
+    cta_text    = request.POST.get('cta_text', '').strip()
+    cta_url     = request.POST.get('cta_url', '').strip()
+    product_ids = request.POST.getlist('product_ids')
+
+    if not subject or not message_txt:
+        messages.error(request, "Subject and message are required.")
+        return redirect('customer_detail', pk=pk)
+
+    protocol = 'https'
+    domain   = getattr(settings, 'SITE_DOMAIN', 'gadgetsoko.com')
+    base_url = f"{protocol}://{domain}"
+
+    # ── Build product rows ──
+    rows_html = ""
+    if product_ids:
+        selected = Product.objects.filter(
+            id__in=product_ids
+        ).select_related('category').prefetch_related('images')
+
+        for product in selected:
+            img_url = None
+            try:
+                pi = product.images.first()
+                if pi and pi.image and pi.image.name:
+                    img_url = base_url + pi.image.url
+            except Exception:
+                pass
+            if not img_url:
+                try:
+                    if product.image and product.image.name:
+                        img_url = base_url + product.image.url
+                except Exception:
+                    pass
+            if not img_url:
+                img_url = "https://via.placeholder.com/52x52?text=No+Image"
+
+            try:
+                product_url = base_url + product.get_absolute_url()
+            except Exception:
+                product_url = f"{base_url}/products/{product.id}/"
+
+            try:
+                category_name = product.category.name
+            except Exception:
+                category_name = ""
+
+            try:
+                final_price = product.final_price
+            except Exception:
+                final_price = product.price
+
+            rows_html += (
+                f"<tr style='background:#f8fafc;'>"
+                f"<td style='padding:10px;border-bottom:1px solid #e2e8f0;"
+                f"width:68px;vertical-align:middle;'>"
+                f"<a href='{product_url}'>"
+                f"<img src='{img_url}' width='52' height='52' "
+                f"style='object-fit:cover;border:1px solid #e2e8f0;display:block;'>"
+                f"</a></td>"
+                f"<td style='padding:10px 14px;font-size:13px;"
+                f"border-bottom:1px solid #e2e8f0;vertical-align:middle;'>"
+                f"<a href='{product_url}' style='color:#0b3a63;font-weight:bold;"
+                f"text-decoration:none;'>{product.name}</a><br>"
+                f"<span style='color:#64748b;font-size:12px;'>{category_name}</span></td>"
+                f"<td style='padding:10px 14px;font-size:13px;font-weight:700;"
+                f"border-bottom:1px solid #e2e8f0;text-align:right;vertical-align:middle;'>"
+                f"KES {int(final_price):,}</td>"
+                f"</tr>"
+            )
+
+    products_table = ""
+    if rows_html:
+        products_table = f"""
+        <tr>
+          <td style="padding:0 20px 30px 20px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                   style="border-top:2px solid #f4330c;">
+              <tr style="background:#0b3a63;">
+                <td style="padding:10px;color:#fff;font-size:12px;font-weight:bold;
+                           text-transform:uppercase;letter-spacing:1px;width:68px;">Photo</td>
+                <td style="padding:10px 14px;color:#fff;font-size:12px;font-weight:bold;
+                           text-transform:uppercase;letter-spacing:1px;">Product</td>
+                <td style="padding:10px 14px;color:#fff;font-size:12px;font-weight:bold;
+                           text-transform:uppercase;letter-spacing:1px;text-align:right;">Price</td>
+              </tr>
+              {rows_html}
+            </table>
+          </td>
+        </tr>"""
+
+    # ── CTA ──
+    cta_html = ""
+    if cta_text and cta_url:
+        cta_html = (
+            f'<a href="{cta_url}" '
+            f'style="background:#f4330c;color:#fff;padding:16px 42px;'
+            f'text-decoration:none;font-size:13px;font-weight:bold;'
+            f'display:inline-block;text-transform:uppercase;letter-spacing:2px;">'
+            f'{cta_text}</a>'
+        )
+
+    display_name = customer.get_full_name() or customer.username
+
+    inner = f"""
+    <tr>
+      <td style="padding:40px 20px;text-align:center;">
+        <h2 style="color:#0b3a63;font-size:22px;margin:0 0 8px 0;
+                   font-weight:bold;text-transform:uppercase;letter-spacing:2px;">
+          Hi, {display_name}
+        </h2>
+        <p style="color:#1e293b;font-size:15px;line-height:26px;margin:0 0 28px 0;
+                  text-align:left;white-space:pre-line;">
+          {message_txt}
+        </p>
+        {cta_html}
+      </td>
+    </tr>
+    {products_table}"""
+
+    html  = _email_wrapper(inner)
+    plain = f"Hi {display_name},\n\n{message_txt}"
+    if cta_text and cta_url:
+        plain += f"\n\n{cta_text}: {cta_url}"
+
+    _send_html_email(subject, customer.email, html, plain)
+    messages.success(request, f"Email sent to {customer.email} ✓")
+    return redirect('customer_detail', pk=pk)
+
+
+# ── REPLACE your existing update_order_status with this ──
+# The only change: reads a hidden 'next' field so saves from the
+# detail page return back there instead of manage_orders.
+
+@staff_member_required
+@require_POST
+def update_order_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order.status = request.POST.get('status', order.status)
+    order.save()
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER', '')
+    if next_url and next_url.startswith('/'):
+        return redirect(next_url)
+    return redirect('manage_orders')
+
+
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+
+@login_required
+def my_orders(request):
+    """Customer-facing order history page."""
+    orders = (
+        Order.objects
+        .filter(user=request.user)
+        .prefetch_related('items__product')
+        .order_by('-created_at')
+    )
+    # Count orders that are still "active" (not delivered, not cancelled)
+    active_count = orders.exclude(status__in=['Delivered', 'Cancelled']).count()
+    return render(request, 'my_orders.html', {
+        'orders': orders,
+        'active_count': active_count,
+    })
+
+
+@login_required
+def cancel_order(request, order_id):
+    """Customer can cancel only if status hasn't reached Shipped."""
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    CANCELLABLE = {'Pending', 'STK_Sent', 'Paid', 'Processing'}
+    if order.status in CANCELLABLE:
+        order.status = 'Cancelled'
+        order.save()
+        messages.success(request, f"Order #{order.id} has been cancelled.")
+    else:
+        messages.error(request, "This order can no longer be cancelled.")
+    return redirect('my_orders')

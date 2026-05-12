@@ -34,10 +34,10 @@
 
         /* ── FONT VARIABLES ── */
         :root {
-            --font-heading: 'Jost', sans-serif;       /* headings, nav links, buttons */
-            --font-body:    'Open Sans', sans-serif;  /* body text, inputs, paragraphs */
-            --font-serif:   'Inria Serif', serif;     /* logo text, hero titles, accents */
-            --font-ui:      'Inter', sans-serif;      /* small labels, badges, captions */
+            --font-heading: 'Jost', sans-serif;
+            --font-body:    'Open Sans', sans-serif;
+            --font-serif:   'Inria Serif', serif;
+            --font-ui:      'Inter', sans-serif;
 
             --primary:       #f4330c;
             --primary-hover: #d73d1f;
@@ -53,6 +53,11 @@
             --radius-sm:     8px;
             --radius-md:     14px;
             --transition:    all 0.3s cubic-bezier(0.4,0,0.2,1);
+
+            --admin-bg:      rgba(255,215,0,0.18);
+            --admin-border:  rgba(255,215,0,0.55);
+            --admin-text:    #ffd700;
+            --admin-hover:   rgba(255,215,0,0.30);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -100,6 +105,189 @@
             transition: width 0.35s ease;
         }
         .gs-nav-link:hover::after { width: 100%; }
+
+        /* ── ADMIN TRIGGER — clean pill, no squish, no pulse ring ── */
+        .gs-admin-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--admin-bg);
+            border: 1.5px solid var(--admin-border);
+            border-radius: 50px;
+            padding: 6px 14px 6px 10px;
+            color: var(--admin-text) !important;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: var(--font-heading);
+            white-space: nowrap;
+            backdrop-filter: blur(4px);
+            transition: var(--transition);
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            /* no ::before ring — that caused the squish */
+        }
+        .gs-admin-trigger:hover,
+        .gs-dropdown-wrap.open .gs-admin-trigger {
+            background: var(--admin-hover);
+            border-color: gold;
+            color: #fff !important;
+            box-shadow: 0 0 14px rgba(255,215,0,0.28);
+        }
+        /* shield icon gets a subtle gold glow instead of a ring */
+        .gs-admin-trigger .shield-icon {
+            font-size: 15px;
+            filter: drop-shadow(0 0 4px rgba(255,215,0,0.6));
+        }
+        /* lock-dot: tiny gold dot that blinks on the shield — replaces old pulse ring */
+        .gs-admin-trigger .lock-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: gold;
+            flex-shrink: 0;
+            animation: lockBlink 2s ease-in-out infinite;
+            box-shadow: 0 0 6px rgba(255,215,0,0.8);
+        }
+        @keyframes lockBlink {
+            0%,100% { opacity: 1; transform: scale(1); }
+            50%      { opacity: 0.35; transform: scale(0.7); }
+        }
+
+        /* Mobile admin link inside sidebar */
+        .mobile-admin-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,215,0,0.15);
+            border: 1px solid rgba(255,215,0,0.4);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: gold !important;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .mobile-admin-link:hover {
+            background: rgba(255,215,0,0.25) !important;
+            color: #fff !important;
+            padding-left: 14px !important;
+        }
+
+        /* ── NAV DROPDOWNS ── */
+        .gs-dropdown-wrap {
+            position: relative;
+        }
+        .gs-dropdown-trigger {
+            background: transparent;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        .gs-chev {
+            font-size: 11px;
+            transition: transform 0.25s ease;
+            opacity: 0.75;
+        }
+        .gs-dropdown-wrap.open .gs-chev { transform: rotate(180deg); }
+
+        .gs-nav-badge {
+            background: #fff;
+            color: var(--primary);
+            font-size: 9px;
+            font-weight: 800;
+            font-family: var(--font-ui);
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1px;
+            animation: pulseBadge 1.8s ease-in-out infinite;
+        }
+        @keyframes pulseBadge {
+            0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.5); }
+            50%      { box-shadow: 0 0 0 5px rgba(255,255,255,0); }
+        }
+        .gs-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            min-width: 190px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.14);
+            overflow: hidden;
+            z-index: 500;
+            border: 1px solid var(--border);
+        }
+        .gs-dropdown-wrap.open .gs-dropdown {
+            display: block;
+            animation: dropIn 0.2s cubic-bezier(0.4,0,0.2,1);
+        }
+        @keyframes dropIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .gs-drop-header {
+            padding: 10px 15px 8px;
+            font-size: 10px;
+            font-weight: 800;
+            font-family: var(--font-ui);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .gs-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--font-heading);
+            color: var(--text-main) !important;
+            transition: background 0.15s, padding-left 0.2s;
+            text-decoration: none;
+            border-bottom: 1px solid #f8fafc;
+        }
+        .gs-dropdown-item:last-child { border-bottom: none; }
+        .gs-dropdown-item:hover {
+            background: var(--bg-light);
+            padding-left: 20px;
+            color: var(--navy) !important;
+        }
+        .gs-dropdown-item i {
+            color: var(--primary);
+            font-size: 14px;
+            flex-shrink: 0;
+            width: 16px;
+        }
+        .gs-drop-badge {
+            margin-left: auto;
+            background: var(--primary);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            font-family: var(--font-ui);
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+        /* Admin dropdown: dark navy header */
+        .gs-dropdown-admin .gs-drop-header {
+            background: var(--navy);
+            color: rgba(255,215,0,0.9);
+            border-bottom-color: rgba(255,255,255,0.08);
+        }
+        .gs-dropdown-admin .gs-dropdown-item i { color: var(--navy); }
+        .gs-dropdown-admin .gs-dropdown-item:hover {
+            background: #f0f7ff;
+            color: var(--navy) !important;
+        }
 
         /* ── USER GREETING BADGE ── */
         .gs-user-greeting {
@@ -186,7 +374,6 @@
         .gs-search input::placeholder { color: rgba(255,255,255,0.75); font-family: var(--font-body); }
         .gs-search:focus-within input { color: var(--text-main); }
         .gs-search:focus-within input::placeholder { color: var(--text-muted); }
-
         .gs-search-btn {
             background: transparent; border: none;
             color: rgba(255,255,255,0.9); padding: 0 13px;
@@ -197,7 +384,6 @@
         }
         .gs-search-btn:hover { background: rgba(255,255,255,0.15); }
         .gs-search:focus-within .gs-search-btn { color: var(--primary); border-left-color: var(--border); }
-
         .search-dropdown {
             position: absolute; top: calc(100% + 8px); left: 0; width: 100%;
             background: var(--white); z-index: 200;
@@ -228,6 +414,7 @@
             transition: var(--transition);
             padding: 25px 20px;
             box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+            overflow-y: auto;
         }
         .mobile-sidebar.active { left: 0; }
         .sidebar-overlay {
@@ -246,6 +433,40 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .mobile-links li a:hover { color: gold; padding-left: 10px; }
+
+        /* Mobile Orders link */
+        .mobile-orders-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #fff !important;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 6px;
+            text-decoration: none;
+        }
+        .mobile-orders-link:hover {
+            background: rgba(255,255,255,0.22) !important;
+            color: #fff !important;
+            padding-left: 14px !important;
+        }
+        .mobile-orders-badge {
+            margin-left: auto;
+            background: #fff;
+            color: var(--primary);
+            font-size: 9px;
+            font-weight: 800;
+            font-family: var(--font-ui);
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            animation: pulseBadge 1.8s ease-in-out infinite;
+        }
 
         /* Mobile user greeting in sidebar */
         .mobile-user-greeting {
@@ -295,7 +516,6 @@
             display: none; z-index: 1999;
         }
         .cart-overlay.active { display: block; }
-
         .cart-header {
             padding: 18px 20px;
             background: var(--bg-light);
@@ -319,9 +539,7 @@
             background: none; border: none;
             font-size: 28px; color: var(--text-muted); line-height: 1;
         }
-
         .cart-items-container { flex: 1; overflow-y: auto; padding: 0; }
-
         .cart-item-row {
             display: flex; align-items: center; gap: 10px;
             padding: 14px 16px;
@@ -349,7 +567,6 @@
             font-family: var(--font-heading);
             flex-shrink: 0;
         }
-
         .qty-controls { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
         .qty-btn {
             width: 24px; height: 24px;
@@ -364,13 +581,11 @@
             font-size: 13px; font-weight: 700;
             font-family: var(--font-ui);
         }
-
         .remove-btn {
             background: transparent; border: none;
             font-size: 18px; color: #ccc; flex-shrink: 0;
         }
         .remove-btn:hover { color: #e53935; }
-
         .cart-empty {
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
@@ -379,7 +594,6 @@
         }
         .cart-empty i { font-size: 48px; margin-bottom: 15px; }
         .cart-empty p { font-size: 14px; }
-
         .cart-footer-panel {
             padding: 18px 20px;
             border-top: 1px solid var(--border);
@@ -506,7 +720,6 @@
             padding: 70px 5% 30px;
             font-family: var(--font-body);
         }
-
         .footer-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -514,7 +727,6 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-
         .footer-column h3 {
             color: var(--gs-orange, #ee4d2d);
             font-size: 14px;
@@ -524,7 +736,6 @@
             letter-spacing: 1.2px;
             margin-bottom: 25px;
         }
-
         .footer-column p {
             font-size: 14px;
             line-height: 1.7;
@@ -532,12 +743,7 @@
             color: #e0e0e0;
             margin-bottom: 12px;
         }
-
-        .footer-column i {
-            margin-right: 10px;
-            color: var(--gs-orange, #ee4d2d);
-        }
-
+        .footer-column i { margin-right: 10px; color: var(--gs-orange, #ee4d2d); }
         .footer-column a {
             display: block;
             color: #d1d1d1;
@@ -547,39 +753,24 @@
             margin-bottom: 12px;
             transition: 0.3s;
         }
-
         .footer-column a:hover {
             color: var(--gs-orange, #ee4d2d);
             transform: translateX(8px);
         }
-
-        /* ── ROTATING SOCIAL ICONS ── */
-        .footer-social {
-            margin-top: 20px;
-            display: flex;
-            gap: 15px;
-        }
-
+        .footer-social { margin-top: 20px; display: flex; gap: 15px; }
         .footer-social a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 42px;
-            height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            width: 42px; height: 42px;
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            color: #fff;
+            border-radius: 50%; color: #fff;
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         .footer-social a:hover {
             background: #ffffff;
             color: var(--gs-orange, #ee4d2d);
             transform: rotate(360deg);
         }
-
-        /* ── FOOTER BOTTOM ── */
         .footer-bottom {
             border-top: 1px solid rgba(255,255,255,0.1);
             margin-top: 50px;
@@ -589,9 +780,7 @@
             font-family: var(--font-ui);
             color: #888;
         }
-
         .footer-bottom strong { color: #fff; font-family: var(--font-heading); }
-
         @media (max-width: 768px) {
             .footer-container { text-align: center; }
             .footer-social { justify-content: center; }
@@ -600,41 +789,29 @@
 
         /* ── NAV AVATAR ── */
         .nav-avatar-img {
-            width: 26px; height: 26px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1.5px solid rgba(255,255,255,0.7);
-            display: block;
-            flex-shrink: 0;
+            width: 26px; height: 26px; border-radius: 50%;
+            object-fit: cover; border: 1.5px solid rgba(255,255,255,0.7);
+            display: block; flex-shrink: 0;
         }
         .nav-avatar-initials {
-            width: 26px; height: 26px;
-            border-radius: 50%;
+            width: 26px; height: 26px; border-radius: 50%;
             background: rgba(255,255,255,0.3);
             border: 1.5px solid rgba(255,255,255,0.6);
             display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 800;
-            color: #fff; flex-shrink: 0;
-            font-family: var(--font-heading);
-            text-transform: uppercase;
+            font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
+            font-family: var(--font-heading); text-transform: uppercase;
         }
         .nav-avatar-img-sm {
-            width: 22px; height: 22px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1.5px solid rgba(255,255,255,0.7);
-            display: block;
+            width: 22px; height: 22px; border-radius: 50%;
+            object-fit: cover; border: 1.5px solid rgba(255,255,255,0.7); display: block;
         }
         .nav-avatar-initials-sm {
-            width: 22px; height: 22px;
-            border-radius: 50%;
+            width: 22px; height: 22px; border-radius: 50%;
             background: rgba(255,255,255,0.3);
             border: 1.5px solid rgba(255,255,255,0.6);
             display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: 800;
-            color: #fff;
-            font-family: var(--font-heading);
-            text-transform: uppercase;
+            font-size: 10px; font-weight: 800; color: #fff;
+            font-family: var(--font-heading); text-transform: uppercase;
         }
 
         /* ── AUTH LOADER ── */
@@ -667,20 +844,15 @@
         .cookie-content { display: flex; align-items: center; gap: 15px; }
         .cookie-icon i { font-size: 30px; color: var(--primary); }
         .cookie-text h4 {
-            margin: 0;
-            font-family: var(--font-heading);
-            font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            margin: 0; font-family: var(--font-heading); font-weight: 700;
+            color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;
         }
         .cookie-text p { margin: 5px 0 0; font-size: 13px; opacity: 0.9; font-family: var(--font-body); }
         .cookie-actions { display: flex; gap: 10px; margin-top: 15px; }
         .btn-accept {
             background: var(--primary); color: white; border: none;
             padding: 8px 20px; border-radius: 5px;
-            font-weight: bold; font-family: var(--font-heading);
-            flex: 1;
+            font-weight: bold; font-family: var(--font-heading); flex: 1;
         }
         .btn-accept:hover { background: #e44d22; }
         .btn-close {
@@ -752,6 +924,30 @@ document.addEventListener('DOMContentLoaded', function() {
         <li><a href="{% url 'about' %}" onclick="toggleMenu()"><i class="bi bi-info-circle me-2"></i>About</a></li>
         <li><a href="{% url 'index' %}#contacts" onclick="toggleMenu()"><i class="bi bi-envelope me-2"></i>Contact</a></li>
         <hr class="text-white-50 my-3">
+
+        {# ── MY ORDERS LINK IN MOBILE SIDEBAR (logged-in only) ── #}
+        {% if user.is_authenticated %}
+        <li>
+            <a href="{% url 'my_orders' %}" onclick="toggleMenu()" class="mobile-orders-link">
+                <i class="bi bi-bag-check-fill"></i>
+                My Orders
+                {% if active_order_count %}
+                <span class="mobile-orders-badge">{{ active_order_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+        {% endif %}
+
+        {# ── ADMIN LINK IN MOBILE SIDEBAR (staff only) ── #}
+        {% if user.is_authenticated and user.is_staff %}
+        <li>
+            <a href="{% url 'dashboard' %}" onclick="toggleMenu()" class="mobile-admin-link">
+                <i class="bi bi-shield-lock-fill"></i>
+                Admin Dashboard
+            </a>
+        </li>
+        {% endif %}
+
         {% if user.is_authenticated %}
             <li><a href="{% url 'logout' %}" onclick="toggleMenu()"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
         {% else %}
@@ -785,6 +981,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 <a href="{% url 'index' %}#FAQ" class="gs-nav-link">FAQs</a>
                 <a href="{% url 'about' %}" class="gs-nav-link">About</a>
                 <a href="{% url 'index' %}#contacts" class="gs-nav-link">Contacts</a>
+
+                {# ── MY ORDERS DROPDOWN (logged-in users only, desktop) ── #}
+                {% if request.user.is_authenticated %}
+                <div class="gs-dropdown-wrap">
+                    <button class="gs-nav-link gs-dropdown-trigger" type="button">
+                        <i class="bi bi-bag-check me-1"></i>Orders
+                        {% if active_order_count %}<span class="gs-nav-badge">{{ active_order_count }}</span>{% endif %}
+                        <i class="bi bi-chevron-down gs-chev"></i>
+                    </button>
+                    <div class="gs-dropdown">
+                        <a href="{% url 'my_orders' %}" class="gs-dropdown-item">
+                            <i class="bi bi-list-ul"></i>
+                            My Orders
+                            {% if active_order_count %}<span class="gs-drop-badge">{{ active_order_count }}</span>{% endif %}
+                        </a>
+                        <a href="{% url 'check' %}" class="gs-dropdown-item">
+                            <i class="bi bi-cart-check"></i>
+                            Checkout
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+               
+
             </div>
         </div>
 
@@ -824,10 +1045,20 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <strong>{{ request.user.username }}</strong>
                             </div>
                         </a>
-                        <a href="{% url 'logout' %}" class="gs-logout-link">
-                            <i class="bi bi-box-arrow-right" style="font-size:11px;"></i>
-                            <span style="font-size:11px;">Logout</span>
-                        </a>
+              <div style="display: flex; align-items: center; gap: 15px;">
+    
+    {% if request.user.is_authenticated and request.user.is_staff %}
+    <a href="{% url 'dashboard' %}" class="gs-logout-link">
+        Admin
+    </a>
+    {% endif %}
+
+    <a href="{% url 'logout' %}" class="gs-logout-link">
+        <i class="bi bi-box-arrow-right" style="font-size:11px;"></i>
+        <span style="font-size:11px;">Logout</span>
+    </a>
+
+</div>
                     </div>
                     {% endwith %}
                 {% else %}
@@ -904,14 +1135,12 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <button class="close-cart" onclick="toggleCart()">&times;</button>
     </div>
-
     <div class="cart-items-container" id="cartSlides">
         <div class="cart-empty">
             <i class="bi bi-cart-x"></i>
             <p>Your cart is empty</p>
         </div>
     </div>
-
     <div class="cart-footer-panel">
         <div class="total-row">
             <span>Subtotal</span>
@@ -952,7 +1181,27 @@ document.addEventListener('DOMContentLoaded', function() {
 <main class="gs-main">
     {% block content %}{% endblock %}
 </main>
+{% if not request.user.is_authenticated %}
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<div id="g_id_onload"
+     data-client_id="{{ GOOGLE_CLIENT_ID }}"
+     data-context="signin"
+     data-ux_mode="popup"
+     data-login_uri="https://gadgetsoko.com/accounts/google/login/callback/"
+     data-auto_prompt="true">
+</div>
+
+<div class="g_id_signin"
+     data-type="standard"
+     data-shape="pill"
+     data-theme="outline"
+     data-text="continue_with"
+     data-size="large">
+</div>
+
+{% endif %}
 <footer class="gs-footer" id="contacts">
     <div class="footer-container">
 
@@ -988,11 +1237,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <a href="https://wa.me/254759829235?text=Hello%20from%20Gadget%20Soko!%20I'm%20interested%20in%20your%20products">
                 <i class="fa-brands fa-whatsapp"></i> WhatsApp: 0759 829 235
             </a>
-
             <div class="footer-social">
                 <a href="https://www.facebook.com/share/18ZrBkP5AU/?mibextid=wwXIfr"><i class="fa-brands fa-facebook-f"></i></a>
                 <a href="https://www.instagram.com/gadjet_space?igsh=MWUxMTY4Mm1uMGg4dw%3D%3D&utm_source=qr"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://www.tiktok.com/@mikebrowz254?_r=1&_t=ZS-95KTSCTORIz"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="https://www.tiktok.com/@gadgetsoko254?lang=en"><i class="fa-brands fa-tiktok"></i></a>
                 <a href="https://wa.me/254759829235?text=Hello%20from%20Gadget%20Soko!%20I'm%20interested%20in%20your%20products."><i class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
@@ -1001,7 +1249,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="footer-bottom">
         <p>All Rights Reserved &copy;2026 | <strong>Built By Hand</strong></p>
-
         <div class="dev-credits" style="margin-top:15px;border-top:1px solid rgba(255,255,255,0.05);padding-top:15px;">
             <p style="font-size:11px;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;opacity:0.7;font-family:var(--font-ui);">
                 Developed by <span style="color:#fff;font-family:var(--font-heading);">TingsTech Technologies</span>
@@ -1047,7 +1294,6 @@ function loadCartItems() {
             <i class="fa fa-spinner fa-spin" style="font-size:32px;margin-bottom:12px;"></i>
             <p>Loading...</p>
         </div>`);
-
     $.ajax({
         url: "{% url 'view_cart' %}",
         type: 'GET',
@@ -1074,11 +1320,9 @@ function showCartLoginPrompt() {
 function renderCartItems(data) {
     const items    = data.items || [];
     const totalQty = items.reduce((s, i) => s + i.quantity, 0);
-
     $('#cartItemCount').text(totalQty + (totalQty === 1 ? ' item' : ' items'));
     $('#sidebarTotal').text('KES ' + Math.round(data.total || 0).toLocaleString());
     $('.cart-count').text(totalQty > 0 ? totalQty : '0');
-
     if (items.length === 0) {
         $('#cartSlides').html(`
             <div class="cart-empty">
@@ -1087,7 +1331,6 @@ function renderCartItems(data) {
             </div>`);
         return;
     }
-
     const defaultImg = "{% static 'images/default.png' %}";
     let html = '';
     items.forEach(function(item) {
@@ -1232,6 +1475,23 @@ function toggleMenu() {
     document.getElementById('sidebarOverlay').classList.toggle('active');
     document.body.style.overflow = document.getElementById('mobileSidebar').classList.contains('active') ? 'hidden' : 'auto';
 }
+
+/* ── NAV DROPDOWNS ── */
+document.querySelectorAll('.gs-dropdown-wrap').forEach(function(wrap) {
+    var trigger = wrap.querySelector('.gs-dropdown-trigger');
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.querySelectorAll('.gs-dropdown-wrap.open').forEach(function(w) {
+            if (w !== wrap) w.classList.remove('open');
+        });
+        wrap.classList.toggle('open');
+    });
+});
+document.addEventListener('click', function() {
+    document.querySelectorAll('.gs-dropdown-wrap.open').forEach(function(w) {
+        w.classList.remove('open');
+    });
+});
 
 /* ── COUNTDOWN TIMERS ── */
 function initCountdowns() {

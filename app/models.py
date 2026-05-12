@@ -128,11 +128,15 @@ class CartItem(models.Model):
 # 6. ORDERS & TRACKING
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('STK_Sent', 'STK Push Sent'),
-        ('Paid', 'Paid'),
-        ('Failed', 'Failed')
-    ]
+    ('Pending',    'Pending'),
+    ('STK_Sent',   'STK Push Sent'),
+    ('Paid',       'Paid'),
+    ('Processing', 'Processing'),
+    ('Shipped',    'Shipped'),
+    ('Delivered',  'Delivered'),
+    ('Failed',     'Failed'),
+    ('Cancelled',  'Cancelled'),
+]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100)
