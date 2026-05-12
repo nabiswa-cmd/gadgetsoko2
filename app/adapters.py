@@ -1,39 +1,96 @@
-from django.contrib.auth.signals import user_logged_in
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-from django.contrib.auth.models import User
+import requests
+import logging
+from django.core.files.base import ContentFile
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from .models import UserProfile
 
-from .models import UserActivity, UserProfile
+logger = logging.getLogger(__name__)
+
+
+class MySocialAccountAdapter(DefaultSocialAccountAdapter):
+
+    def save_user(self, request, sociallogin, form=None):
+        """
+        Called when a social account user is saved (new OR existing).
+        Captures Google profile picture and sends welcome email for new users.
+        """
+        # Track whether this is a brand-new user BEFORE super() creates them
+        is_new = sociallogin.is_existing is False
+
+        user = super().save_user(request, sociallogin, form)
+
+        # Mark as social auth so the post_save signal skips the welcome email
+        user._from_social_auth = True
+
+        # Ensure UserProfile exists
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+
+        # Download and save Google avatar if they don't have one yet
+        if not profile.avatar:
+            try:
+                extra_data = sociallogin.account.extra_data
+                picture_url = extra_data.get('picture')
+
+                if picture_url:
+                    resp = requests.get(picture_url, timeout=10)
+                    resp.raise_for_status()
+
+                    content_type = resp.headers.get('Content-Type', 'image/jpeg')
+                    ext = 'jpg' if 'jpeg' in content_type else content_type.split('/')[-1]
+                    filename = f"google_{user.pk}.{ext}"
+
+                    profile.avatar.save(filename, ContentFile(resp.content), save=True)
+                    logger.info("Saved Google avatar for user %s", user.username)
+
+            except Exception as exc:
+                logger.warning("Could not save Google avatar for %s: %s", user.username, exc)
+
+        # Send welcome email only for brand-new users, AFTER avatar is saved
+        if is_new and user.email:
+            _send_welcome_email(user, profile)
+
+        return user
+
+    def is_auto_signup_allowed(self, request, sociallogin):
+        return True
+
+    def populate_user(self, request, sociallogin, data):
+        """Populate basic user fields from Google data."""
+        user = super().populate_user(request, sociallogin, data)
+        return user
+
+    def pre_social_login(self, request, sociallogin):
+        """Fires on every Google login. Refreshes avatar if it was deleted."""
+        if not sociallogin.is_existing:
+            return  # new user — handled in save_user
+
+        try:
+            user = sociallogin.user
+            if not user.pk:
+                return
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+
+            if not profile.avatar:
+                picture_url = sociallogin.account.extra_data.get('picture')
+                if picture_url:
+                    resp = requests.get(picture_url, timeout=10)
+                    resp.raise_for_status()
+                    content_type = resp.headers.get('Content-Type', 'image/jpeg')
+                    ext = 'jpg' if 'jpeg' in content_type else content_type.split('/')[-1]
+                    profile.avatar.save(
+                        f"google_{user.pk}.{ext}",
+                        ContentFile(resp.content),
+                        save=True
+                    )
+        except Exception as exc:
+            logger.warning("pre_social_login avatar refresh failed: %s", exc)
 
 
 # ─────────────────────────────────────────────────────────────────
-# 1. LOG LOGIN ACTIVITY
-# ─────────────────────────────────────────────────────────────────
-@receiver(user_logged_in)
-def log_user_login(sender, request, user, **kwargs):
-    UserActivity.objects.create(
-        user=user,
-        action='LOGIN',
-        extra_info='User logged in'
-    )
-
-
-# ─────────────────────────────────────────────────────────────────
-# 2. AUTO-CREATE UserProfile FOR EVERY NEW USER
-# ─────────────────────────────────────────────────────────────────
-@receiver(post_save, sender=User)
-def create_or_save_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.get_or_create(user=instance)
-    else:
-        UserProfile.objects.get_or_create(user=instance)
-
-
-# ─────────────────────────────────────────────────────────────────
-# 3. WELCOME EMAIL — skipped for Google/social signups
-#    (those are handled by the adapter AFTER the avatar is saved)
+# Standalone welcome email — called after avatar is already saved
+# (mirrors the HTML in signals.py but runs from the adapter)
 # ─────────────────────────────────────────────────────────────────
 def _build_avatar_html(profile, protocol, domain) -> str:
     avatar_url = None
@@ -63,23 +120,11 @@ def _build_avatar_html(profile, protocol, domain) -> str:
     """
 
 
-@receiver(post_save, sender=User)
-def send_welcome_email(sender, instance, created, **kwargs):
-    if not created:
-        return
-
-    # ✅ Skip — Google signup: adapter sends the email AFTER the avatar is saved
-    if getattr(instance, '_from_social_auth', False):
-        return
-
-    if not instance.email:
-        return
-
-    profile, _ = UserProfile.objects.get_or_create(user=instance)
+def _send_welcome_email(user, profile):
     protocol = "https"
     domain   = getattr(settings, "SITE_DOMAIN", "gadgetsoko.com")
     avatar_html  = _build_avatar_html(profile, protocol, domain)
-    display_name = instance.get_full_name() or instance.username
+    display_name = user.get_full_name() or user.username
 
     html_content = f"""<!DOCTYPE html>
 <html>
@@ -106,7 +151,7 @@ def send_welcome_email(sender, instance, created, **kwargs):
                          font-weight:bold;text-transform:uppercase;letter-spacing:2px;">
                 Welcome, {display_name}!
               </h2>
-              <p style="color:#64748b;font-size:13px;margin:0;">@{instance.username}</p>
+              <p style="color:#64748b;font-size:13px;margin:0;">@{user.username}</p>
             </td>
           </tr>
 
@@ -155,7 +200,7 @@ def send_welcome_email(sender, instance, created, **kwargs):
 
     plain_text = (
         f"Welcome to Gadget Soko, {display_name}!\n\n"
-        f"Your account (@{instance.username}) is now active.\n\n"
+        f"Your account (@{user.username}) is now active.\n\n"
         f"Start shopping: {protocol}://{domain}\n"
         f"Complete your profile: {protocol}://{domain}/profile/edit/\n\n"
         f"© 2026 Gadget Soko | Nairobi, Kenya"
@@ -166,12 +211,10 @@ def send_welcome_email(sender, instance, created, **kwargs):
             subject=f"Welcome to Gadget Soko, {display_name}! 🎉",
             body=plain_text,
             from_email=settings.EMAIL_HOST_USER,
-            to=[instance.email],
+            to=[user.email],
         )
         msg.attach_alternative(html_content, "text/html")
         msg.send(fail_silently=False)
+        logger.info("Welcome email sent to %s", user.email)
     except Exception as exc:
-        import logging
-        logging.getLogger(__name__).exception(
-            "Welcome email failed for user %s: %s", instance.username, exc
-        )
+        logger.exception("Welcome email failed for user %s: %s", user.username, exc)

@@ -190,6 +190,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'prompt': 'select_account',
         },
         'OAUTH_PKCE_ENABLED': True,
+        # Add this — tells allauth to store picture in extra_data
+        'FETCH_USERINFO': True,
     }
 }
 
@@ -230,3 +232,6 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+
+SOCIALACCOUNT_ADAPTER = 'app.adapters.MySocialAccountAdapter'
