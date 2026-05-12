@@ -2097,33 +2097,32 @@ def customer_detail(request, pk):
 
 from django.db.models import Sum
 
-
 @staff_member_required
 def customer_detail(request, pk):
     customer = get_object_or_404(
         User.objects.select_related('profile')
                     .prefetch_related('order_set__items__product__images'),
-        pk=pk, is_staff=False
+        pk=pk
     )
 
     orders = customer.order_set.prefetch_related(
         'items', 'items__product', 'items__product__images'
     ).order_by('-created_at')
 
-    total_spent  = orders.aggregate(t=Sum('total'))['t'] or 0
+    total_spent = orders.aggregate(t=Sum('total'))['t'] or 0
     status_choices = Order.STATUS_CHOICES
 
     return render(request, 'customer_detail.html', {
-        'customer'      : customer,
-        'orders'        : orders,
-        'total_spent'   : total_spent,
+        'customer': customer,
+        'orders': orders,
+        'total_spent': total_spent,
         'status_choices': status_choices,
     })
 
 
 @staff_member_required
 def send_customer_email(request, pk):
-    customer = get_object_or_404(User, pk=pk, is_staff=False)
+    customer = get_object_or_404(User, pk=pk)
 
     if request.method != 'POST':
         return redirect('customer_detail', pk=pk)
