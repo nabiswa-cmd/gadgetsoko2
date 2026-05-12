@@ -165,7 +165,8 @@ MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL')
 SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'https://gadgetsoko.com')
 
 GEMINI_API_KEY = "AIzaSyBvuzWyutF1NItMRXNx7F6B7ExF_V3ReS8"
-
+GOOGLE_CLIENT_ID = os.getenv("CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 # ---------------------------------------------------------------------------
 # GOOGLE OAUTH
 # ---------------------------------------------------------------------------

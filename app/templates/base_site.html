@@ -73,7 +73,14 @@
             display: flex;
             flex-direction: column;
         }
-
+/* ── Hide Google one-tap signin button ── */
+#g_id_onload,
+.g_id_signin,
+iframe[src*="accounts.google.com/gsi"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
         a { text-decoration: none; color: inherit; transition: var(--transition); }
         button { cursor: pointer; transition: var(--transition); }
 
@@ -87,6 +94,7 @@
 
         .gs-logo img { height: 42px; display: block; }
 
+        /* ── NAV LINK: IN16HUB-style bottom bar grows upward ── */
         .gs-nav-link {
             position: relative;
             color: rgba(255,255,255,0.92) !important;
@@ -97,14 +105,27 @@
             padding: 7px 11px !important;
             border-radius: var(--radius-sm);
             white-space: nowrap;
+            overflow: hidden;
         }
         .gs-nav-link::after {
-            content: ""; position: absolute;
-            left: 0; bottom: 0; width: 0; height: 2px;
-            background: linear-gradient(90deg, var(--white), gold, var(--white));
-            transition: width 0.35s ease;
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 7px;
+            right: 7px;
+            height: 2px;
+            background: #fff;
+            transform: scaleY(0);
+            transform-origin: bottom center;
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .gs-nav-link:hover::after { width: 100%; }
+        .gs-nav-link:hover::after,
+        .gs-nav-link.active::after {
+            transform: scaleY(1);
+        }
+        .gs-nav-link::before {
+            content: none;
+        }
 
         /* ── ADMIN TRIGGER — clean pill, no squish, no pulse ring ── */
         .gs-admin-trigger {
@@ -124,7 +145,6 @@
             transition: var(--transition);
             letter-spacing: 0.3px;
             cursor: pointer;
-            /* no ::before ring — that caused the squish */
         }
         .gs-admin-trigger:hover,
         .gs-dropdown-wrap.open .gs-admin-trigger {
@@ -133,12 +153,10 @@
             color: #fff !important;
             box-shadow: 0 0 14px rgba(255,215,0,0.28);
         }
-        /* shield icon gets a subtle gold glow instead of a ring */
         .gs-admin-trigger .shield-icon {
             font-size: 15px;
             filter: drop-shadow(0 0 4px rgba(255,215,0,0.6));
         }
-        /* lock-dot: tiny gold dot that blinks on the shield — replaces old pulse ring */
         .gs-admin-trigger .lock-dot {
             width: 7px; height: 7px;
             border-radius: 50%;
@@ -860,6 +878,104 @@
             border: 1px solid #444; padding: 8px 15px;
             border-radius: 5px; font-family: var(--font-ui);
         }
+
+        /* ── PWA INSTALL BUTTON (in footer) ── */
+        #pwa-install-btn {
+            display: none; /* JS shows it only when browser fires beforeinstallprompt */
+            align-items: center;
+            gap: 7px;
+            background: transparent;
+            color: rgba(255,255,255,0.85);
+            border: 1.5px solid rgba(255,255,255,0.35);
+            border-radius: 6px;
+            padding: 7px 14px;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 14px;
+            box-shadow: none;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+        #pwa-install-btn:hover {
+            border-color: rgba(255,255,255,0.75);
+            color: #fff;
+            transform: none;
+            box-shadow: none;
+            background: rgba(255,255,255,0.06);
+        }
+        #pwa-install-btn i { font-size: 13px; }
+
+        /* ── PWA INSTALL POPUP (bottom sheet) ── */
+        #pwa-popup {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            width: calc(100% - 40px);
+            max-width: 400px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+            padding: 24px 22px 20px;
+            z-index: 9997;
+            font-family: var(--font-body);
+            border: 1.5px solid var(--border);
+            opacity: 0;
+            transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        #pwa-popup.show {
+            display: block;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .pwa-popup-close {
+            position: absolute; top: 13px; right: 16px;
+            background: none; border: none;
+            font-size: 22px; color: var(--text-muted);
+            cursor: pointer; line-height: 1;
+        }
+        .pwa-popup-header {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 12px;
+        }
+        .pwa-popup-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), #ff6b3d);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(244,51,12,0.3);
+        }
+        .pwa-popup-icon i { font-size: 26px; color: #fff; }
+        .pwa-popup-title {
+            font-family: var(--font-heading);
+            font-size: 16px; font-weight: 800;
+            color: var(--text-main); line-height: 1.2;
+        }
+        .pwa-popup-title small {
+            display: block; font-size: 12px; font-weight: 400;
+            color: var(--text-muted); font-family: var(--font-ui); margin-top: 3px;
+        }
+        .pwa-popup-body {
+            font-size: 13px; color: var(--text-muted);
+            line-height: 1.55; margin-bottom: 18px;
+            font-family: var(--font-ui);
+        }
+        .pwa-popup-actions { display: flex; gap: 10px; }
+        .pwa-btn-install {
+            flex: 1; background: var(--primary); color: #fff;
+            border: none; border-radius: 10px; padding: 12px;
+            font-family: var(--font-heading); font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: var(--transition);
+        }
+        .pwa-btn-install:hover { background: var(--primary-hover); }
+        .pwa-btn-dismiss {
+            background: var(--bg-light); color: var(--text-muted);
+            border: 1px solid var(--border); border-radius: 10px;
+            padding: 12px 18px; font-family: var(--font-ui);
+            font-size: 13px; cursor: pointer; transition: var(--transition);
+        }
+        .pwa-btn-dismiss:hover { background: #e2e8f0; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -1003,8 +1119,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
                 {% endif %}
-
-               
 
             </div>
         </div>
@@ -1177,6 +1291,29 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
+{# ── PWA INSTALL POPUP (bottom sheet, shown automatically after 4s if installable) ── #}
+<div id="pwa-popup">
+    <button class="pwa-popup-close" onclick="dismissPwaPopup()" aria-label="Close">&times;</button>
+    <div class="pwa-popup-header">
+        <div class="pwa-popup-icon">
+            <i class="bi bi-phone-fill"></i>
+        </div>
+        <div class="pwa-popup-title">
+            Get the App
+            <small>Fast, free &amp; works offline</small>
+        </div>
+    </div>
+    <p class="pwa-popup-body">
+        Install <strong>Gadget Soko</strong> on your home screen for a faster, smoother shopping experience — no App Store needed!
+    </p>
+    <div class="pwa-popup-actions">
+        <button class="pwa-btn-install" onclick="triggerPwaInstall()">
+            <i class="bi bi-download me-1"></i> Install App
+        </button>
+        <button class="pwa-btn-dismiss" onclick="dismissPwaPopup()">Not now</button>
+    </div>
+</div>
+
 {# ── MAIN CONTENT ── #}
 <main class="gs-main">
     {% block content %}{% endblock %}
@@ -1216,6 +1353,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 Biashara Street, Shop No. 5<br>
                 Nairobi, Kenya, Africa
             </p>
+            {# ── PWA DOWNLOAD APP BUTTON — appears when browser supports install ── #}
+            <button id="pwa-install-btn" onclick="triggerPwaInstall()">
+                <i class="bi-phone-fill"></i>
+                Download App
+            </button>
         </div>
 
         <div class="footer-column">
@@ -1528,6 +1670,66 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 function acceptCookies() { localStorage.setItem('gsk_cookies','accepted'); closeCookiePopup(); }
 function closeCookiePopup() { const p = document.getElementById('cookie-popup'); if (p) p.classList.add('hidden'); }
+
+/* ── PWA INSTALL LOGIC ── */
+let _pwaPrompt = null;
+
+// Browser fires this when the site is installable (HTTPS + manifest + service worker)
+window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();          // stop the default mini-infobar
+    _pwaPrompt = e;
+
+    // 1. Reveal the footer "Download App" button
+    const btn = document.getElementById('pwa-install-btn');
+    if (btn) btn.style.display = 'inline-flex';
+
+    // 2. Show the bottom-sheet popup once per session
+    if (!sessionStorage.getItem('gsk_pwa_dismissed')) {
+        setTimeout(function() {
+            const popup = document.getElementById('pwa-popup');
+            if (popup) {
+                popup.style.display = 'block';
+                // tiny delay so CSS transition plays
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        popup.classList.add('show');
+                    });
+                });
+            }
+        }, 4000);
+    }
+});
+
+function triggerPwaInstall() {
+    if (!_pwaPrompt) return;
+    _pwaPrompt.prompt();
+    _pwaPrompt.userChoice.then(function(result) {
+        if (result.outcome === 'accepted') {
+            showToast('Gadget Soko installed! Find it on your home screen.', 'success');
+            const btn = document.getElementById('pwa-install-btn');
+            if (btn) btn.style.display = 'none';
+        }
+        dismissPwaPopup();
+        _pwaPrompt = null;
+    });
+}
+
+function dismissPwaPopup() {
+    const popup = document.getElementById('pwa-popup');
+    if (popup) {
+        popup.classList.remove('show');
+        setTimeout(function() { popup.style.display = 'none'; }, 400);
+    }
+    sessionStorage.setItem('gsk_pwa_dismissed', '1');
+}
+
+// Hide install button once the app is actually installed
+window.addEventListener('appinstalled', function() {
+    const btn = document.getElementById('pwa-install-btn');
+    if (btn) btn.style.display = 'none';
+    dismissPwaPopup();
+    showToast('Gadget Soko is now on your home screen!', 'success');
+});
 
 </script>
 
